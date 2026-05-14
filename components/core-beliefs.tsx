@@ -1,9 +1,18 @@
+"use client";
+
 import { IconBookmarkQuestion } from "@tabler/icons-react";
 
 import { Button } from "@/components/ui/button";
 import { BELIEFS } from "@/constants/core-beliefs";
+import { useLanguage } from "@/lib/i18n";
 
 const CoreBeliefs = () => {
+  const { messages: t } = useLanguage();
+  const beliefs = BELIEFS.map((belief, index) => ({
+    ...belief,
+    ...t.coreBeliefs.items[index],
+  }));
+
   return (
     <div id="core-beliefs" className="mb-48 space-y-10">
       <section
@@ -16,17 +25,16 @@ const CoreBeliefs = () => {
               id="core-beliefs-heading"
               className="mt-6 text-5xl font-black tracking-tight text-secondary"
             >
-              Our<span className="text-primary"> Beliefs </span>
+              {t.coreBeliefs.titleStart}
+              <span className="text-primary">{t.coreBeliefs.titleEmphasis}</span>
             </h1>
             <p className="mt-4 text-sm leading-7 text-foreground dark:text-white sm:text-base">
-              Tujuh doktrin inti ini merangkum pengharapan, panggilan, dan dasar
-              iman yang kami pegang sebagai bagian dari Gereja Masehi Advent
-              Hari Ketujuh.
+              {t.coreBeliefs.description}
             </p>
           </div>
 
           <div className="mt-12 grid gap-5 md:grid-cols-2 xl:grid-cols-4 xl:auto-rows-[minmax(220px,1fr)]">
-            {BELIEFS.map((belief) => {
+            {beliefs.map((belief) => {
               const Icon = belief.icon;
 
               return (
@@ -77,7 +85,7 @@ const CoreBeliefs = () => {
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                Baca lebih lanjut tentang 28 Doktrin Advent
+                {t.coreBeliefs.readMore}
                 <IconBookmarkQuestion />
               </a>
             </Button>

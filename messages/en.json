@@ -1,0 +1,236 @@
+{
+  "nav": {
+    "home": "Home",
+    "members": "Members",
+    "donate": "Donate"
+  },
+  "hero": {
+    "eyebrow": "Shalom and welcome!",
+    "description": "A warm community where worship feels like family, faith grows with purpose, and every visitor is invited to discover a place to belong.",
+    "links": {
+      "rundown": "Rundown",
+      "location": "Location",
+      "contact": "Get in touch"
+    },
+    "scroll": "Scroll to explore"
+  },
+  "coreValues": {
+    "titleStart": "Vision",
+    "titleMiddle": " and ",
+    "titleEnd": "Mission",
+    "description": "Our vision and mission guide us to share God's love, live by His Word, and serve others as part of Christ's redemptive work.",
+    "pillars": [
+      {
+        "title": "Vision",
+        "descriptor": "Where we are being led",
+        "description": "Sharing God's love and salvation through Jesus Christ, and taking part in His redemptive work in the world.",
+        "footer": "God leads, we follow."
+      },
+      {
+        "title": "Mission",
+        "descriptor": "How we live it out",
+        "description": "Following God's words and teachings in the Bible, and living our faith in practical ways that reflect His love and grace.",
+        "footer": "Love God, and love others as ourselves."
+      }
+    ]
+  },
+  "coreBeliefs": {
+    "titleStart": "Our",
+    "titleEmphasis": " Beliefs ",
+    "description": "These core doctrines summarize the hope, calling, and foundation of faith we hold as part of the Seventh-day Adventist Church.",
+    "readMore": "Read more about the 28 Adventist Beliefs",
+    "items": [
+      {
+        "title": "Sabbath",
+        "summary": "A holy day to pause, worship, and enjoy fellowship with God and one another.",
+        "highlight": "Rest, worship, renewal"
+      },
+      {
+        "title": "Second Coming of Jesus",
+        "summary": "The church's great hope that Christ will return visibly and gloriously.",
+        "highlight": "Blessed hope"
+      },
+      {
+        "title": "The Bible",
+        "summary": "God's Word is the foundation of faith, teaching, and the life of every believer.",
+        "highlight": "Authority of Scripture"
+      },
+      {
+        "title": "Baptism",
+        "summary": "A sign of commitment to Christ, repentance, and new life in Him.",
+        "highlight": "New life in Christ"
+      },
+      {
+        "title": "Stewardship",
+        "summary": "Everything we have comes from God and is used faithfully for His glory.",
+        "highlight": "Faithful stewardship"
+      },
+      {
+        "title": "The Remnant and Its Mission",
+        "summary": "God's people are called to be faithful, share salvation, and live as His witnesses.",
+        "highlight": "Called to witness"
+      }
+    ]
+  },
+  "rundown": {
+    "titleStart": "Worship",
+    "titleEmphasis": " Rundown",
+    "viewParticipants": "View Participants",
+    "sabbath": "Sabbath",
+    "serviceQuestion": "What happens in this service?",
+    "momentsLabel": "Worship moments",
+    "momentsTitle": "What does our Sabbath worship look like?",
+    "items": [
+      {
+        "title": "Sabbath School",
+        "detail": "Sabbath School discussions to start the Sabbath on a spiritual note.",
+        "subdetail": "In Sabbath School worship, we start off with a few songs. Welcome and opening prayer are led by the Sabbath School leader. We have a special song, followed by a mission story, offering, lesson discussion, and a closing family worship or stewardship moment.",
+        "participants": ["Song Leader", "Pianist", "Sabbath School Leader", "Memory Verse & Opening Prayer", "Special Song", "Mission Story", "Deacons/Deaconesses", "Sabbath School Discussion", "Family Worship / Stewardship"]
+      },
+      {
+        "title": "Divine Service",
+        "detail": "Praise, prayer, and the main sermon for the day.",
+        "subdetail": "In Divine Service, the congregation gathers to praise God, pray together, read Scripture, and listen to a message that strengthens faith.",
+        "participants": ["Song Leader", "Pianist", "Responsive Reading", "Sermon", "Pastoral Prayer", "Scripture Reading", "Main Message"]
+      },
+      {
+        "title": "Potluck Fellowship",
+        "detail": "A shared meal and warm conversations with the church family.",
+        "subdetail": "Potluck fellowship is a time to get to know one another, welcome guests, and enjoy community after worship.",
+        "participants": ["Meal Coordination", "Table Hosting", "Guest Welcome"]
+      },
+      {
+        "title": "Choir Practice",
+        "detail": "Song rehearsal and preparation for upcoming worship services.",
+        "subdetail": "The choir rehearses vocals, harmonies, and ministry songs so they can serve with readiness and heart.",
+        "participants": ["Warm-up and Vocal Drill", "Special Number Rehearsal", "Closing Run-through"]
+      },
+      {
+        "title": "Adventist Youth Fellowship",
+        "detail": "Youth-led worship, activities, and spiritual reflection.",
+        "subdetail": "Youth fellowship closes the Sabbath with praise, Bible reflection, group activities, and a time of prayerful commitment together.",
+        "participants": ["Praise and Worship", "Interactive Bible Talk", "Group Activity", "Commitment Prayer"]
+      }
+    ],
+    "moments": [
+      {
+        "label": "Moment 01",
+        "title": "A soft start before worship begins",
+        "description": "Temporary image placeholder for the welcome moments, greetings, and early arrivals before the service starts."
+      },
+      {
+        "label": "Moment 02",
+        "title": "Voices rising together in praise",
+        "description": "This is standing in for future worship photos and helps the section feel alive while the real gallery is being prepared."
+      },
+      {
+        "label": "Moment 03",
+        "title": "Scripture, stillness, and reflection",
+        "description": "A placeholder frame for the quieter parts of the day, where the room settles and attention turns toward the message."
+      },
+      {
+        "label": "Moment 04",
+        "title": "Shared meals and joyful conversations",
+        "description": "This will eventually be swapped for fellowship photography, but for now it keeps the story of the day flowing visually."
+      },
+      {
+        "label": "Moment 05",
+        "title": "Ending the Sabbath with warmth",
+        "description": "A final placeholder image for the closing rhythm of the day, leaving the section with a calm and gracious finish."
+      }
+    ]
+  },
+  "location": {
+    "titleStart": "Our",
+    "titleEmphasis": " Location",
+    "description": "We warmly welcome you to visit us in person. Below, you'll find our church location and worship hours. We look forward to seeing you and sharing in fellowship together.",
+    "address": "Address:",
+    "worshipHours": "Worship Hours:",
+    "worshipHoursValue": "Every Saturday, 8:30 AM - 6:00 PM",
+    "directions": "Get Directions"
+  },
+  "contact": {
+    "titleStart": "Get in Touch",
+    "titleEmphasis": " with Us",
+    "description": "Feel free to reach out to us through any of the methods. Whether you want to send prayer requests, questions, or a simple greeting, we're here to listen and connect with you.",
+    "gmailLabel": "Contact us through Gmail",
+    "whatsappLabel": "Contact us through WhatsApp",
+    "messageTypes": ["Prayer requests", "Questions", "Greetings"]
+  },
+  "faq": {
+    "titleStart": "Frequently Asked",
+    "titleEmphasis": " Questions",
+    "items": [
+      {
+        "title": "What time does Sabbath worship begin?",
+        "content": "Sabbath School begins at 8:30 AM and Divine Service begins around 10:30 AM every Saturday."
+      },
+      {
+        "title": "Are visitors welcome to worship with us?",
+        "content": "Absolutely. We welcome every guest who wants to worship, study Scripture, or join our fellowship."
+      },
+      {
+        "title": "What language is used during worship?",
+        "content": "The main worship service is usually in Bahasa Indonesia, with welcome and support for English-speaking guests when needed."
+      },
+      {
+        "title": "Are there activities for young people?",
+        "content": "Yes. Adventist Youth Fellowship is usually held on Saturday afternoon with praise, Bible discussion, and group activities."
+      },
+      {
+        "title": "How can I contact the church?",
+        "content": "You can contact us through Gmail, WhatsApp, or the social media links listed in the Get in Touch section."
+      }
+    ]
+  },
+  "footer": {
+    "description": "GMAHK Villa Nusa Indah Seventh-day Adventist Church is a church community committed to sharing the love of Christ and serving the community with dedication.",
+    "contact": "Contact Us",
+    "schedule": "Worship Schedule",
+    "address": "Jl. Raya Villa Nusa Indah, Villa Nusa Indah District",
+    "copyright": "All rights reserved.",
+    "built": "Built with love by the VNI Coms Team.",
+    "schedules": [
+      {
+        "title": "Sabbath Worship",
+        "time": "Saturday, 08:30 - 12:00 WIB"
+      },
+      {
+        "title": "Wednesday Night",
+        "time": "Wednesday, 19:00 - 20:00 WIB"
+      }
+    ]
+  },
+  "members": {
+    "eyebrow": "Church Directory",
+    "titleStart": "Church",
+    "titleEmphasis": " Members ",
+    "description": "Members and ministry leaders of GMAHK Villa Nusa Indah are arranged in an easy-to-scan grid. Use search to find a specific member name.",
+    "searchAria": "Search member name",
+    "searchPlaceholder": "Search member name...",
+    "count": "{filtered} of {total} members",
+    "photoAlt": "Photo of {name}",
+    "notFoundTitle": "No members found",
+    "notFoundDescription": "Try another spelling or clear the search keyword.",
+    "positions": {
+      "pastor": "Pastor",
+      "headElder": "Head Elder",
+      "secretary": "Secretary",
+      "treasurer": "Treasurer",
+      "sabbathSchoolLeader": "Sabbath School Leader",
+      "headDeacon": "Head Deacon",
+      "headDeaconess": "Head Deaconess",
+      "musicLeader": "Music Leader",
+      "ayLeader": "Adventist Youth Leader",
+      "childrenLeader": "Children's Ministries Leader",
+      "communicationLeader": "Communication Leader",
+      "womenLeader": "Women's Ministries Leader",
+      "healthLeader": "Health Leader",
+      "sabbathSchoolTeacher": "Sabbath School Teacher",
+      "sabbathSchoolTreasurer": "Sabbath School Treasurer",
+      "deacon": "Deacon",
+      "deaconess": "Deaconess",
+      "member": "Church Member"
+    }
+  }
+}

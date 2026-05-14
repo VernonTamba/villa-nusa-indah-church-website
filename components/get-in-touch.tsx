@@ -3,6 +3,7 @@
 import { Card, CardBody } from "@heroui/react";
 
 import { CONTACT_OPTIONS } from "@/constants/get-in-touch";
+import { useLanguage } from "@/lib/i18n";
 
 const DIRECT_CONTACT_OPTIONS = CONTACT_OPTIONS.slice(0, 2);
 const SOCIAL_CONTACT_OPTIONS = CONTACT_OPTIONS.slice(2);
@@ -14,6 +15,8 @@ const CONTACT_CARD_BODY_CLASS =
   "flex items-center justify-center bg-[radial-gradient(circle_at_top,_rgba(1,75,63,0.12),_transparent_60%),linear-gradient(180deg,_rgba(248,167,36,0.1),_rgba(255,255,255,0.96))] dark:bg-[radial-gradient(circle_at_top,_rgba(248,167,36,0.2),_transparent_55%),linear-gradient(180deg,_rgba(255,255,255,0.06),_rgba(255,255,255,0.02))]";
 
 const GetInTouch = () => {
+  const { messages: t } = useLanguage();
+
   return (
     <div
       id="get-in-touch"
@@ -26,13 +29,11 @@ const GetInTouch = () => {
               id="core-values-heading"
               className="text-5xl font-black tracking-tight text-primary"
             >
-              Get in Touch <span className="text-secondary">with Us</span>
+              {t.contact.titleStart}
+              <span className="text-secondary">{t.contact.titleEmphasis}</span>
             </h1>
             <p className="mt-4 text-sm leading-7 text-foreground dark:text-white sm:text-base">
-              Feel free to reach out to us through any of the methods. Whether
-              you want to send: prayer requests, inquiries, or just a simple
-              greeting, we're here to listen and connect with you. We look
-              forward to hearing from you!
+              {t.contact.description}
             </p>
           </div>
         </div>
@@ -62,10 +63,12 @@ const GetInTouch = () => {
       <div className="flex w-full max-w-6xl flex-col items-center gap-10">
         <div className="grid w-full max-w-3xl grid-cols-1 justify-items-center gap-5 sm:grid-cols-2">
           {DIRECT_CONTACT_OPTIONS.map(
-            ({ description, href, linkLabel, icon: Icon }) => (
+            ({ description, href, icon: Icon }, index) => (
               <a
-                key={`${linkLabel}-${description}`}
-                aria-label={linkLabel}
+                key={`${href}-${description}`}
+                aria-label={
+                  index === 0 ? t.contact.gmailLabel : t.contact.whatsappLabel
+                }
                 className="group block w-full max-w-[300px] rounded-large focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                 href={href}
                 rel="noreferrer"

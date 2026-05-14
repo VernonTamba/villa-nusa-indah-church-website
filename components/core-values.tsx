@@ -1,4 +1,18 @@
-import { IDENTITY_PILLARS, type IdentityPillar } from "@/constants/core-values";
+"use client";
+
+import { IDENTITY_PILLARS } from "@/constants/core-values";
+import { useLanguage } from "@/lib/i18n";
+
+type PillarCardProps = {
+  number: string;
+  title: string;
+  descriptor: string;
+  description: string;
+  icon: (typeof IDENTITY_PILLARS)[number]["icon"];
+  cardClassName: string;
+  iconClassName: string;
+  footer: string;
+};
 
 const PillarCard = ({
   number,
@@ -9,7 +23,7 @@ const PillarCard = ({
   cardClassName,
   iconClassName,
   footer,
-}: IdentityPillar) => {
+}: PillarCardProps) => {
   return (
     <article
       className={`group relative h-full overflow-hidden rounded-[30px] border border-primary/10 p-6 shadow-[0_18px_45px_rgba(15,23,42,0.08)] transition-all duration-300 hover:-translate-y-2 hover:shadow-[0_26px_60px_rgba(1,75,63,0.14)] dark:border-white/10 dark:shadow-[0_22px_55px_rgba(2,6,23,0.28)] ${cardClassName}`}
@@ -54,7 +68,12 @@ const PillarCard = ({
 };
 
 const CoreValues = () => {
-  const [visionPillar, missionPillar] = IDENTITY_PILLARS;
+  const { messages: t } = useLanguage();
+  const pillars = IDENTITY_PILLARS.map((pillar, index) => ({
+    ...pillar,
+    ...t.coreValues.pillars[index],
+  }));
+  const [visionPillar, missionPillar] = pillars;
 
   return (
     <div id="core-values" className="mb-48 space-y-10">
@@ -70,12 +89,14 @@ const CoreValues = () => {
                   id="core-values-heading"
                   className="text-5xl font-black tracking-tight text-primary"
                 >
-                  Vision<span className="text-secondary"> and </span>Mission
+                  {t.coreValues.titleStart}
+                  <span className="text-secondary">
+                    {t.coreValues.titleMiddle}
+                  </span>
+                  {t.coreValues.titleEnd}
                 </h1>
                 <p className="mt-4 text-sm leading-7 text-foreground dark:text-white sm:text-base">
-                  Tujuh doktrin inti ini merangkum pengharapan, panggilan, dan
-                  dasar iman yang kami pegang sebagai bagian dari Gereja Masehi
-                  Advent Hari Ketujuh.
+                  {t.coreValues.description}
                 </p>
               </div>
             </div>

@@ -5,6 +5,7 @@ import Image, { type StaticImageData } from "next/image";
 import { Input } from "@heroui/input";
 import { IconSearch, IconUserOff, IconUsersGroup } from "@tabler/icons-react";
 
+import { useLanguage } from "@/lib/i18n";
 import memberPlaceholder from "@/public/images/member-placeholder.svg";
 
 type Member = {
@@ -305,7 +306,29 @@ const MEMBERS: Member[] = [
   },
 ];
 
+const POSITION_KEYS = {
+  Pendeta: "pastor",
+  "Ketua Jemaat": "headElder",
+  Sekretaris: "secretary",
+  Bendahara: "treasurer",
+  "Pemimpin Sekolah Sabat": "sabbathSchoolLeader",
+  "Ketua Diakon": "headDeacon",
+  "Ketua Diakones": "headDeaconess",
+  "Pemimpin Musik": "musicLeader",
+  "Pemimpin Pemuda Advent": "ayLeader",
+  "Pemimpin Pelayanan Anak": "childrenLeader",
+  "Pemimpin Komunikasi": "communicationLeader",
+  "Pemimpin Pelayanan Wanita": "womenLeader",
+  "Pemimpin Kesehatan": "healthLeader",
+  "Guru Sekolah Sabat": "sabbathSchoolTeacher",
+  "Bendahara Sekolah Sabat": "sabbathSchoolTreasurer",
+  Diakon: "deacon",
+  Diakones: "deaconess",
+  "Anggota Jemaat": "member",
+} as const;
+
 const MembersDirectory = () => {
+  const { messages: t } = useLanguage();
   const [searchQuery, setSearchQuery] = useState("");
 
   const filteredMembers = useMemo(() => {
@@ -330,31 +353,30 @@ const MembersDirectory = () => {
           <div className="max-w-3xl">
             <span className="inline-flex items-center gap-2 rounded-full border border-primary/10 bg-white/80 px-4 py-1 text-[11px] font-semibold uppercase tracking-[0.28em] text-primary/70 backdrop-blur-sm dark:border-white/10 dark:bg-white/8 dark:text-white/70">
               <IconUsersGroup size={16} stroke={1.8} />
-              Direktori Jemaat
+              {t.members.eyebrow}
             </span>
             <h1
               id="members-heading"
               className="mt-6 text-4xl font-black tracking-tight text-primary sm:text-5xl dark:text-white"
             >
-              Anggota<span className="text-secondary"> Jemaat </span>
+              {t.members.titleStart}
+              <span className="text-secondary">{t.members.titleEmphasis}</span>
             </h1>
             <p className="mt-4 max-w-2xl text-sm leading-7 text-foreground sm:text-base dark:text-white">
-              Daftar anggota dan pelayan GMAHK Villa Nusa Indah tersusun dalam
-              grid yang mudah dipindai. Gunakan pencarian untuk menemukan nama
-              anggota tertentu.
+              {t.members.description}
             </p>
           </div>
 
           <div className="w-full lg:max-w-md">
             <Input
-              aria-label="Cari nama anggota"
+              aria-label={t.members.searchAria}
               classNames={{
                 input: "text-sm",
                 inputWrapper:
                   "h-14 border border-primary/10 bg-white/90 shadow-[0_16px_40px_rgba(1,75,63,0.08)] dark:border-white/10 dark:bg-white/10",
               }}
               isClearable
-              placeholder="Cari nama anggota..."
+              placeholder={t.members.searchPlaceholder}
               radius="full"
               size="lg"
               startContent={
@@ -370,7 +392,9 @@ const MembersDirectory = () => {
               onValueChange={setSearchQuery}
             />
             <p className="mt-3 text-right text-xs font-medium text-foreground dark:text-white">
-              {filteredMembers.length} dari {MEMBERS.length} anggota
+              {t.members.count
+                .replace("{filtered}", String(filteredMembers.length))
+                .replace("{total}", String(MEMBERS.length))}
             </p>
           </div>
         </div>
@@ -385,7 +409,7 @@ const MembersDirectory = () => {
                 <div className="relative h-28 w-28 overflow-hidden rounded-[20px] bg-primary-muted shadow-[0_12px_28px_rgba(1,75,63,0.12)] sm:h-32 sm:w-32 dark:bg-white/10">
                   <Image
                     fill
-                    alt={`Foto ${member.name}`}
+                    alt={t.members.photoAlt.replace("{name}", member.name)}
                     className="object-cover transition-transform duration-500 group-hover:scale-105"
                     priority={member.id <= 8}
                     sizes="(min-width: 640px) 8rem, 7rem"
@@ -399,7 +423,13 @@ const MembersDirectory = () => {
                     {member.name}
                   </h2>
                   <p className="mt-2 inline-flex rounded-full border border-primary/10 bg-secondary-muted px-3 py-1 text-xs font-semibold text-primary dark:border-white/10 dark:bg-secondary/12 dark:text-secondary">
-                    {member.position}
+                    {
+                      t.members.positions[
+                        POSITION_KEYS[
+                          member.position as keyof typeof POSITION_KEYS
+                        ]
+                      ]
+                    }
                   </p>
                 </div>
               </article>
@@ -413,10 +443,10 @@ const MembersDirectory = () => {
               stroke={1.6}
             />
             <h2 className="mt-5 text-xl font-bold text-primary dark:text-white">
-              Anggota tidak ditemukan
+              {t.members.notFoundTitle}
             </h2>
             <p className="mt-2 max-w-md text-sm leading-6 text-foreground dark:text-white">
-              Coba gunakan ejaan nama lain atau hapus kata kunci pencarian.
+              {t.members.notFoundDescription}
             </p>
           </div>
         )}

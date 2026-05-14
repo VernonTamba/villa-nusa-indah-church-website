@@ -1,0 +1,236 @@
+{
+  "nav": {
+    "home": "Beranda",
+    "members": "Anggota",
+    "donate": "Donasi"
+  },
+  "hero": {
+    "eyebrow": "Shalom dan selamat datang!",
+    "description": "Komunitas yang hangat, tempat ibadah terasa seperti keluarga, iman bertumbuh dengan tujuan, dan setiap tamu diajak menemukan tempat untuk bertumbuh bersama.",
+    "links": {
+      "rundown": "Rangkaian Ibadah",
+      "location": "Lokasi",
+      "contact": "Hubungi Kami"
+    },
+    "scroll": "Lihat lebih lanjut"
+  },
+  "coreValues": {
+    "titleStart": "Visi",
+    "titleMiddle": " dan ",
+    "titleEnd": "Misi",
+    "description": "Visi dan misi ini menuntun kami untuk membagikan kasih Allah, hidup dalam firman-Nya, dan melayani sesama sebagai bagian dari pekerjaan penebusan Kristus.",
+    "pillars": [
+      {
+        "title": "Visi",
+        "descriptor": "Ke mana Tuhan menuntun kami",
+        "description": "Membagikan kasih dan keselamatan Allah melalui Yesus Kristus, serta mengambil bagian dalam pekerjaan penebusan-Nya di dunia.",
+        "footer": "Tuhan memimpin, kami mengikuti."
+      },
+      {
+        "title": "Misi",
+        "descriptor": "Bagaimana kami menghidupinya",
+        "description": "Mengikuti firman dan pengajaran Allah dalam Alkitab, serta menjalankan iman melalui tindakan nyata yang mencerminkan kasih dan anugerah Allah.",
+        "footer": "Mengasihi Allah dan mengasihi sesama."
+      }
+    ]
+  },
+  "coreBeliefs": {
+    "titleStart": "Kepercayaan",
+    "titleEmphasis": " Kami ",
+    "description": "Beberapa doktrin inti ini merangkum pengharapan, panggilan, dan dasar iman yang kami pegang sebagai bagian dari Gereja Masehi Advent Hari Ketujuh.",
+    "readMore": "Baca lebih lanjut tentang 28 Doktrin Advent",
+    "items": [
+      {
+        "title": "Hari Sabat",
+        "summary": "Hari kudus untuk berhenti, beribadah, dan menikmati persekutuan dengan Tuhan serta sesama.",
+        "highlight": "Perhentian, ibadah, pembaruan"
+      },
+      {
+        "title": "Kedatangan Yesus Kedua Kali",
+        "summary": "Pengharapan besar gereja bahwa Kristus akan datang kembali secara nyata dan mulia.",
+        "highlight": "Pengharapan yang diberkati"
+      },
+      {
+        "title": "Alkitab",
+        "summary": "Firman Allah yang menjadi dasar iman, pengajaran, dan kehidupan orang percaya.",
+        "highlight": "Otoritas Firman"
+      },
+      {
+        "title": "Baptisan",
+        "summary": "Tanda komitmen kepada Kristus, pertobatan, dan hidup baru di dalam Dia.",
+        "highlight": "Hidup baru dalam Kristus"
+      },
+      {
+        "title": "Penatalayanan",
+        "summary": "Segala yang kita miliki berasal dari Tuhan dan dipakai dengan setia untuk kemuliaan-Nya.",
+        "highlight": "Setia mengelola berkat"
+      },
+      {
+        "title": "Umat yang Sisa dan Tugasnya",
+        "summary": "Umat Tuhan dipanggil untuk setia, membawa kabar keselamatan, dan hidup sebagai saksi-Nya.",
+        "highlight": "Dipanggil untuk bersaksi"
+      }
+    ]
+  },
+  "rundown": {
+    "titleStart": "Rangkaian",
+    "titleEmphasis": " Ibadah",
+    "viewParticipants": "Lihat Pelayan",
+    "sabbath": "Sabat",
+    "serviceQuestion": "Apa yang terjadi dalam ibadah ini?",
+    "momentsLabel": "Momen ibadah",
+    "momentsTitle": "Seperti apa suasana ibadah Sabat kami?",
+    "items": [
+      {
+        "title": "Sekolah Sabat",
+        "detail": "Diskusi Sekolah Sabat untuk memulai hari Sabat dengan pertumbuhan rohani.",
+        "subdetail": "Dalam ibadah Sekolah Sabat, kami memulai dengan beberapa lagu. Sambutan dan doa pembuka dibawakan oleh pemimpin Sekolah Sabat. Ada lagu istimewa, cerita misi, persembahan, diskusi pelajaran, dan penutup melalui ibadah keluarga atau penatalayanan.",
+        "participants": ["Pemimpin Lagu", "Pianis", "Pemimpin Sekolah Sabat", "Ayat Hafalan & Doa Pembuka", "Lagu Istimewa", "Cerita Misi", "Diakon/Diakones", "Diskusi Sekolah Sabat", "Ibadah Keluarga / Penatalayanan"]
+      },
+      {
+        "title": "Kebaktian",
+        "detail": "Pujian, doa, dan khotbah utama pada hari Sabat.",
+        "subdetail": "Dalam kebaktian, jemaat berkumpul untuk memuji Tuhan, berdoa bersama, membaca Firman, dan mendengarkan pekabaran yang meneguhkan iman.",
+        "participants": ["Pemimpin Lagu", "Pianis", "Pembacaan Responsif", "Khotbah", "Doa Pastoral", "Pembacaan Alkitab", "Pekabaran Utama"]
+      },
+      {
+        "title": "Persekutuan Makan Bersama",
+        "detail": "Makan bersama dan percakapan hangat dengan keluarga jemaat.",
+        "subdetail": "Persekutuan makan bersama menjadi waktu untuk saling mengenal, menyambut tamu, dan menikmati kebersamaan setelah ibadah.",
+        "participants": ["Koordinasi Makanan", "Tuan Rumah Meja", "Penyambutan Tamu"]
+      },
+      {
+        "title": "Latihan Paduan Suara",
+        "detail": "Latihan lagu dan persiapan untuk pelayanan ibadah berikutnya.",
+        "subdetail": "Paduan suara berlatih vokal, harmoni, dan lagu pelayanan agar dapat melayani dengan lebih siap dan sepenuh hati.",
+        "participants": ["Pemanasan dan Latihan Vokal", "Latihan Lagu Istimewa", "Latihan Penutup"]
+      },
+      {
+        "title": "Persekutuan Pemuda Advent",
+        "detail": "Ibadah yang dipimpin pemuda, kegiatan bersama, dan renungan rohani.",
+        "subdetail": "Persekutuan pemuda menutup hari Sabat dengan pujian, refleksi Alkitab, kegiatan kelompok, dan doa komitmen bersama.",
+        "participants": ["Pujian dan Penyembahan", "Pembahasan Alkitab Interaktif", "Kegiatan Kelompok", "Doa Komitmen"]
+      }
+    ],
+    "moments": [
+      {
+        "label": "Momen 01",
+        "title": "Awal yang tenang sebelum ibadah",
+        "description": "Gambar sementara untuk momen penyambutan, sapaan, dan kedatangan awal sebelum ibadah dimulai."
+      },
+      {
+        "label": "Momen 02",
+        "title": "Suara jemaat bersatu dalam pujian",
+        "description": "Gambar ini menjadi pengganti sementara untuk foto ibadah yang akan disiapkan kemudian."
+      },
+      {
+        "label": "Momen 03",
+        "title": "Firman, keteduhan, dan perenungan",
+        "description": "Bingkai sementara untuk bagian ibadah yang lebih hening, ketika perhatian tertuju kepada pekabaran Firman."
+      },
+      {
+        "label": "Momen 04",
+        "title": "Makan bersama dan percakapan hangat",
+        "description": "Nantinya bagian ini dapat diganti dengan foto persekutuan jemaat yang sebenarnya."
+      },
+      {
+        "label": "Momen 05",
+        "title": "Menutup Sabat dengan kehangatan",
+        "description": "Gambar sementara untuk ritme penutup hari Sabat yang tenang dan penuh syukur."
+      }
+    ]
+  },
+  "location": {
+    "titleStart": "Lokasi",
+    "titleEmphasis": " Kami",
+    "description": "Kami menyambut Anda untuk berkunjung secara langsung. Di bawah ini tersedia lokasi gereja dan jam ibadah kami. Kami menantikan kehadiran Anda untuk bersekutu bersama.",
+    "address": "Alamat:",
+    "worshipHours": "Jam Ibadah:",
+    "worshipHoursValue": "Setiap Sabtu, 08:30 - 18:00 WIB",
+    "directions": "Petunjuk Arah"
+  },
+  "contact": {
+    "titleStart": "Hubungi",
+    "titleEmphasis": " Kami",
+    "description": "Silakan menghubungi kami melalui kanal yang tersedia. Baik untuk permohonan doa, pertanyaan, maupun sapaan sederhana, kami siap mendengar dan terhubung dengan Anda.",
+    "gmailLabel": "Hubungi kami melalui Gmail",
+    "whatsappLabel": "Hubungi kami melalui WhatsApp",
+    "messageTypes": ["Permohonan doa", "Pertanyaan", "Salam"]
+  },
+  "faq": {
+    "titleStart": "Pertanyaan",
+    "titleEmphasis": " Umum",
+    "items": [
+      {
+        "title": "Kapan ibadah Sabat dimulai?",
+        "content": "Sekolah Sabat dimulai pukul 08:30 dan Kebaktian dimulai sekitar pukul 10:30 setiap hari Sabtu."
+      },
+      {
+        "title": "Apakah tamu boleh datang beribadah?",
+        "content": "Tentu. Kami menyambut setiap tamu yang ingin beribadah, belajar Firman, atau bersekutu bersama."
+      },
+      {
+        "title": "Bahasa apa yang digunakan dalam ibadah?",
+        "content": "Ibadah utama umumnya menggunakan Bahasa Indonesia, dengan sapaan dan dukungan bagi tamu berbahasa Inggris bila diperlukan."
+      },
+      {
+        "title": "Apakah ada kegiatan untuk anak muda?",
+        "content": "Ada. Persekutuan Pemuda Advent biasanya diadakan pada Sabtu sore dengan pujian, pembahasan Alkitab, dan kegiatan bersama."
+      },
+      {
+        "title": "Bagaimana cara menghubungi gereja?",
+        "content": "Anda dapat menghubungi kami melalui Gmail, WhatsApp, atau media sosial yang tercantum pada bagian Hubungi Kami."
+      }
+    ]
+  },
+  "footer": {
+    "description": "Gereja Masehi Advent Hari Ketujuh Villa Nusa Indah adalah komunitas gereja yang berkomitmen untuk menyebarkan kasih Kristus dan melayani masyarakat dengan penuh dedikasi.",
+    "contact": "Kontak Kami",
+    "schedule": "Jadwal Kebaktian",
+    "address": "Jl. Raya Villa Nusa Indah, Kecamatan Villa Nusa Indah",
+    "copyright": "Hak cipta dilindungi.",
+    "built": "Dibuat dengan hati oleh VNI Coms Team.",
+    "schedules": [
+      {
+        "title": "Kebaktian Sabat",
+        "time": "Sabtu, 08:30 - 12:00 WIB"
+      },
+      {
+        "title": "Rabu Malam",
+        "time": "Rabu, 19:00 - 20:00 WIB"
+      }
+    ]
+  },
+  "members": {
+    "eyebrow": "Direktori Jemaat",
+    "titleStart": "Anggota",
+    "titleEmphasis": " Jemaat ",
+    "description": "Daftar anggota dan pelayan GMAHK Villa Nusa Indah tersusun dalam grid yang mudah dipindai. Gunakan pencarian untuk menemukan nama anggota tertentu.",
+    "searchAria": "Cari nama anggota",
+    "searchPlaceholder": "Cari nama anggota...",
+    "count": "{filtered} dari {total} anggota",
+    "photoAlt": "Foto {name}",
+    "notFoundTitle": "Anggota tidak ditemukan",
+    "notFoundDescription": "Coba gunakan ejaan nama lain atau hapus kata kunci pencarian.",
+    "positions": {
+      "pastor": "Pendeta",
+      "headElder": "Ketua Jemaat",
+      "secretary": "Sekretaris",
+      "treasurer": "Bendahara",
+      "sabbathSchoolLeader": "Pemimpin Sekolah Sabat",
+      "headDeacon": "Ketua Diakon",
+      "headDeaconess": "Ketua Diakones",
+      "musicLeader": "Pemimpin Musik",
+      "ayLeader": "Pemimpin Pemuda Advent",
+      "childrenLeader": "Pemimpin Pelayanan Anak",
+      "communicationLeader": "Pemimpin Komunikasi",
+      "womenLeader": "Pemimpin Pelayanan Wanita",
+      "healthLeader": "Pemimpin Kesehatan",
+      "sabbathSchoolTeacher": "Guru Sekolah Sabat",
+      "sabbathSchoolTreasurer": "Bendahara Sekolah Sabat",
+      "deacon": "Diakon",
+      "deaconess": "Diakones",
+      "member": "Anggota Jemaat"
+    }
+  }
+}

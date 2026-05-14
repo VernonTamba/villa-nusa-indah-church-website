@@ -16,6 +16,8 @@ import {
   useTransform,
 } from "framer-motion";
 
+import { useLanguage } from "@/lib/i18n";
+
 const HERO_SLIDES = [
   {
     src: "/images/hero-1.jpeg",
@@ -50,6 +52,7 @@ const HERO_LINKS = [
 ];
 
 const Hero = () => {
+  const { messages: t } = useLanguage();
   const heroRef = useRef<HTMLElement>(null);
   const [activeSlide, setActiveSlide] = useState(0);
   const shouldReduceMotion = useReducedMotion() ?? false;
@@ -120,7 +123,7 @@ const Hero = () => {
               transition={{ duration: 0.6, ease: "easeOut" }}
             >
               <IconSparkles size={16} />
-              Shalom and welcome!
+              {t.hero.eyebrow}
             </motion.p>
 
             <motion.div
@@ -133,9 +136,7 @@ const Hero = () => {
                 GMAHK Villa Nusa Indah
               </h1>
               <p className="max-w-2xl text-base leading-7 text-white sm:text-lg sm:leading-8">
-                A warm community where worship feels like family, faith grows
-                with purpose, and every visitor is invited to discover a place
-                to belong.
+                {t.hero.description}
               </p>
             </motion.div>
 
@@ -150,7 +151,7 @@ const Hero = () => {
 
                 return (
                   <a
-                    key={item.label}
+                    key={item.href}
                     href={item.href}
                     className="group flex items-center gap-3 border border-white/20 bg-white/10 px-4 py-3 shadow-[0_18px_45px_rgba(0,0,0,0.18)] backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:border-secondary/70 hover:bg-white/15 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-secondary rounded-xl"
                   >
@@ -158,7 +159,11 @@ const Hero = () => {
                       <Icon size={20} />
                     </span>
                     <span className="text-sm font-semibold text-white">
-                      {item.label}
+                      {item.href === "#rundown"
+                        ? t.hero.links.rundown
+                        : item.href === "#location"
+                          ? t.hero.links.location
+                          : t.hero.links.contact}
                     </span>
                   </a>
                 );
@@ -182,7 +187,7 @@ const Hero = () => {
           </div>
 
           <div className="ml-auto flex items-center gap-3 text-sm font-semibold text-white">
-            <span>Scroll to explore</span>
+            <span>{t.hero.scroll}</span>
             <motion.span
               aria-hidden="true"
               animate={shouldReduceMotion ? undefined : { y: [0, 7, 0] }}

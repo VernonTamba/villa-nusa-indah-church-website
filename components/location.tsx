@@ -8,10 +8,13 @@ import {
 import dynamic from "next/dynamic";
 import { Button } from "@heroui/react";
 import { CHURCH_LOCATION } from "@/constants/location";
+import { useLanguage } from "@/lib/i18n";
 
 const ChurchMap = dynamic(() => import("@/components/ui/map"), { ssr: false });
 
 const Location = () => {
+  const { messages: t } = useLanguage();
+
   return (
     <div id="location" className="mb-48 scroll-mt-24">
       <div className="text-center mx-auto max-w-4xl">
@@ -21,12 +24,11 @@ const Location = () => {
               id="core-values-heading"
               className="text-5xl font-black tracking-tight text-primary"
             >
-              Our <span className="text-secondary">Location</span>
+              {t.location.titleStart}
+              <span className="text-secondary">{t.location.titleEmphasis}</span>
             </h1>
             <p className="mt-4 text-sm leading-7 text-foreground dark:text-white sm:text-base">
-              We warmly welcome you to visit us in person! Below, you'll find
-              our church's location and worship hours. We look forward to seeing
-              you and sharing in fellowship together!
+              {t.location.description}
             </p>
           </div>
         </div>
@@ -39,7 +41,9 @@ const Location = () => {
               <IconMapPinFilled size={40} className="text-primary" />
             </div>
             <div>
-              <h2 className="text-2xl font-bold mb-2">Address:</h2>
+              <h2 className="text-2xl font-bold mb-2">
+                {t.location.address}
+              </h2>
               <p className="text-sm mb-4">{CHURCH_LOCATION.address}</p>
             </div>
           </div>
@@ -49,8 +53,10 @@ const Location = () => {
               <IconClockHour8Filled size={40} className="text-primary" />
             </div>
             <div>
-              <h2 className="text-2xl font-bold mb-2">Worship Hours:</h2>
-              <p className="text-sm mb-4">Every Saturday, 8:30 AM - 18:00 PM</p>
+              <h2 className="text-2xl font-bold mb-2">
+                {t.location.worshipHours}
+              </h2>
+              <p className="text-sm mb-4">{t.location.worshipHoursValue}</p>
             </div>
           </div>
 
@@ -65,7 +71,7 @@ const Location = () => {
                   className="relative z-10 bg-secondary text-secondary-foreground font-semibold"
                   startContent={<IconLocationFilled />}
                 >
-                  Get Directions
+                  {t.location.directions}
                 </Button>
               </div>
             </div>

@@ -18,6 +18,7 @@ import {
   SCROLL_MOMENTS,
   type ScrollMoment,
 } from "@/constants/rundown";
+import { useLanguage, type Locale } from "@/lib/i18n";
 
 type ScrollStackCardProps = {
   item: ScrollMoment;
@@ -116,7 +117,7 @@ const ScrollStackCard = ({
   );
 };
 
-function getNextSaturday(): string {
+function getNextSaturday(locale: Locale): string {
   const today = new Date();
   const dayOfWeek = today.getDay(); // 0 = Sunday, 6 = Saturday
 
@@ -126,7 +127,7 @@ function getNextSaturday(): string {
   const nextSaturday = new Date(today);
   nextSaturday.setDate(today.getDate() + daysUntilSaturday);
 
-  return nextSaturday.toLocaleDateString("en-GB", {
+  return nextSaturday.toLocaleDateString(locale === "id" ? "id-ID" : "en-GB", {
     day: "2-digit",
     month: "long",
     year: "numeric",
@@ -134,6 +135,7 @@ function getNextSaturday(): string {
 }
 
 const Rundown = () => {
+  const { locale, messages: t } = useLanguage();
   const [openSheet, setOpenSheet] = useState<number | null>(null);
   const scrollStackRef = useRef<HTMLDivElement | null>(null);
   const shouldReduceMotion = useReducedMotion() ?? false;
@@ -146,11 +148,24 @@ const Rundown = () => {
     damping: 26,
     mass: 0.35,
   });
+  const rundownItems = RUNDOWN_ITEMS.map((item, index) => ({
+    ...item,
+    ...t.rundown.items[index],
+    participants: item.participants.map((participant, participantIndex) => ({
+      ...participant,
+      rundown: t.rundown.items[index].participants[participantIndex],
+    })),
+  }));
+  const scrollMoments = SCROLL_MOMENTS.map((moment, index) => ({
+    ...moment,
+    ...t.rundown.moments[index],
+  }));
 
   return (
     <div id="rundown" className="mb-48 scroll-mt-24">
-      <h1 className="scroll-m-20 text-4xl md:text-5xl font-extrabold tracking-tight text-center text-primary px-2 mb-6">
-        Worship <span className="text-secondary">Rundown</span>
+      <h1 className="scroll-m-20 text-5xl font-extrabold tracking-tight text-center text-primary px-2 mb-6">
+        {t.rundown.titleStart}
+        <span className="text-secondary">{t.rundown.titleEmphasis}</span>
       </h1>
 
       <div className="my-12">
@@ -158,7 +173,7 @@ const Rundown = () => {
           <div className="pointer-events-none absolute left-1/2 top-0 hidden h-full w-px -translate-x-1/2 bg-gradient-to-b from-primary/20 via-secondary/60 to-primary/20 lg:block" />
 
           <div className="flex flex-col gap-6">
-            {RUNDOWN_ITEMS.map((item, index) => {
+            {rundownItems.map((item, index) => {
               const isEven = index % 2 === 0;
               const isLast = index === RUNDOWN_ITEMS.length - 1;
               const Icon = item.icon;
@@ -173,7 +188,7 @@ const Rundown = () => {
                   >
                     <div className="space-y-1 p-5">
                       <p className="text-base font-medium text-foreground dark:text-white">
-                        Sabbath, {getNextSaturday()}
+                        {t.rundown.sabbath}, {getNextSaturday(locale)}
                       </p>
                       <p className="text-sm text-foreground dark:text-white mb-4">
                         {item.time}
@@ -183,7 +198,7 @@ const Rundown = () => {
                           aria-label={item.title}
                           title={
                             <span className="text-sm font-medium">
-                              What happens in this service?
+                              {t.rundown.serviceQuestion}
                             </span>
                           }
                         >
@@ -237,7 +252,7 @@ const Rundown = () => {
                             className="cursor-pointer"
                             onClick={() => setOpenSheet(index)}
                           >
-                            View Participants <IconScanPosition />
+                            {t.rundown.viewParticipants} <IconScanPosition />
                           </Button>
                         </div>
 
@@ -267,10 +282,10 @@ const Rundown = () => {
         <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-0">
           <div className="space-y-3 text-center w-full">
             <p className="text-xs font-semibold uppercase tracking-[0.28em] text-secondary">
-              Worship moments
+              {t.rundown.momentsLabel}
             </p>
             <h2 className="text-3xl font-bold tracking-tight text-primary dark:text-white">
-              What does our Sabbath worship look like?
+              {t.rundown.momentsTitle}
             </h2>
           </div>
 
@@ -280,7 +295,7 @@ const Rundown = () => {
           >
             <div className="sticky top-16 flex h-[76vh] items-center justify-center">
               <div className="relative h-full w-full px-2 sm:px-4">
-                {SCROLL_MOMENTS.map((item, index) => (
+                {scrollMoments.map((item, index) => (
                   <ScrollStackCard
                     key={item.label}
                     item={item}
