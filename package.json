@@ -54,6 +54,8 @@
     "@radix-ui/react-separator": "^1.1.8",
     "@react-aria/ssr": "3.9.10",
     "@react-aria/visually-hidden": "3.8.31",
+    "@supabase/ssr": "^0.10.3",
+    "@supabase/supabase-js": "^2.105.4",
     "@tabler/icons": "^3.40.0",
     "@tabler/icons-react": "^3.40.0",
     "class-variance-authority": "^0.7.1",

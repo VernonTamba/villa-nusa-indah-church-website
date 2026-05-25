@@ -1,13 +1,6 @@
-import {
-  IconBook2,
-  IconCoffee,
-  IconMicrophone2,
-  IconMusic,
-  IconPackage,
-  IconScanPosition,
-  IconSparkles,
-  IconUsersGroup,
-} from "@tabler/icons-react";
+// Icon names are stored as plain strings so this constant is fully serializable
+// and can be safely passed across the RSC → Client Component boundary.
+// Resolve the string to an actual component in the Client Component using RUNDOWN_ICON_MAP.
 
 export const RUNDOWN_ITEMS = [
   {
@@ -17,48 +10,48 @@ export const RUNDOWN_ITEMS = [
       "Sabbath School discussions to start the Sabbath on a spiritual note.",
     subdetail:
       "In Sabbath School worship, we start off with a few songs. Welcome and opening prayer are done by the Sabbath School leader. We have a special song, followed by a mission story. Deacons and deaconesses assist with the offering. The Sabbath School discussion is led by assigned groups, and we end with family worship or stewardship.",
-    icon: IconBook2,
+    icon: "IconBook2",
     participants: [
       {
         rundown: "Song Leader",
         participant: "Jane Doe",
-        icon: <IconMicrophone2 />,
+        icon: "IconMicrophone2",
       },
       {
         rundown: "Pianist",
         participant: "Matthew Doe",
-        icon: <IconMicrophone2 />,
+        icon: "IconMicrophone2",
       },
       {
         rundown: "Sabbath School Leader",
         participant: "John Doe",
-        icon: <IconSparkles />,
+        icon: "IconSparkles",
       },
       {
         rundown: "Memory Verse & Opening Prayer",
         participant: "Rachel",
-        icon: <IconScanPosition />,
+        icon: "IconScanPosition",
       },
       {
         rundown: "Special Song",
         participant: "VNI Youth",
-        icon: <IconMusic />,
+        icon: "IconMusic",
       },
-      { rundown: "Mission Story", participant: "Andry", icon: <IconBook2 /> },
+      { rundown: "Mission Story", participant: "Andry", icon: "IconBook2" },
       {
         rundown: "Deacons/Deaconesses",
         participant: "Mary and John",
-        icon: <IconUsersGroup />,
+        icon: "IconUsersGroup",
       },
       {
         rundown: "Sabbath School Discussion",
         participant: "By Assigned Groups",
-        icon: <IconBook2 />,
+        icon: "IconBook2",
       },
       {
         rundown: "Family Worship / Stewardship",
         participant: "Momota",
-        icon: <IconSparkles />,
+        icon: "IconSparkles",
       },
     ],
   },
@@ -66,44 +59,44 @@ export const RUNDOWN_ITEMS = [
     title: "Divine Service",
     time: "10:30 - 12:00",
     detail: "Praise, prayer, and the main sermon for the day.",
-    icon: IconMicrophone2,
+    icon: "IconMicrophone2",
     subdetail:
       "In Sabbath School worship, we start off with a few songs. Welcome and opening prayer are done by the Sabbath School leader. We have a special song, followed by a mission story. Deacons and deaconesses assist with the offering. The Sabbath School discussion is led by assigned groups, and we end with family worship or stewardship.",
     participants: [
       {
         rundown: "Song Leader",
         participant: "Jane Doe",
-        icon: <IconMicrophone2 />,
+        icon: "IconMicrophone2",
       },
       {
         rundown: "Pianist",
         participant: "Matthew Doe",
-        icon: <IconMicrophone2 />,
+        icon: "IconMicrophone2",
       },
       {
         rundown: "Responsive Reading",
         participant: "Pr. Michael",
-        icon: <IconBook2 />,
+        icon: "IconBook2",
       },
       {
         rundown: "Sermon",
         participant: "Pr. Michael",
-        icon: <IconMicrophone2 />,
+        icon: "IconMicrophone2",
       },
       {
         rundown: "Pastoral Prayer",
         participant: "Pr. Michael",
-        icon: <IconSparkles />,
+        icon: "IconSparkles",
       },
       {
         rundown: "Scripture Reading",
         participant: "Sis. Angela",
-        icon: <IconBook2 />,
+        icon: "IconBook2",
       },
       {
         rundown: "Main Message",
         participant: "Pr. Michael",
-        icon: <IconMicrophone2 />,
+        icon: "IconMicrophone2",
       },
     ],
   },
@@ -113,22 +106,22 @@ export const RUNDOWN_ITEMS = [
     detail: "A shared meal and warm conversations with the church family.",
     subdetail:
       "In Sabbath School worship, we start off with a few songs. Welcome and opening prayer are done by the Sabbath School leader. We have a special song, followed by a mission story. Deacons and deaconesses assist with the offering. The Sabbath School discussion is led by assigned groups, and we end with family worship or stewardship.",
-    icon: IconCoffee,
+    icon: "IconCoffee",
     participants: [
       {
         rundown: "Meal Coordination",
         participant: "Hospitality Team",
-        icon: <IconPackage />,
+        icon: "IconPackage",
       },
       {
         rundown: "Table Hosting",
         participant: "Family Ministries",
-        icon: <IconUsersGroup />,
+        icon: "IconUsersGroup",
       },
       {
         rundown: "Guest Welcome",
         participant: "Ushering Team",
-        icon: <IconUsersGroup />,
+        icon: "IconUsersGroup",
       },
     ],
   },
@@ -138,22 +131,22 @@ export const RUNDOWN_ITEMS = [
     detail: "Song rehearsal and preparation for upcoming worship services.",
     subdetail:
       "In Sabbath School worship, we start off with a few songs. Welcome and opening prayer are done by the Sabbath School leader. We have a special song, followed by a mission story. Deacons and deaconesses assist with the offering. The Sabbath School discussion is led by assigned groups, and we end with family worship or stewardship.",
-    icon: IconMusic,
+    icon: "IconMusic",
     participants: [
       {
         rundown: "Warm-up and Vocal Drill",
         participant: "Choir Director",
-        icon: <IconMicrophone2 />,
+        icon: "IconMicrophone2",
       },
       {
         rundown: "Special Number Rehearsal",
         participant: "Alto and Tenor Sections",
-        icon: <IconMusic />,
+        icon: "IconMusic",
       },
       {
         rundown: "Closing Run-through",
         participant: "Full Choir",
-        icon: <IconMicrophone2 />,
+        icon: "IconMicrophone2",
       },
     ],
   },
@@ -163,31 +156,31 @@ export const RUNDOWN_ITEMS = [
     detail: "Youth-led worship, activities, and spiritual reflection.",
     subdetail:
       "Youth fellowship closes the Sabbath with praise, Bible reflection, group activities, and a time of prayerful commitment together.",
-    icon: IconUsersGroup,
+    icon: "IconUsersGroup",
     participants: [
       {
         rundown: "Praise and Worship",
         participant: "AY Music Team",
-        icon: <IconMicrophone2 />,
+        icon: "IconMicrophone2",
       },
       {
         rundown: "Interactive Bible Talk",
         participant: "Youth Leader Karen",
-        icon: <IconBook2 />,
+        icon: "IconBook2",
       },
       {
         rundown: "Group Activity",
         participant: "AY Officers",
-        icon: <IconUsersGroup />,
+        icon: "IconUsersGroup",
       },
       {
         rundown: "Commitment Prayer",
         participant: "Bro. Nathan",
-        icon: <IconSparkles />,
+        icon: "IconSparkles",
       },
     ],
   },
-] as const;
+];
 
 export type ScrollMoment = {
   label: string;

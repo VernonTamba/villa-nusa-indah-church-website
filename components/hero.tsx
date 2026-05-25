@@ -17,20 +17,13 @@ import {
 } from "framer-motion";
 
 import { useLanguage } from "@/lib/i18n";
+import { createClient } from "@/utils/supabase/client";
 
-const HERO_SLIDES = [
-  {
-    src: "/images/hero-1.jpeg",
-  },
-  {
-    src: "/images/hero-2.jpeg",
-  },
-  {
-    src: "/images/hero-3.jpeg",
-  },
-  {
-    src: "/images/hero-4.jpeg",
-  },
+const FALLBACK_SLIDES = [
+  { src: "/images/hero-1.jpeg" },
+  { src: "/images/hero-2.jpeg" },
+  { src: "/images/hero-3.jpeg" },
+  { src: "/images/hero-4.jpeg" },
 ];
 
 const HERO_LINKS = [
@@ -55,6 +48,7 @@ const Hero = () => {
   const { messages: t } = useLanguage();
   const heroRef = useRef<HTMLElement>(null);
   const [activeSlide, setActiveSlide] = useState(0);
+  const [heroSlides, setHeroSlides] = useState<{ src: string }[]>(FALLBACK_SLIDES);
   const shouldReduceMotion = useReducedMotion() ?? false;
   const { scrollYProgress } = useScroll({
     target: heroRef,
@@ -62,15 +56,29 @@ const Hero = () => {
   });
   const backgroundY = useTransform(scrollYProgress, [0, 1], ["0%", "12%"]);
 
+  // Fetch hero images from Supabase; fall back to local images if empty
+  useEffect(() => {
+    const supabase = createClient();
+    supabase
+      .from("hero_images")
+      .select("public_url")
+      .order("display_order", { ascending: true })
+      .then(({ data }) => {
+        if (data && data.length > 0) {
+          setHeroSlides(data.map((row) => ({ src: row.public_url })));
+        }
+      });
+  }, []);
+
   useEffect(() => {
     if (shouldReduceMotion) return;
 
     const carouselTimer = window.setInterval(() => {
-      setActiveSlide((currentSlide) => (currentSlide + 1) % HERO_SLIDES.length);
+      setActiveSlide((currentSlide) => (currentSlide + 1) % heroSlides.length);
     }, 5600);
 
     return () => window.clearInterval(carouselTimer);
-  }, [shouldReduceMotion]);
+  }, [shouldReduceMotion, heroSlides.length]);
 
   return (
     <section
@@ -82,7 +90,7 @@ const Hero = () => {
         style={{ y: shouldReduceMotion ? 0 : backgroundY }}
         aria-hidden="true"
       >
-        {HERO_SLIDES.map((slide, index) => (
+        {heroSlides.map((slide, index) => (
           <motion.div
             key={slide.src}
             className="absolute inset-0"
@@ -174,9 +182,9 @@ const Hero = () => {
 
         <div className="mt-auto flex items-end justify-between gap-6">
           <div className="hidden items-center gap-2 sm:flex" aria-hidden="true">
-            {HERO_SLIDES.map((slide, index) => (
+            {heroSlides.map((slide, index) => (
               <span
-                key={slide.src}
+                key={slide.src + index}
                 className={`h-1 rounded-full transition-all duration-500 ${
                   activeSlide === index
                     ? "w-12 bg-secondary"

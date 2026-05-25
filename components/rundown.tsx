@@ -1,7 +1,29 @@
 "use client";
 
-import { Fragment, useRef, useState } from "react";
-import { IconScanPosition, IconSparkles } from "@tabler/icons-react";
+import { Fragment, useEffect, useRef, useState } from "react";
+import {
+  IconBook2,
+  IconCoffee,
+  IconMicrophone2,
+  IconMusic,
+  IconPackage,
+  IconScanPosition,
+  IconSparkles,
+  IconUsersGroup,
+  type Icon as TablerIcon,
+} from "@tabler/icons-react";
+
+/** Map from the serializable string key stored in RUNDOWN_ITEMS to the actual icon component. */
+const RUNDOWN_ICON_MAP: Record<string, TablerIcon> = {
+  IconBook2,
+  IconCoffee,
+  IconMicrophone2,
+  IconMusic,
+  IconPackage,
+  IconScanPosition,
+  IconSparkles,
+  IconUsersGroup,
+};
 import { Button } from "@/components/ui/button";
 import SideSheet from "./ui/side-sheet";
 import { Accordion, AccordionItem } from "@heroui/react";
@@ -19,6 +41,12 @@ import {
   type ScrollMoment,
 } from "@/constants/rundown";
 import { useLanguage, type Locale } from "@/lib/i18n";
+import { createClient } from "@/utils/supabase/client";
+
+// Derive the same snake_case key used in the admin panel
+function toKey(s: string) {
+  return s.toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_|_$/g, "");
+}
 
 type ScrollStackCardProps = {
   item: ScrollMoment;
@@ -148,17 +176,64 @@ const Rundown = () => {
     damping: 26,
     mass: 0.35,
   });
-  const rundownItems = RUNDOWN_ITEMS.map((item, index) => ({
-    ...item,
-    ...t.rundown.items[index],
-    participants: item.participants.map((participant, participantIndex) => ({
-      ...participant,
-      rundown: t.rundown.items[index].participants[participantIndex],
-    })),
-  }));
-  const scrollMoments = SCROLL_MOMENTS.map((moment, index) => ({
+
+  // DB participant name lookup: service_key -> role_key -> participant_name
+  const [dbParticipants, setDbParticipants] = useState<Record<string, Record<string, string>>>({});
+  // DB sabbath moments (images from storage)
+  const [dbMoments, setDbMoments] = useState<ScrollMoment[] | null>(null);
+
+  useEffect(() => {
+    const supabase = createClient();
+    // Fetch participant names
+    supabase.from("rundown_participants").select("service_key,role_key,participant_name").then(({ data }) => {
+      if (!data) return;
+      const lookup: Record<string, Record<string, string>> = {};
+      for (const row of data) {
+        if (!lookup[row.service_key]) lookup[row.service_key] = {};
+        lookup[row.service_key][row.role_key] = row.participant_name;
+      }
+      setDbParticipants(lookup);
+    });
+    // Fetch sabbath moments
+    supabase
+      .from("sabbath_moments")
+      .select("label,title,description,public_url")
+      .order("display_order", { ascending: true })
+      .then(({ data }) => {
+        if (data && data.length > 0) {
+          setDbMoments(
+            data.map((row) => ({
+              label: row.label,
+              title: row.title,
+              description: row.description,
+              image: row.public_url,
+            })),
+          );
+        }
+      });
+  }, []);
+
+  const rundownItems = RUNDOWN_ITEMS.map((item, index) => {
+    const sk = toKey(item.title);
+    return {
+      ...item,
+      ...t.rundown.items[index],
+      participants: item.participants.map((participant, participantIndex) => {
+        const rk = toKey(participant.rundown);
+        return {
+          ...participant,
+          rundown: t.rundown.items[index].participants[participantIndex],
+          // Use DB name if available, otherwise fall back to constant
+          participant: dbParticipants[sk]?.[rk] ?? participant.participant,
+        };
+      }),
+    };
+  });
+
+  const scrollMoments = (dbMoments ?? SCROLL_MOMENTS).map((moment, index) => ({
     ...moment,
-    ...t.rundown.moments[index],
+    // Only overlay i18n text if using fallback static moments
+    ...(dbMoments ? {} : t.rundown.moments[index]),
   }));
 
   return (
@@ -176,7 +251,7 @@ const Rundown = () => {
             {rundownItems.map((item, index) => {
               const isEven = index % 2 === 0;
               const isLast = index === RUNDOWN_ITEMS.length - 1;
-              const Icon = item.icon;
+              const Icon = RUNDOWN_ICON_MAP[item.icon] ?? IconSparkles;
 
               return (
                 <Fragment key={item.title}>
@@ -208,22 +283,25 @@ const Rundown = () => {
                         </AccordionItem>
                       </Accordion>
                       <div className="space-y-3 mt-6">
-                        {item.participants.map((p) => (
-                          <div
-                            key={p.rundown}
-                            className="flex items-center gap-3 rounded-lg border border-border hover:border-l-4 hover:border-l-primary p-3 pl-4 transition-colors duration-300"
-                          >
-                            {p.icon}
-                            <div>
-                              <p className="text-sm font-medium text-foreground dark:text-white">
-                                {p.rundown}
-                              </p>
-                              <p className="text-xs text-foreground dark:text-white mt-0.5">
-                                {p.participant}
-                              </p>
+                        {item.participants.map((p) => {
+                          const ParticipantIcon = RUNDOWN_ICON_MAP[p.icon] ?? IconSparkles;
+                          return (
+                            <div
+                              key={p.rundown}
+                              className="flex items-center gap-3 rounded-lg border border-border hover:border-l-4 hover:border-l-primary p-3 pl-4 transition-colors duration-300"
+                            >
+                              <ParticipantIcon size={16} />
+                              <div>
+                                <p className="text-sm font-medium text-foreground dark:text-white">
+                                  {p.rundown}
+                                </p>
+                                <p className="text-xs text-foreground dark:text-white mt-0.5">
+                                  {p.participant}
+                                </p>
+                              </div>
                             </div>
-                          </div>
-                        ))}
+                          );
+                        })}
                       </div>
                     </div>
                   </SideSheet>
