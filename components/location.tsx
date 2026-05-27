@@ -6,9 +6,17 @@ import {
   IconMapPinFilled,
 } from "@tabler/icons-react";
 import dynamic from "next/dynamic";
+import { motion } from "framer-motion";
 import { Button } from "@heroui/react";
 import { CHURCH_LOCATION } from "@/constants/location";
 import { useLanguage } from "@/lib/i18n";
+import {
+  fadeUp,
+  slideLeft,
+  slideRight,
+  staggerContainer,
+  viewport,
+} from "@/lib/animations";
 
 const ChurchMap = dynamic(() => import("@/components/ui/map"), { ssr: false });
 
@@ -17,11 +25,18 @@ const Location = () => {
 
   return (
     <div id="location" className="mb-48 scroll-mt-24">
-      <div className="text-center mx-auto max-w-4xl">
+      {/* Section heading */}
+      <motion.div
+        className="text-center mx-auto max-w-4xl"
+        variants={fadeUp}
+        initial="hidden"
+        whileInView="visible"
+        viewport={viewport}
+      >
         <div className="space-y-6">
           <div className="space-y-6">
             <h1
-              id="core-values-heading"
+              id="location-heading"
               className="text-5xl font-black tracking-tight text-primary"
             >
               {t.location.titleStart}
@@ -32,10 +47,20 @@ const Location = () => {
             </p>
           </div>
         </div>
-      </div>
+      </motion.div>
 
-      <div className="my-12 flex flex-col gap-8 overflow-x-hidden lg:flex-row lg:items-stretch">
-        <div className="flex flex-1 flex-col justify-center gap-6 rounded-2xl border border-primary/20 bg-[linear-gradient(145deg,rgba(255,255,255,0.96),rgba(248,167,36,0.16),rgba(1,75,63,0.08))] p-6 shadow-[0_18px_50px_rgba(1,75,63,0.16)] backdrop-blur-2xl dark:border-white/20 dark:bg-[linear-gradient(145deg,rgba(255,255,255,0.1),rgba(255,255,255,0.04))] dark:shadow-[0_8px_32px_rgba(15,23,42,0.18)] lg:max-w-none">
+      {/* Info card + map with slide-in from opposite sides */}
+      <motion.div
+        className="my-12 flex flex-col gap-8 overflow-x-hidden lg:flex-row lg:items-stretch"
+        variants={staggerContainer}
+        initial="hidden"
+        whileInView="visible"
+        viewport={viewport}
+      >
+        <motion.div
+          variants={slideLeft}
+          className="flex flex-1 flex-col justify-center gap-6 rounded-2xl border border-primary/20 bg-[linear-gradient(145deg,rgba(255,255,255,0.96),rgba(248,167,36,0.16),rgba(1,75,63,0.08))] p-6 shadow-[0_18px_50px_rgba(1,75,63,0.16)] backdrop-blur-2xl dark:border-white/20 dark:bg-[linear-gradient(145deg,rgba(255,255,255,0.1),rgba(255,255,255,0.04))] dark:shadow-[0_8px_32px_rgba(15,23,42,0.18)] lg:max-w-none"
+        >
           <div className="flex items-start justify-start gap-4">
             <div className="flex h-16 w-16 shrink-0 items-center justify-center">
               <IconMapPinFilled size={40} className="text-primary" />
@@ -76,12 +101,12 @@ const Location = () => {
               </div>
             </div>
           </div>
-        </div>
+        </motion.div>
 
-        <div className="flex-1">
+        <motion.div variants={slideRight} className="flex-1">
           <ChurchMap />
-        </div>
-      </div>
+        </motion.div>
+      </motion.div>
     </div>
   );
 };

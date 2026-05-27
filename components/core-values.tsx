@@ -1,7 +1,16 @@
 "use client";
 
+import { motion } from "framer-motion";
+
 import { IDENTITY_PILLARS } from "@/constants/core-values";
 import { useLanguage } from "@/lib/i18n";
+import {
+  fadeUp,
+  slideLeft,
+  slideRight,
+  staggerContainer,
+  viewport,
+} from "@/lib/animations";
 
 type PillarCardProps = {
   number: string;
@@ -82,7 +91,14 @@ const CoreValues = () => {
         className="px-4 py-16 sm:px-6 lg:px-10"
       >
         <div className="mx-auto max-w-6xl">
-          <div className="text-center mx-auto max-w-3xl">
+          {/* Section heading */}
+          <motion.div
+            className="text-center mx-auto max-w-3xl"
+            variants={fadeUp}
+            initial="hidden"
+            whileInView="visible"
+            viewport={viewport}
+          >
             <div className="space-y-6">
               <div className="space-y-4">
                 <h1
@@ -100,12 +116,23 @@ const CoreValues = () => {
                 </p>
               </div>
             </div>
-          </div>
+          </motion.div>
 
-          <div className="mt-12 grid gap-5 lg:grid-cols-2">
-            <PillarCard {...visionPillar} />
-            <PillarCard {...missionPillar} />
-          </div>
+          {/* Two pillar cards with slide-in from opposite sides */}
+          <motion.div
+            className="mt-12 grid gap-5 lg:grid-cols-2"
+            variants={staggerContainer}
+            initial="hidden"
+            whileInView="visible"
+            viewport={viewport}
+          >
+            <motion.div variants={slideLeft}>
+              <PillarCard {...visionPillar} />
+            </motion.div>
+            <motion.div variants={slideRight}>
+              <PillarCard {...missionPillar} />
+            </motion.div>
+          </motion.div>
         </div>
       </section>
     </div>

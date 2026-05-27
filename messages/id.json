@@ -75,41 +75,42 @@
   "rundown": {
     "titleStart": "Rangkaian",
     "titleEmphasis": " Ibadah",
-    "viewParticipants": "Lihat Pelayan",
+    "viewDetail": "Lihat Detail",
     "sabbath": "Sabat",
     "serviceQuestion": "Apa yang terjadi dalam ibadah ini?",
+    "noRundown": "Tidak ada rundown terstruktur untuk sesi ini.",
     "momentsLabel": "Momen ibadah",
     "momentsTitle": "Seperti apa suasana ibadah Sabat kami?",
     "items": [
       {
         "title": "Sekolah Sabat",
         "detail": "Diskusi Sekolah Sabat untuk memulai hari Sabat dengan pertumbuhan rohani.",
-        "subdetail": "Dalam ibadah Sekolah Sabat, kami memulai dengan beberapa lagu. Sambutan dan doa pembuka dibawakan oleh pemimpin Sekolah Sabat. Ada lagu istimewa, cerita misi, persembahan, diskusi pelajaran, dan penutup melalui ibadah keluarga atau penatalayanan.",
-        "participants": ["Pemimpin Lagu", "Pianis", "Pemimpin Sekolah Sabat", "Ayat Hafalan & Doa Pembuka", "Lagu Istimewa", "Cerita Misi", "Diakon/Diakones", "Diskusi Sekolah Sabat", "Ibadah Keluarga / Penatalayanan"]
+        "subdetail": "Dalam ibadah Sekolah Sabat, kami memulai dengan beberapa lagu. Pemimpin Sekolah Sabat membuka dengan sambutan dan doa. Ada bacaan mission, lagu pujian, persembahan yang dibantu diakon dan diakones, diskusi pelajaran, pelayanan perorangan, dan doa penutup.",
+        "participants": ["Pemimpin Lagu", "Pianist", "Pemimpin Sekolah Sabat", "Ayat Inti dan Doa Buka", "Bacaan Mission", "Lagu Pujian", "Diakon/Diakones", "Diakon/Diakones 2", "Diskusi Sekolah Sabat", "Pelayanan Perorangan/Rumah Tangga & Kesehatan", "Doa Tutup"]
       },
       {
-        "title": "Kebaktian",
+        "title": "Khotbah",
         "detail": "Pujian, doa, dan khotbah utama pada hari Sabat.",
-        "subdetail": "Dalam kebaktian, jemaat berkumpul untuk memuji Tuhan, berdoa bersama, membaca Firman, dan mendengarkan pekabaran yang meneguhkan iman.",
-        "participants": ["Pemimpin Lagu", "Pianis", "Pembacaan Responsif", "Khotbah", "Doa Pastoral", "Pembacaan Alkitab", "Pekabaran Utama"]
+        "subdetail": "Khotbah dibuka dengan nyanyian jemaat dan iringan piano. Ibadah mencakup bacaan ayat bersahutan, doa syafaat, pembacaan dan doa persembahan, pelayanan diakon dan diakones, cerita anak-anak, lagu pujian, khotbah utama, dan doa berkat penutup.",
+        "participants": ["Pemimpin Lagu", "Pianist", "Bacaan Ayat Bersahutan", "Doa Syafaat", "Pembacaan dan Doa Persembahan", "Diakon/Diakones", "Diakon/Diakones 2", "Cerita Anak-Anak", "Lagu Pujian", "Khotbah", "Doa Berkat"]
       },
       {
-        "title": "Persekutuan Makan Bersama",
+        "title": "Makan Siang Bersama",
         "detail": "Makan bersama dan percakapan hangat dengan keluarga jemaat.",
-        "subdetail": "Persekutuan makan bersama menjadi waktu untuk saling mengenal, menyambut tamu, dan menikmati kebersamaan setelah ibadah.",
-        "participants": ["Koordinasi Makanan", "Tuan Rumah Meja", "Penyambutan Tamu"]
+        "subdetail": "Persekutuan makan bersama menjadi waktu untuk saling mengenal, menyambut tamu, dan menikmati kebersamaan setelah ibadah. Tidak ada rundown terstruktur — cukup makanan enak dan persekutuan yang hangat.",
+        "participants": []
       },
       {
-        "title": "Latihan Paduan Suara",
+        "title": "Latihan Choir",
         "detail": "Latihan lagu dan persiapan untuk pelayanan ibadah berikutnya.",
-        "subdetail": "Paduan suara berlatih vokal, harmoni, dan lagu pelayanan agar dapat melayani dengan lebih siap dan sepenuh hati.",
-        "participants": ["Pemanasan dan Latihan Vokal", "Latihan Lagu Istimewa", "Latihan Penutup"]
+        "subdetail": "Choir berkumpul untuk berlatih vokal, harmoni, dan lagu pelayanan agar dapat melayani dengan lebih siap dan sepenuh hati. Terbuka untuk semua anggota choir.",
+        "participants": []
       },
       {
-        "title": "Persekutuan Pemuda Advent",
+        "title": "Acara Pemuda Advent",
         "detail": "Ibadah yang dipimpin pemuda, kegiatan bersama, dan renungan rohani.",
-        "subdetail": "Persekutuan pemuda menutup hari Sabat dengan pujian, refleksi Alkitab, kegiatan kelompok, dan doa komitmen bersama.",
-        "participants": ["Pujian dan Penyembahan", "Pembahasan Alkitab Interaktif", "Kegiatan Kelompok", "Doa Komitmen"]
+        "subdetail": "Persekutuan pemuda menutup hari Sabat dengan pujian, refleksi Alkitab, kegiatan kelompok, games, dan doa komitmen bersama.",
+        "participants": ["Pemimpin Lagu", "Pianist", "Pemimpin Acara", "Moto, Tujuan, dan Janji PA", "Ayat Inti dan Doa Buka", "Energizer", "Games Alkitab", "Lagu Pujian", "Acara Inti", "Renungan"]
       }
     ],
     "moments": [

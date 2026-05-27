@@ -15,6 +15,8 @@ import {
   IconPhoneFilled,
 } from "@tabler/icons-react";
 import { useLanguage } from "@/lib/i18n";
+import { motion } from "framer-motion";
+import { fadeUp, fadeIn, staggerContainer, staggerItem, viewport } from "@/lib/animations";
 
 const Footer = () => {
   const { messages: t } = useLanguage();
@@ -25,8 +27,14 @@ const Footer = () => {
 
   return (
     <div className="container mx-auto max-w-9xl px-6">
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-12">
-        <div className="flex flex-col gap-2 px-4 py-6">
+      <motion.div
+        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-12"
+        variants={staggerContainer}
+        initial="hidden"
+        whileInView="visible"
+        viewport={viewport}
+      >
+        <motion.div variants={staggerItem} className="flex flex-col gap-2 px-4 py-6">
           <div className="flex items-center gap-3 max-w-fit">
             <Image
               src={AdventistLogo}
@@ -66,8 +74,8 @@ const Footer = () => {
               <IconBrandYoutube />
             </Button>
           </div>
-        </div>
-        <div className="px-4 py-6">
+        </motion.div>
+        <motion.div variants={staggerItem} className="px-4 py-6">
           <p className="font-semibold my-2">{t.footer.contact}</p>
           <div className="flex flex-col gap-2 mt-3">
             <p className="text-sm flex items-center gap-2">
@@ -83,8 +91,8 @@ const Footer = () => {
               {CONTACT_DETAILS.email}
             </p>
           </div>
-        </div>
-        <div className="px-4 py-6">
+        </motion.div>
+        <motion.div variants={staggerItem} className="px-4 py-6">
           <p className="font-semibold my-2">{t.footer.schedule}</p>
           <div className="flex flex-col gap-4 mt-4">
             {schedules.map((item) => (
@@ -100,9 +108,15 @@ const Footer = () => {
               </Card>
             ))}
           </div>
-        </div>
-      </div>
-      <footer className="w-full flex items-center justify-center gap-12 py-6 border-t border-primary/50">
+        </motion.div>
+      </motion.div>
+      <motion.footer
+        className="w-full flex items-center justify-center gap-12 py-6 border-t border-primary/50"
+        variants={fadeIn}
+        initial="hidden"
+        whileInView="visible"
+        viewport={viewport}
+      >
         <p className="text-sm">
           &copy; {new Date().getFullYear()} GMAHK Villa Nusa Indah.{" "}
           {t.footer.copyright}
@@ -111,7 +125,7 @@ const Footer = () => {
         <p className="text-sm ml-4">
           {t.footer.built}
         </p>
-      </footer>
+      </motion.footer>
     </div>
   );
 };

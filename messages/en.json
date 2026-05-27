@@ -75,41 +75,42 @@
   "rundown": {
     "titleStart": "Worship",
     "titleEmphasis": " Rundown",
-    "viewParticipants": "View Participants",
+    "viewDetail": "View Detail",
     "sabbath": "Sabbath",
     "serviceQuestion": "What happens in this service?",
+    "noRundown": "No structured rundown for this session.",
     "momentsLabel": "Worship moments",
     "momentsTitle": "What does our Sabbath worship look like?",
     "items": [
       {
         "title": "Sabbath School",
         "detail": "Sabbath School discussions to start the Sabbath on a spiritual note.",
-        "subdetail": "In Sabbath School worship, we start off with a few songs. Welcome and opening prayer are led by the Sabbath School leader. We have a special song, followed by a mission story, offering, lesson discussion, and a closing family worship or stewardship moment.",
-        "participants": ["Song Leader", "Pianist", "Sabbath School Leader", "Memory Verse & Opening Prayer", "Special Song", "Mission Story", "Deacons/Deaconesses", "Sabbath School Discussion", "Family Worship / Stewardship"]
+        "subdetail": "In Sabbath School worship, we start off with a few songs. The Sabbath School leader opens with a welcome and prayer. We have a mission story, special song, offering assisted by deacons and deaconesses, a lesson discussion, stewardship moment, and a closing prayer.",
+        "participants": ["Song Leader", "Pianist", "Sabbath School Leader", "Memory Verse & Opening Prayer", "Mission Story", "Special Song", "Deacons/Deaconesses", "Sabbath School Discussion", "Personal Ministry / Family & Health", "Closing Prayer"]
       },
       {
         "title": "Divine Service",
         "detail": "Praise, prayer, and the main sermon for the day.",
-        "subdetail": "In Divine Service, the congregation gathers to praise God, pray together, read Scripture, and listen to a message that strengthens faith.",
-        "participants": ["Song Leader", "Pianist", "Responsive Reading", "Sermon", "Pastoral Prayer", "Scripture Reading", "Main Message"]
+        "subdetail": "Divine Service opens with congregational singing and piano accompaniment. The service includes responsive reading, intercessory prayer, offering with prayer, assistance from deacons and deaconesses, a children's story, special song, the main sermon, and a closing benediction.",
+        "participants": ["Song Leader", "Pianist", "Responsive Reading", "Intercessory Prayer", "Offering Reading & Prayer", "Deacons/Deaconesses", "Children's Story", "Special Song", "Sermon", "Benediction"]
       },
       {
         "title": "Potluck Fellowship",
         "detail": "A shared meal and warm conversations with the church family.",
-        "subdetail": "Potluck fellowship is a time to get to know one another, welcome guests, and enjoy community after worship.",
-        "participants": ["Meal Coordination", "Table Hosting", "Guest Welcome"]
+        "subdetail": "Potluck fellowship is a time to get to know one another, welcome guests, and enjoy community after worship. No structured rundown — just good food and warm fellowship.",
+        "participants": []
       },
       {
         "title": "Choir Practice",
         "detail": "Song rehearsal and preparation for upcoming worship services.",
-        "subdetail": "The choir rehearses vocals, harmonies, and ministry songs so they can serve with readiness and heart.",
-        "participants": ["Warm-up and Vocal Drill", "Special Number Rehearsal", "Closing Run-through"]
+        "subdetail": "The choir gathers to rehearse vocals, harmonies, and ministry songs so they can serve with readiness and heart. Open to all choir members.",
+        "participants": []
       },
       {
         "title": "Adventist Youth Fellowship",
         "detail": "Youth-led worship, activities, and spiritual reflection.",
-        "subdetail": "Youth fellowship closes the Sabbath with praise, Bible reflection, group activities, and a time of prayerful commitment together.",
-        "participants": ["Praise and Worship", "Interactive Bible Talk", "Group Activity", "Commitment Prayer"]
+        "subdetail": "Youth fellowship closes the Sabbath with praise, Bible reflection, group activities, games, and a time of prayerful commitment together.",
+        "participants": ["Song Leader", "Pianist", "MC", "AY Motto, Aim & Pledge", "Memory Verse & Opening Prayer", "Energizer", "Bible Games", "Special Song", "Main Program", "Devotional"]
       }
     ],
     "moments": [

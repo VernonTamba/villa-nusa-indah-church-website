@@ -1,10 +1,17 @@
 "use client";
 
 import { IconBookmarkQuestion } from "@tabler/icons-react";
+import { motion } from "framer-motion";
 
 import { Button } from "@/components/ui/button";
 import { BELIEFS } from "@/constants/core-beliefs";
 import { useLanguage } from "@/lib/i18n";
+import {
+  fadeUp,
+  staggerContainer,
+  staggerItem,
+  viewport,
+} from "@/lib/animations";
 
 const CoreBeliefs = () => {
   const { messages: t } = useLanguage();
@@ -20,7 +27,14 @@ const CoreBeliefs = () => {
         className="px-4 py-16 sm:px-6 lg:px-10"
       >
         <div className="mx-auto max-w-6xl">
-          <div className="mx-auto max-w-3xl text-center">
+          {/* Section heading */}
+          <motion.div
+            className="mx-auto max-w-3xl text-center"
+            variants={fadeUp}
+            initial="hidden"
+            whileInView="visible"
+            viewport={viewport}
+          >
             <h1
               id="core-beliefs-heading"
               className="mt-6 text-5xl font-black tracking-tight text-secondary"
@@ -31,15 +45,23 @@ const CoreBeliefs = () => {
             <p className="mt-4 text-sm leading-7 text-foreground dark:text-white sm:text-base">
               {t.coreBeliefs.description}
             </p>
-          </div>
+          </motion.div>
 
-          <div className="mt-12 grid gap-5 md:grid-cols-2 xl:grid-cols-4 xl:auto-rows-[minmax(220px,1fr)]">
+          {/* Cards grid */}
+          <motion.div
+            className="mt-12 grid gap-5 md:grid-cols-2 xl:grid-cols-4 xl:auto-rows-[minmax(220px,1fr)]"
+            variants={staggerContainer}
+            initial="hidden"
+            whileInView="visible"
+            viewport={viewport}
+          >
             {beliefs.map((belief) => {
               const Icon = belief.icon;
 
               return (
-                <article
+                <motion.article
                   key={belief.title}
+                  variants={staggerItem}
                   className={`group relative overflow-hidden rounded-[30px] border border-primary/10 p-6 shadow-[0_18px_45px_rgba(15,23,42,0.08)] transition-all duration-300 hover:-translate-y-2 hover:shadow-[0_26px_60px_rgba(1,75,63,0.14)] dark:border-white/10 dark:shadow-[0_22px_55px_rgba(2,6,23,0.28)] ${belief.className}`}
                 >
                   <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.34),transparent_30%),radial-gradient(circle_at_bottom_left,rgba(1,75,63,0.08),transparent_34%)] dark:bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.12),transparent_28%),radial-gradient(circle_at_bottom_left,rgba(248,167,36,0.08),transparent_34%)]" />
@@ -69,19 +91,26 @@ const CoreBeliefs = () => {
                       </p>
                     </div>
                   </div>
-                </article>
+                </motion.article>
               );
             })}
-          </div>
+          </motion.div>
 
-          <div className="mt-10 flex justify-center">
+          {/* CTA button */}
+          <motion.div
+            className="mt-10 flex justify-center"
+            variants={fadeUp}
+            initial="hidden"
+            whileInView="visible"
+            viewport={viewport}
+          >
             <Button
               asChild
               size="lg"
               className="h-12 rounded-full px-6 text-sm font-semibold shadow-[0_16px_40px_rgba(1,75,63,0.16)]"
             >
               <a
-                href="https://example.com/28-doktrin-advent"
+                href="https://adventist.org/beliefs"
                 target="_blank"
                 rel="noopener noreferrer"
               >
@@ -89,7 +118,7 @@ const CoreBeliefs = () => {
                 <IconBookmarkQuestion />
               </a>
             </Button>
-          </div>
+          </motion.div>
         </div>
       </section>
     </div>

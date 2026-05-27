@@ -1,18 +1,15 @@
 "use client";
 
-import { Card, CardBody } from "@heroui/react";
+import { motion } from "framer-motion";
 
 import { CONTACT_OPTIONS } from "@/constants/get-in-touch";
 import { useLanguage } from "@/lib/i18n";
-
-const DIRECT_CONTACT_OPTIONS = CONTACT_OPTIONS.slice(0, 2);
-const SOCIAL_CONTACT_OPTIONS = CONTACT_OPTIONS.slice(2);
-
-const CONTACT_CARD_CLASS =
-  "relative w-full cursor-pointer overflow-hidden border border-primary bg-white transition-all duration-300 ease-out group-hover:-translate-y-1.5 group-hover:scale-[1.02] group-hover:shadow-[0_18px_42px_rgba(1,75,63,0.2)] dark:border-white/20 dark:bg-transparent dark:group-hover:shadow-[0_18px_42px_rgba(248,167,36,0.14)]";
-
-const CONTACT_CARD_BODY_CLASS =
-  "flex items-center justify-center bg-[radial-gradient(circle_at_top,_rgba(1,75,63,0.12),_transparent_60%),linear-gradient(180deg,_rgba(248,167,36,0.1),_rgba(255,255,255,0.96))] dark:bg-[radial-gradient(circle_at_top,_rgba(248,167,36,0.2),_transparent_55%),linear-gradient(180deg,_rgba(255,255,255,0.06),_rgba(255,255,255,0.02))]";
+import {
+  fadeUp,
+  staggerContainer,
+  staggerItem,
+  viewport,
+} from "@/lib/animations";
 
 const GetInTouch = () => {
   const { messages: t } = useLanguage();
@@ -22,11 +19,18 @@ const GetInTouch = () => {
       id="get-in-touch"
       className="mb-48 flex scroll-mt-24 flex-col items-center gap-10 px-2"
     >
-      <div className="text-center mx-auto max-w-4xl">
+      {/* Section heading */}
+      <motion.div
+        className="text-center mx-auto max-w-4xl"
+        variants={fadeUp}
+        initial="hidden"
+        whileInView="visible"
+        viewport={viewport}
+      >
         <div className="space-y-6">
           <div className="space-y-6">
             <h1
-              id="core-values-heading"
+              id="get-in-touch-heading"
               className="text-5xl font-black tracking-tight text-primary"
             >
               {t.contact.titleStart}
@@ -37,98 +41,65 @@ const GetInTouch = () => {
             </p>
           </div>
         </div>
-      </div>
-      {/* <div className="flex w-full max-w-2xl flex-col">
-        <p className="mb-6 text-center text-sm leading-6 text-foreground dark:text-white">
-          Feel free to reach out to us through any of the methods. Whether you
-          want to send: prayer requests, inquiries, or just a simple greeting,
-          we're here to listen and connect with you. We look forward to hearing
-          from you!
-        </p>
+      </motion.div>
 
-        <div className="flex gap-3">
-          {CONTACT_MESSAGE_TYPES.map((type) => (
-            <div key={type} className="my-1 flex w-full items-center">
-              <Alert
-                className="py-1"
-                color="success"
-                title={type}
-                variant="faded"
-              />
+      {/* Contact rows – staggered entrance */}
+      <motion.div
+        className="flex w-full max-w-3xl flex-col gap-4"
+        variants={staggerContainer}
+        initial="hidden"
+        whileInView="visible"
+        viewport={viewport}
+      >
+        {CONTACT_OPTIONS.map(({ label, description, href, linkLabel, icon: Icon }) => (
+          <motion.a
+            key={`${linkLabel}-${description}`}
+            variants={staggerItem}
+            aria-label={linkLabel}
+            className="group flex min-h-20 items-center gap-5 rounded-2xl border-2 border-primary/30 bg-background px-6 py-4 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-primary/60 hover:shadow-[0_12px_32px_rgba(1,75,63,0.14)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background dark:hover:shadow-[0_12px_32px_rgba(248,167,36,0.12)]"
+            href={href}
+            rel="noreferrer"
+            target="_blank"
+          >
+            {/* Left: label + description */}
+            <div className="flex min-w-0 flex-1 flex-col">
+              <p className="text-base font-bold leading-tight text-foreground dark:text-white">
+                {label}
+              </p>
+              <p className="mt-0.5 truncate text-sm text-foreground/60 transition-colors duration-300 group-hover:text-foreground/80 dark:text-white/60 dark:group-hover:text-white/80">
+                {description}
+              </p>
             </div>
-          ))}
-        </div>
-      </div> */}
 
-      <div className="flex w-full max-w-6xl flex-col items-center gap-10">
-        <div className="grid w-full max-w-3xl grid-cols-1 justify-items-center gap-5 sm:grid-cols-2">
-          {DIRECT_CONTACT_OPTIONS.map(
-            ({ description, href, icon: Icon }, index) => (
-              <a
-                key={`${href}-${description}`}
-                aria-label={
-                  index === 0 ? t.contact.gmailLabel : t.contact.whatsappLabel
-                }
-                className="group block w-full max-w-[300px] rounded-large focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background"
-                href={href}
-                rel="noreferrer"
-                target="_blank"
-              >
-                <Card className={CONTACT_CARD_CLASS} radius="lg">
-                  <CardBody className={`${CONTACT_CARD_BODY_CLASS} px-5 py-7`}>
-                    <div className="flex min-w-0 flex-col items-center justify-center gap-4">
-                      <p className="max-w-full truncate text-center text-sm font-semibold text-primary dark:text-white">
-                        {description}
-                      </p>
-
-                      <div className="flex h-20 w-20 items-center justify-center rounded-full border-2 border-primary/20 bg-white/80 text-primary shadow-[0_12px_30px_rgba(1,75,63,0.14)] transition-all duration-300 group-hover:scale-110 group-hover:border-primary group-hover:shadow-[0_18px_36px_rgba(1,75,63,0.24)] dark:border-white/20 dark:bg-white/10 dark:text-secondary dark:group-hover:border-secondary dark:group-hover:shadow-[0_18px_36px_rgba(248,167,36,0.18)]">
-                        <Icon
-                          size={44}
-                          stroke={1.6}
-                          className="transition-transform duration-300 group-hover:scale-110 group-hover:-rotate-6"
-                        />
-                      </div>
-                    </div>
-                  </CardBody>
-                </Card>
-              </a>
-            ),
-          )}
-        </div>
-
-        <div className="grid w-full max-w-6xl grid-cols-1 justify-items-center gap-4 sm:grid-cols-3 lg:grid-cols-5">
-          {SOCIAL_CONTACT_OPTIONS.map(
-            ({ description, href, linkLabel, icon: Icon }) => (
-              <a
-                key={`${linkLabel}-${description}`}
-                aria-label={linkLabel}
-                className="group block w-full max-w-[190px] rounded-large focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background"
-                href={href}
-                rel="noreferrer"
-                target="_blank"
-              >
-                <Card className={CONTACT_CARD_CLASS} radius="lg">
-                  <CardBody className={`${CONTACT_CARD_BODY_CLASS} px-3 py-5`}>
-                    <div className="flex min-w-0 flex-col items-center justify-center gap-3">
-                      <div className="flex h-16 w-16 items-center justify-center rounded-full border-2 border-primary/20 bg-white/80 text-primary shadow-[0_10px_24px_rgba(1,75,63,0.14)] transition-all duration-300 group-hover:scale-110 group-hover:border-primary group-hover:shadow-[0_14px_30px_rgba(1,75,63,0.22)] dark:border-white/20 dark:bg-white/10 dark:text-secondary dark:group-hover:border-secondary dark:group-hover:shadow-[0_14px_30px_rgba(248,167,36,0.16)]">
-                        <Icon
-                          size={34}
-                          stroke={1.6}
-                          className="transition-transform duration-300 group-hover:scale-110 group-hover:-rotate-6"
-                        />
-                      </div>
-
-                      <p className="max-w-full truncate text-center text-sm font-semibold text-primary dark:text-white">
-                        {description}
-                      </p>
-                    </div>
-                  </CardBody>
-                </Card>
-              </a>
-            ),
-          )}
-        </div>
-      </div>
+            {/* Right: fade-in visit hint + icon pill */}
+            <div className="flex shrink-0 items-center gap-3">
+              <span className="flex items-center gap-1 text-xs font-semibold text-primary/60 opacity-0 transition-all duration-300 group-hover:opacity-100 dark:text-white/60">
+                Visit
+                <svg
+                  className="h-3.5 w-3.5 transition-transform duration-300 ease-out group-hover:-translate-y-0.5 group-hover:translate-x-0.5"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth={2.5}
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    d="M7 17L17 7M17 7H7M17 7v10"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              </span>
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-primary/20 bg-muted text-primary shadow-sm transition-all duration-300 group-hover:scale-110 group-hover:border-primary group-hover:bg-primary group-hover:text-primary-foreground group-hover:shadow-[0_8px_24px_rgba(1,75,63,0.22)] dark:border-white/20 dark:text-white dark:group-hover:border-secondary dark:group-hover:bg-secondary dark:group-hover:text-secondary-foreground dark:group-hover:shadow-[0_8px_24px_rgba(248,167,36,0.22)]">
+                <Icon
+                  size={22}
+                  stroke={1.75}
+                  className="transition-transform duration-300 group-hover:scale-105"
+                />
+              </div>
+            </div>
+          </motion.a>
+        ))}
+      </motion.div>
     </div>
   );
 };

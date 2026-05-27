@@ -35,6 +35,7 @@ import {
   useTransform,
   type MotionValue,
 } from "framer-motion";
+import { fadeUp, staggerContainer, staggerItem, viewport } from "@/lib/animations";
 import {
   RUNDOWN_ITEMS,
   SCROLL_MOMENTS,
@@ -238,16 +239,28 @@ const Rundown = () => {
 
   return (
     <div id="rundown" className="mb-48 scroll-mt-24">
-      <h1 className="scroll-m-20 text-5xl font-extrabold tracking-tight text-center text-primary px-2 mb-6">
+      <motion.h1
+        className="scroll-m-20 text-5xl font-extrabold tracking-tight text-center text-primary px-2 mb-6"
+        variants={fadeUp}
+        initial="hidden"
+        whileInView="visible"
+        viewport={viewport}
+      >
         {t.rundown.titleStart}
         <span className="text-secondary">{t.rundown.titleEmphasis}</span>
-      </h1>
+      </motion.h1>
 
       <div className="my-12">
         <div className="relative mx-auto max-w-6xl">
           <div className="pointer-events-none absolute left-1/2 top-0 hidden h-full w-px -translate-x-1/2 bg-gradient-to-b from-primary/20 via-secondary/60 to-primary/20 lg:block" />
 
-          <div className="flex flex-col gap-6">
+          <motion.div
+            className="flex flex-col gap-6"
+            variants={staggerContainer}
+            initial="hidden"
+            whileInView="visible"
+            viewport={viewport}
+          >
             {rundownItems.map((item, index) => {
               const isEven = index % 2 === 0;
               const isLast = index === RUNDOWN_ITEMS.length - 1;
@@ -277,35 +290,46 @@ const Rundown = () => {
                             </span>
                           }
                         >
-                          <div className="flex items-start gap-2 pb-2 text-xs">
+                          <div className="flex flex-col gap-3 pb-2 text-xs">
                             <p>{item.subdetail}</p>
+                            {item.image && (
+                              <img
+                                src={item.image}
+                                alt={`${item.title} situation`}
+                                className="w-full rounded-xl object-cover max-h-40"
+                                loading="lazy"
+                              />
+                            )}
                           </div>
                         </AccordionItem>
                       </Accordion>
                       <div className="space-y-3 mt-6">
-                        {item.participants.map((p) => {
-                          const ParticipantIcon = RUNDOWN_ICON_MAP[p.icon] ?? IconSparkles;
-                          return (
-                            <div
-                              key={p.rundown}
-                              className="flex items-center gap-3 rounded-lg border border-border hover:border-l-4 hover:border-l-primary p-3 pl-4 transition-colors duration-300"
-                            >
-                              <ParticipantIcon size={16} />
-                              <div>
-                                <p className="text-sm font-medium text-foreground dark:text-white">
-                                  {p.rundown}
-                                </p>
-                                <p className="text-xs text-foreground dark:text-white mt-0.5">
-                                  {p.participant}
-                                </p>
+                        {item.participants.length > 0 && (
+                          item.participants.map((p) => {
+                            const ParticipantIcon = RUNDOWN_ICON_MAP[p.icon] ?? IconSparkles;
+                            return (
+                              <div
+                                key={p.rundown}
+                                className="flex items-center gap-3 rounded-lg border border-border hover:border-l-4 hover:border-l-primary p-3 pl-4 transition-colors duration-300"
+                              >
+                                <ParticipantIcon size={16} />
+                                <div>
+                                  <p className="text-sm font-medium text-foreground dark:text-white">
+                                    {p.rundown}
+                                  </p>
+                                  <p className="text-xs text-foreground dark:text-white mt-0.5">
+                                    {p.participant}
+                                  </p>
+                                </div>
                               </div>
-                            </div>
-                          );
-                        })}
+                            );
+                          })
+                        )}
                       </div>
                     </div>
                   </SideSheet>
-                  <div
+                  <motion.div
+                    variants={staggerItem}
                     className={`group relative flex w-full ${
                       isEven ? "lg:justify-start" : "lg:justify-end"
                     }`}
@@ -330,7 +354,7 @@ const Rundown = () => {
                             className="cursor-pointer"
                             onClick={() => setOpenSheet(index)}
                           >
-                            {t.rundown.viewParticipants} <IconScanPosition />
+                            {t.rundown.viewDetail} <IconScanPosition />
                           </Button>
                         </div>
 
@@ -348,24 +372,30 @@ const Rundown = () => {
                         </div>
                       </div>
                     </div>
-                  </div>
+                  </motion.div>
                 </Fragment>
               );
             })}
-          </div>
+          </motion.div>
         </div>
       </div>
 
       <div className="mt-28">
         <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-0">
-          <div className="space-y-3 text-center w-full">
+          <motion.div
+            className="space-y-3 text-center w-full"
+            variants={fadeUp}
+            initial="hidden"
+            whileInView="visible"
+            viewport={viewport}
+          >
             <p className="text-xs font-semibold uppercase tracking-[0.28em] text-secondary">
               {t.rundown.momentsLabel}
             </p>
             <h2 className="text-3xl font-bold tracking-tight text-primary dark:text-white">
               {t.rundown.momentsTitle}
             </h2>
-          </div>
+          </motion.div>
 
           <div
             ref={scrollStackRef}
