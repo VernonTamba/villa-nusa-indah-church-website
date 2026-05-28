@@ -101,7 +101,7 @@ const CoreValues = () => {
           >
             <div className="space-y-6">
               <div className="space-y-4">
-                <h1
+                <h2
                   id="core-values-heading"
                   className="text-5xl font-black tracking-tight text-primary"
                 >
@@ -110,7 +110,7 @@ const CoreValues = () => {
                     {t.coreValues.titleMiddle}
                   </span>
                   {t.coreValues.titleEnd}
-                </h1>
+                </h2>
                 <p className="mt-4 text-sm leading-7 text-foreground dark:text-white sm:text-base">
                   {t.coreValues.description}
                 </p>

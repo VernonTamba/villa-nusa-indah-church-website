@@ -29,13 +29,13 @@ const GetInTouch = () => {
       >
         <div className="space-y-6">
           <div className="space-y-6">
-            <h1
+            <h2
               id="get-in-touch-heading"
               className="text-5xl font-black tracking-tight text-primary"
             >
               {t.contact.titleStart}
               <span className="text-secondary">{t.contact.titleEmphasis}</span>
-            </h1>
+            </h2>
             <p className="mt-4 text-sm leading-7 text-foreground dark:text-white sm:text-base">
               {t.contact.description}
             </p>
@@ -74,7 +74,7 @@ const GetInTouch = () => {
             {/* Right: fade-in visit hint + icon pill */}
             <div className="flex shrink-0 items-center gap-3">
               <span className="flex items-center gap-1 text-xs font-semibold text-primary/60 opacity-0 transition-all duration-300 group-hover:opacity-100 dark:text-white/60">
-                Visit
+                {t.contact.visitLabel}
                 <svg
                   className="h-3.5 w-3.5 transition-transform duration-300 ease-out group-hover:-translate-y-0.5 group-hover:translate-x-0.5"
                   fill="none"

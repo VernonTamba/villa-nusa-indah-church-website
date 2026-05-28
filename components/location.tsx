@@ -35,13 +35,13 @@ const Location = () => {
       >
         <div className="space-y-6">
           <div className="space-y-6">
-            <h1
+            <h2
               id="location-heading"
               className="text-5xl font-black tracking-tight text-primary"
             >
               {t.location.titleStart}
               <span className="text-secondary">{t.location.titleEmphasis}</span>
-            </h1>
+            </h2>
             <p className="mt-4 text-sm leading-7 text-foreground dark:text-white sm:text-base">
               {t.location.description}
             </p>

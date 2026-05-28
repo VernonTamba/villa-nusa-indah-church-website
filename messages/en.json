@@ -156,6 +156,7 @@
     "description": "Feel free to reach out to us through any of the methods. Whether you want to send prayer requests, questions, or a simple greeting, we're here to listen and connect with you.",
     "gmailLabel": "Contact us through Gmail",
     "whatsappLabel": "Contact us through WhatsApp",
+    "visitLabel": "Visit",
     "messageTypes": ["Prayer requests", "Questions", "Greetings"]
   },
   "faq": {
@@ -233,5 +234,39 @@
       "deaconess": "Deaconess",
       "member": "Church Member"
     }
+  },
+  "donate": {
+    "eyebrow": "Church Construction Fund",
+    "titleStart": "Build",
+    "titleEmphasis": " Our Church",
+    "description": "We are trusting God together to build a church for GMAHK Villa Nusa Indah in Jatirasa, Bekasi. Your generous gift — large or small — brings us one step closer to a permanent home for worship and community.",
+    "locationTitle": "Building Location",
+    "locationAddress": "Jatirasa, Bekasi, Jawa Barat",
+    "locationDescription": "The new church will be located in Jatirasa, Bekasi, Jawa Barat. This will serve as a permanent home for our congregation and a place of worship for the surrounding community.",
+    "accountTitle": "Church Accounts",
+    "accountSubtitle": "Please transfer to one of the following accounts and keep your receipt.",
+    "bankLabel": "Bank",
+    "accountNumberLabel": "Account Number",
+    "accountHolderLabel": "Account Holder",
+    "copyButton": "Copy",
+    "copiedButton": "Copied!",
+    "noteTitle": "Important Notes",
+    "notes": [
+      "Please include your name and purpose in the transfer description.",
+      "For tithe and offerings, please label accordingly (e.g., 'Tithe – [Your Name]').",
+      "Contact the church treasurer for confirmation after transferring."
+    ],
+    "accounts": [
+      {
+        "bank": "Bank Central Asia (BCA)",
+        "accountNumber": "1234567890",
+        "accountHolder": "Gereja Masehi Advent Hari Ketujuh VNI"
+      },
+      {
+        "bank": "Bank Mandiri",
+        "accountNumber": "0987654321",
+        "accountHolder": "Gereja Masehi Advent Hari Ketujuh VNI"
+      }
+    ]
   }
 }

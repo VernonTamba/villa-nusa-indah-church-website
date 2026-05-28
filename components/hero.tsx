@@ -29,17 +29,17 @@ const FALLBACK_SLIDES = [
 const HERO_LINKS = [
   {
     icon: IconCalendarEvent,
-    label: "Rundown",
+    labelKey: "rundown" as const,
     href: "#rundown",
   },
   {
     icon: IconMapPin,
-    label: "Location",
+    labelKey: "location" as const,
     href: "#location",
   },
   {
     icon: IconMail,
-    label: "Get in touch",
+    labelKey: "contact" as const,
     href: "#get-in-touch",
   },
 ];
@@ -108,7 +108,7 @@ const Hero = () => {
               fill
               priority={index === 0}
               src={slide.src}
-              alt=""
+              alt={`${t.hero.eyebrow} — slide ${index + 1}`}
               sizes="100vw"
               className="object-cover object-[center_38%]"
             />
@@ -167,11 +167,7 @@ const Hero = () => {
                       <Icon size={20} />
                     </span>
                     <span className="text-sm font-semibold text-white">
-                      {item.href === "#rundown"
-                        ? t.hero.links.rundown
-                        : item.href === "#location"
-                          ? t.hero.links.location
-                          : t.hero.links.contact}
+                      {t.hero.links[item.labelKey]}
                     </span>
                   </a>
                 );
@@ -181,14 +177,17 @@ const Hero = () => {
         </div>
 
         <div className="mt-auto flex items-end justify-between gap-6">
-          <div className="hidden items-center gap-2 sm:flex" aria-hidden="true">
+          <div className="hidden items-center gap-2 sm:flex" aria-label="Slide indicators">
             {heroSlides.map((slide, index) => (
-              <span
+              <button
                 key={slide.src + index}
-                className={`h-1 rounded-full transition-all duration-500 ${
+                onClick={() => setActiveSlide(index)}
+                aria-label={`Go to slide ${index + 1}`}
+                aria-current={activeSlide === index ? "true" : undefined}
+                className={`h-1 rounded-full transition-all duration-500 cursor-pointer ${
                   activeSlide === index
                     ? "w-12 bg-secondary"
-                    : "w-6 bg-white/40"
+                    : "w-6 bg-white/40 hover:bg-white/70"
                 }`}
               />
             ))}

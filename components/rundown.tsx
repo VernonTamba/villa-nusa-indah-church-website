@@ -239,7 +239,7 @@ const Rundown = () => {
 
   return (
     <div id="rundown" className="mb-48 scroll-mt-24">
-      <motion.h1
+      <motion.h2
         className="scroll-m-20 text-5xl font-extrabold tracking-tight text-center text-primary px-2 mb-6"
         variants={fadeUp}
         initial="hidden"
@@ -248,13 +248,14 @@ const Rundown = () => {
       >
         {t.rundown.titleStart}
         <span className="text-secondary">{t.rundown.titleEmphasis}</span>
-      </motion.h1>
+      </motion.h2>
 
       <div className="my-12">
         <div className="relative mx-auto max-w-6xl">
           <div className="pointer-events-none absolute left-1/2 top-0 hidden h-full w-px -translate-x-1/2 bg-gradient-to-b from-primary/20 via-secondary/60 to-primary/20 lg:block" />
 
           <motion.div
+            key={locale}
             className="flex flex-col gap-6"
             variants={staggerContainer}
             initial="hidden"

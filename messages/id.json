@@ -86,13 +86,13 @@
         "title": "Sekolah Sabat",
         "detail": "Diskusi Sekolah Sabat untuk memulai hari Sabat dengan pertumbuhan rohani.",
         "subdetail": "Dalam ibadah Sekolah Sabat, kami memulai dengan beberapa lagu. Pemimpin Sekolah Sabat membuka dengan sambutan dan doa. Ada bacaan mission, lagu pujian, persembahan yang dibantu diakon dan diakones, diskusi pelajaran, pelayanan perorangan, dan doa penutup.",
-        "participants": ["Pemimpin Lagu", "Pianist", "Pemimpin Sekolah Sabat", "Ayat Inti dan Doa Buka", "Bacaan Mission", "Lagu Pujian", "Diakon/Diakones", "Diakon/Diakones 2", "Diskusi Sekolah Sabat", "Pelayanan Perorangan/Rumah Tangga & Kesehatan", "Doa Tutup"]
+        "participants": ["Pemimpin Lagu", "Pianist", "Pemimpin Sekolah Sabat", "Ayat Inti dan Doa Buka", "Bacaan Mission", "Lagu Pujian", "Diakon/Diakones", "Diskusi Sekolah Sabat", "Pelayanan Perorangan/Rumah Tangga & Kesehatan", "Doa Tutup"]
       },
       {
         "title": "Khotbah",
         "detail": "Pujian, doa, dan khotbah utama pada hari Sabat.",
         "subdetail": "Khotbah dibuka dengan nyanyian jemaat dan iringan piano. Ibadah mencakup bacaan ayat bersahutan, doa syafaat, pembacaan dan doa persembahan, pelayanan diakon dan diakones, cerita anak-anak, lagu pujian, khotbah utama, dan doa berkat penutup.",
-        "participants": ["Pemimpin Lagu", "Pianist", "Bacaan Ayat Bersahutan", "Doa Syafaat", "Pembacaan dan Doa Persembahan", "Diakon/Diakones", "Diakon/Diakones 2", "Cerita Anak-Anak", "Lagu Pujian", "Khotbah", "Doa Berkat"]
+        "participants": ["Pemimpin Lagu", "Pianist", "Bacaan Ayat Bersahutan", "Doa Syafaat", "Pembacaan dan Doa Persembahan", "Diakon/Diakones", "Cerita Anak-Anak", "Lagu Pujian", "Khotbah", "Doa Berkat"]
       },
       {
         "title": "Makan Siang Bersama",
@@ -156,6 +156,7 @@
     "description": "Silakan menghubungi kami melalui kanal yang tersedia. Baik untuk permohonan doa, pertanyaan, maupun sapaan sederhana, kami siap mendengar dan terhubung dengan Anda.",
     "gmailLabel": "Hubungi kami melalui Gmail",
     "whatsappLabel": "Hubungi kami melalui WhatsApp",
+    "visitLabel": "Kunjungi",
     "messageTypes": ["Permohonan doa", "Pertanyaan", "Salam"]
   },
   "faq": {
@@ -233,5 +234,39 @@
       "deaconess": "Diakones",
       "member": "Anggota Jemaat"
     }
+  },
+  "donate": {
+    "eyebrow": "Dana Pembangunan Gereja",
+    "titleStart": "Bangun",
+    "titleEmphasis": " Gereja Kita",
+    "description": "Kami bersama-sama mempercayai Tuhan untuk membangun gereja bagi GMAHK Villa Nusa Indah di Jatirasa, Bekasi. Persembahan Anda — besar maupun kecil — membawa kami selangkah lebih dekat menuju rumah ibadah yang permanen.",
+    "locationTitle": "Lokasi Pembangunan",
+    "locationAddress": "Jatirasa, Bekasi, Jawa Barat",
+    "locationDescription": "Gereja baru akan berlokasi di Jatirasa, Bekasi, Jawa Barat. Ini akan menjadi rumah permanen bagi jemaat kami dan tempat ibadah bagi komunitas sekitarnya.",
+    "accountTitle": "Rekening Gereja",
+    "accountSubtitle": "Silakan transfer ke salah satu rekening berikut dan simpan bukti transfernya.",
+    "bankLabel": "Bank",
+    "accountNumberLabel": "Nomor Rekening",
+    "accountHolderLabel": "Nama Rekening",
+    "copyButton": "Salin",
+    "copiedButton": "Tersalin!",
+    "noteTitle": "Catatan Penting",
+    "notes": [
+      "Mohon cantumkan nama dan keperluan transfer di keterangan transfer.",
+      "Untuk persepuluhan dan persembahan, mohon beri keterangan yang sesuai (mis. 'Persepuluhan – [Nama Anda]').",
+      "Hubungi bendahara gereja untuk konfirmasi setelah melakukan transfer."
+    ],
+    "accounts": [
+      {
+        "bank": "Bank Central Asia (BCA)",
+        "accountNumber": "1234567890",
+        "accountHolder": "Gereja Masehi Advent Hari Ketujuh VNI"
+      },
+      {
+        "bank": "Bank Mandiri",
+        "accountNumber": "0987654321",
+        "accountHolder": "Gereja Masehi Advent Hari Ketujuh VNI"
+      }
+    ]
   }
 }

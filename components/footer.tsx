@@ -17,6 +17,7 @@ import {
 import { useLanguage } from "@/lib/i18n";
 import { motion } from "framer-motion";
 import { fadeUp, fadeIn, staggerContainer, staggerItem, viewport } from "@/lib/animations";
+import { siteConfig } from "@/config/site";
 
 const Footer = () => {
   const { messages: t } = useLanguage();
@@ -36,12 +37,14 @@ const Footer = () => {
       >
         <motion.div variants={staggerItem} className="flex flex-col gap-2 px-4 py-6">
           <div className="flex items-center gap-3 max-w-fit">
-            <Image
-              src={AdventistLogo}
-              alt="Adventist Logo"
-              height={36}
-              width={36}
-            />
+            <span className="flex items-center justify-center rounded-md bg-white p-1">
+              <Image
+                src={AdventistLogo}
+                alt="Adventist Logo"
+                height={30}
+                width={30}
+              />
+            </span>
             <p className="font-bold text-inherit leading-4">
               GMAHK Villa Nusa Indah
             </p>
@@ -55,6 +58,11 @@ const Footer = () => {
             <Button
               isIconOnly
               variant="solid"
+              as="a"
+              href={siteConfig.links.facebook}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Facebook"
               className="bg-primary text-primary-foreground"
             >
               <IconBrandFacebook />
@@ -62,6 +70,11 @@ const Footer = () => {
             <Button
               isIconOnly
               variant="solid"
+              as="a"
+              href={siteConfig.links.instagram}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Instagram"
               className="bg-primary text-primary-foreground"
             >
               <IconBrandInstagram />
@@ -69,6 +82,11 @@ const Footer = () => {
             <Button
               isIconOnly
               variant="solid"
+              as="a"
+              href={siteConfig.links.youtube}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="YouTube"
               className="bg-primary text-primary-foreground"
             >
               <IconBrandYoutube />

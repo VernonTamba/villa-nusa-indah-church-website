@@ -14,7 +14,7 @@ import {
 } from "@/lib/animations";
 
 const CoreBeliefs = () => {
-  const { messages: t } = useLanguage();
+  const { locale, messages: t } = useLanguage();
   const beliefs = BELIEFS.map((belief, index) => ({
     ...belief,
     ...t.coreBeliefs.items[index],
@@ -35,13 +35,13 @@ const CoreBeliefs = () => {
             whileInView="visible"
             viewport={viewport}
           >
-            <h1
+            <h2
               id="core-beliefs-heading"
               className="mt-6 text-5xl font-black tracking-tight text-secondary"
             >
               {t.coreBeliefs.titleStart}
               <span className="text-primary">{t.coreBeliefs.titleEmphasis}</span>
-            </h1>
+            </h2>
             <p className="mt-4 text-sm leading-7 text-foreground dark:text-white sm:text-base">
               {t.coreBeliefs.description}
             </p>
@@ -49,6 +49,7 @@ const CoreBeliefs = () => {
 
           {/* Cards grid */}
           <motion.div
+            key={locale}
             className="mt-12 grid gap-5 md:grid-cols-2 xl:grid-cols-4 xl:auto-rows-[minmax(220px,1fr)]"
             variants={staggerContainer}
             initial="hidden"

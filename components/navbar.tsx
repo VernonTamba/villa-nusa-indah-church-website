@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
 import {
   Navbar as HeroUINavbar,
   NavbarContent,
@@ -26,7 +27,13 @@ import Image from "next/image";
 
 export const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
+  const pathname = usePathname();
   const { messages: t } = useLanguage();
+
+  // Only show the transparent/white-text hero style on the home page.
+  // All other pages (members, donate, etc.) always use the opaque navbar.
+  const isHomePage = pathname === "/";
+  const isTransparent = isHomePage && !isScrolled;
 
   const navItems = [
     { label: t.nav.home, href: "/" },
@@ -50,24 +57,24 @@ export const Navbar = () => {
       maxWidth="2xl"
       position="static"
       style={
-        isScrolled
-          ? undefined
-          : {
+        isTransparent
+          ? {
               backgroundColor: "transparent",
               backdropFilter: "none",
               WebkitBackdropFilter: "none",
             }
+          : undefined
       }
       className={clsx(
         "fixed inset-x-0 top-0 z-9999 border-b transition-colors duration-300",
-        isScrolled
-          ? "border-divider bg-background/80 shadow-sm"
-          : "border-transparent bg-transparent shadow-none backdrop-blur-none",
+        isTransparent
+          ? "border-transparent bg-transparent shadow-none backdrop-blur-none"
+          : "border-divider bg-background/80 shadow-sm",
       )}
       classNames={{
-        base: isScrolled
-          ? "fixed inset-x-0 top-0 bg-background/80"
-          : "fixed inset-x-0 top-0 bg-transparent backdrop-blur-none backdrop-saturate-100",
+        base: isTransparent
+          ? "fixed inset-x-0 top-0 bg-transparent backdrop-blur-none backdrop-saturate-100"
+          : "fixed inset-x-0 top-0 bg-background/80",
       }}
     >
       <NavbarContent
@@ -76,16 +83,18 @@ export const Navbar = () => {
       >
         <NavbarBrand
           as="li"
-          className={clsx("gap-3 max-w-fit", !isScrolled && "text-white")}
+          className={clsx("gap-3 max-w-fit", isTransparent && "text-white")}
         >
           <NextLink className="flex justify-start items-center gap-1" href="/">
-            <Image
-              src={AdventistLogo}
-              alt="Adventist Logo"
-              height={36}
-              width={36}
-            />
-            <p className="font-bold text-inherit leading-4">
+            <span className="flex items-center justify-center rounded-md bg-white p-1">
+              <Image
+                src={AdventistLogo}
+                alt="Adventist Logo"
+                height={30}
+                width={30}
+              />
+            </span>
+            <p className="ml-3 font-bold text-inherit leading-4">
               GMAHK <br /> Villa Nusa Indah
             </p>
           </NextLink>
@@ -97,9 +106,9 @@ export const Navbar = () => {
                 className={clsx(
                   linkStyles({ color: "foreground" }),
                   "data-[active=true]:font-medium",
-                  isScrolled
-                    ? "data-[active=true]:text-primary"
-                    : "text-white data-[active=true]:text-secondary",
+                  isTransparent
+                    ? "text-white data-[active=true]:text-secondary"
+                    : "data-[active=true]:text-primary",
                 )}
                 color="foreground"
                 href={item.href}
@@ -123,10 +132,9 @@ export const Navbar = () => {
         </NavbarItem>
         <NavbarItem className="hidden md:flex">
           <Button
-            isExternal
             as={Link}
             className="text-sm font-normal text-default-600 bg-default-100"
-            href={siteConfig.links.sponsor}
+            href={siteConfig.links.donate}
             startContent={<HeartFilledIcon className="text-danger" />}
             variant="flat"
           >
@@ -144,15 +152,9 @@ export const Navbar = () => {
       <NavbarMenu>
         <div className="mx-4 mt-2 flex flex-col gap-2">
           {navItems.map((item, index) => (
-            <NavbarMenuItem key={`${item}-${index}`}>
+            <NavbarMenuItem key={`${item.href}-${index}`}>
               <Link
-                color={
-                  index === 2
-                    ? "primary"
-                    : index === siteConfig.navMenuItems.length - 1
-                      ? "danger"
-                      : "foreground"
-                }
+                color="foreground"
                 href={item.href}
                 size="lg"
               >
@@ -160,6 +162,15 @@ export const Navbar = () => {
               </Link>
             </NavbarMenuItem>
           ))}
+          <NavbarMenuItem>
+            <Link
+              color="foreground"
+              href={siteConfig.links.donate}
+              size="lg"
+            >
+              {t.nav.donate}
+            </Link>
+          </NavbarMenuItem>
         </div>
       </NavbarMenu>
     </HeroUINavbar>
