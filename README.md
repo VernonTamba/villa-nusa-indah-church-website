@@ -37,7 +37,7 @@ This is the official website for **GMAHK Villa Nusa Indah (VNI)** — a Seventh-
 |---|---|
 | 🌍 **Bilingual (ID / EN)** | Custom i18n system with language toggle — no third-party library |
 | 🌙 **Dark Mode First** | Dark theme by default, toggleable with `next-themes` |
-| 🗺️ **Interactive Map** | Embedded church location map via Leaflet |
+| 🗺️ **Interactive Map** | Embedded church location via Google Maps iframe |
 | 📋 **Service Rundown** | Live worship service schedule managed via admin panel |
 | 👥 **Members Directory** | Searchable member list fetched from Supabase |
 | 🔐 **Admin Dashboard** | Protected admin interface for managing rundown & members |
@@ -59,7 +59,7 @@ This is the official website for **GMAHK Villa Nusa Indah (VNI)** — a Seventh-
 | **Icons** | `@tabler/icons-react`, `lucide-react` |
 | **Database** | [Supabase](https://supabase.com/) (PostgreSQL) via `@supabase/ssr` |
 | **i18n** | Custom `LanguageProvider` + `useLanguage()` hook |
-| **Map** | [Leaflet](https://leafletjs.com/) + `react-leaflet` |
+| **Map** | Google Maps Embed (iframe) |
 | **Theme** | `next-themes` (dark default) |
 | **Font** | Inter (via `config/fonts.ts`) |
 | **Build** | Turbopack (dev) |
