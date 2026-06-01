@@ -137,11 +137,11 @@ const Footer = () => {
       >
         <p className="text-sm">
           &copy; {new Date().getFullYear()} GMAHK Villa Nusa Indah.{" "}
-          {t.footer.copyright}
+          All rights reserved.
         </p>
 
         <p className="text-sm ml-4">
-          {t.footer.built}
+          Built with <span className="text-primary">♥</span> by the VNI Coms Team.
         </p>
       </motion.footer>
     </div>

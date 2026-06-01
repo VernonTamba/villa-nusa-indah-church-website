@@ -27,20 +27,29 @@ import Image from "next/image";
 
 export const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const pathname = usePathname();
   const { messages: t } = useLanguage();
 
   // Only show the transparent/white-text hero style on the home page.
-  // All other pages (members, donate, etc.) always use the opaque navbar.
+  // Wait until mounted to avoid hydration mismatch between SSR and client scroll state.
   const isHomePage = pathname === "/";
-  const isTransparent = isHomePage && !isScrolled;
+  const isTransparent = mounted && isHomePage && !isScrolled;
 
   const navItems = [
     { label: t.nav.home, href: "/" },
     { label: t.nav.members, href: "/members" },
   ];
 
+  // Close the mobile menu whenever the route changes.
   useEffect(() => {
+    setIsMenuOpen(false);
+  }, [pathname]);
+
+  useEffect(() => {
+    setMounted(true);
+
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 0);
     };
@@ -53,6 +62,8 @@ export const Navbar = () => {
 
   return (
     <HeroUINavbar
+      isMenuOpen={isMenuOpen}
+      onMenuOpenChange={setIsMenuOpen}
       isBlurred={isScrolled}
       maxWidth="2xl"
       position="static"
@@ -66,15 +77,23 @@ export const Navbar = () => {
           : undefined
       }
       className={clsx(
-        "fixed inset-x-0 top-0 z-9999 border-b transition-colors duration-300",
+        // z-[9999] — bracket syntax is required by Tailwind v4 for arbitrary z-index values.
+        // Without brackets, z-9999 is silently ignored causing the navbar to have no z-index.
+        "fixed inset-x-0 top-0 z-[9999] border-b transition-colors duration-300",
         isTransparent
           ? "border-transparent bg-transparent shadow-none backdrop-blur-none"
           : "border-divider bg-background/80 shadow-sm",
       )}
       classNames={{
+        // Do NOT add position/layout classes here — the className above already handles
+        // the fixed positioning. Duplicating `fixed` on the inner <nav> (classNames.base)
+        // causes a double-fixed nesting bug on mobile browsers.
         base: isTransparent
-          ? "fixed inset-x-0 top-0 bg-transparent backdrop-blur-none backdrop-saturate-100"
-          : "fixed inset-x-0 top-0 bg-background/80",
+          ? "bg-transparent backdrop-blur-none backdrop-saturate-100"
+          : "bg-background/80",
+        // The mobile menu overlay must have a very high z-index so it renders above
+        // the hero section's transform stacking context.
+        menu: "z-[9999] pt-6",
       }}
     >
       <NavbarContent
@@ -110,6 +129,7 @@ export const Navbar = () => {
                   isTransparent
                     ? "text-white data-[active=true]:text-secondary"
                     : "data-[active=true]:text-primary",
+                  pathname === item.href && "font-semibold",
                 )}
                 color="foreground"
                 href={item.href}
@@ -155,9 +175,14 @@ export const Navbar = () => {
           {navItems.map((item, index) => (
             <NavbarMenuItem key={`${item.href}-${index}`}>
               <Link
-                color="foreground"
+                color={pathname === item.href ? "primary" : "foreground"}
                 href={item.href}
                 size="lg"
+                className={clsx(
+                  "w-full",
+                  pathname === item.href && "font-semibold",
+                )}
+                onPress={() => setIsMenuOpen(false)}
               >
                 {item.label}
               </Link>
@@ -165,9 +190,14 @@ export const Navbar = () => {
           ))}
           <NavbarMenuItem>
             <Link
-              color="foreground"
+              color={pathname === siteConfig.links.donate ? "primary" : "foreground"}
               href={siteConfig.links.donate}
               size="lg"
+              className={clsx(
+                "w-full",
+                pathname === siteConfig.links.donate && "font-semibold",
+              )}
+              onPress={() => setIsMenuOpen(false)}
             >
               {t.nav.donate}
             </Link>

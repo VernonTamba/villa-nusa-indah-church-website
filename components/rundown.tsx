@@ -3,6 +3,8 @@
 import { Fragment, useEffect, useRef, useState } from "react";
 import {
   IconBook2,
+  IconChevronLeft,
+  IconChevronRight,
   IconCoffee,
   IconMicrophone2,
   IconMusic,
@@ -28,6 +30,7 @@ import { Button } from "@/components/ui/button";
 import SideSheet from "./ui/side-sheet";
 import { Accordion, AccordionItem } from "@heroui/react";
 import {
+  AnimatePresence,
   motion,
   useReducedMotion,
   useScroll,
@@ -48,6 +51,8 @@ import { createClient } from "@/utils/supabase/client";
 function toKey(s: string) {
   return s.toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_|_$/g, "");
 }
+
+// ─── Desktop: Scroll-Stack Card ───────────────────────────────────────────────
 
 type ScrollStackCardProps = {
   item: ScrollMoment;
@@ -146,6 +151,162 @@ const ScrollStackCard = ({
   );
 };
 
+// ─── Mobile: Swipeable Card Carousel ──────────────────────────────────────────
+
+type MobileCardCarouselProps = {
+  moments: ScrollMoment[];
+  reduceMotion: boolean;
+};
+
+const MobileCardCarousel = ({ moments, reduceMotion }: MobileCardCarouselProps) => {
+  const [activeIndex, setActiveIndex] = useState(0);
+  const [direction, setDirection] = useState(0); // 1 = forward (left swipe), -1 = backward (right swipe)
+  const total = moments.length;
+
+  const goTo = (next: number) => {
+    const clamped = Math.max(0, Math.min(total - 1, next));
+    if (clamped === activeIndex) return;
+    setDirection(clamped > activeIndex ? 1 : -1);
+    setActiveIndex(clamped);
+  };
+
+  // Slide variants: entering card slides in from the side, exiting card scales back slightly
+  const cardVariants = {
+    enter: (dir: number) => ({
+      x: dir >= 0 ? "72%" : "-72%",
+      opacity: 0,
+      scale: 0.92,
+    }),
+    center: {
+      x: 0,
+      opacity: 1,
+      scale: 1,
+      transition: { duration: 0.42, ease: [0.22, 1, 0.36, 1] },
+    },
+    exit: (dir: number) => ({
+      x: dir >= 0 ? "-28%" : "28%",
+      opacity: 0,
+      scale: 0.94,
+      transition: { duration: 0.32, ease: [0.22, 1, 0.36, 1] },
+    }),
+  };
+
+  const current = moments[activeIndex];
+
+  return (
+    <div className="mt-6 select-none">
+      {/* Card area */}
+      <div className="relative h-[65vh] overflow-hidden rounded-[28px]">
+        <AnimatePresence custom={direction} mode="wait" initial={false}>
+          <motion.figure
+            key={activeIndex}
+            custom={direction}
+            variants={reduceMotion ? undefined : cardVariants}
+            initial={reduceMotion ? { opacity: 0 } : "enter"}
+            animate={reduceMotion ? { opacity: 1 } : "center"}
+            exit={reduceMotion ? { opacity: 0 } : "exit"}
+            // Swipe gesture
+            drag={!reduceMotion ? "x" : undefined}
+            dragConstraints={{ left: 0, right: 0 }}
+            dragElastic={0.18}
+            onDragEnd={(_, info) => {
+              const THRESHOLD = 48;
+              if (info.offset.x < -THRESHOLD && activeIndex < total - 1) {
+                goTo(activeIndex + 1);
+              } else if (info.offset.x > THRESHOLD && activeIndex > 0) {
+                goTo(activeIndex - 1);
+              }
+            }}
+            className="absolute inset-0 cursor-grab active:cursor-grabbing"
+            style={{ touchAction: "pan-y" }}
+          >
+            <div className="relative flex h-full overflow-hidden rounded-[28px] border border-white/20 bg-slate-950 shadow-[0_28px_80px_rgba(2,6,23,0.28)]">
+              {/* Image — pointer-events-none prevents the browser's default image-drag from
+                  interfering with the Framer Motion drag gesture */}
+              <img
+                src={current.image}
+                alt={current.title}
+                loading="eager"
+                draggable={false}
+                className="h-full w-full object-cover pointer-events-none"
+              />
+
+              {/* Overlays */}
+              <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(2,6,23,0.08),rgba(2,6,23,0.76))]" />
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.22),transparent_28%),radial-gradient(circle_at_bottom_right,rgba(248,167,36,0.22),transparent_32%)]" />
+
+              {/* Caption */}
+              <figcaption className="absolute inset-x-0 bottom-0 space-y-3 p-5">
+                <div className="flex items-center justify-between gap-3">
+                  <span className="inline-flex rounded-full border border-white/20 bg-white/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.24em] text-white backdrop-blur-sm">
+                    {current.label}
+                  </span>
+                  <span className="text-xs font-semibold tracking-[0.35em] text-white/70">
+                    {String(activeIndex + 1).padStart(2, "0")} / {String(total).padStart(2, "0")}
+                  </span>
+                </div>
+                <div className="space-y-2">
+                  <h3 className="text-xl font-bold leading-tight text-white">
+                    {current.title}
+                  </h3>
+                  <p className="text-sm leading-6 text-white/80">
+                    {current.description}
+                  </p>
+                </div>
+              </figcaption>
+
+              {/* Prev button */}
+              <button
+                onClick={() => goTo(activeIndex - 1)}
+                disabled={activeIndex === 0}
+                aria-label="Previous moment"
+                className="absolute left-3 top-1/2 z-10 -translate-y-1/2 flex h-10 w-10 items-center justify-center rounded-full bg-black/35 text-white backdrop-blur-sm transition-all duration-200 hover:bg-black/55 disabled:opacity-0 disabled:pointer-events-none"
+              >
+                <IconChevronLeft size={20} stroke={2.2} />
+              </button>
+
+              {/* Next button */}
+              <button
+                onClick={() => goTo(activeIndex + 1)}
+                disabled={activeIndex === total - 1}
+                aria-label="Next moment"
+                className="absolute right-3 top-1/2 z-10 -translate-y-1/2 flex h-10 w-10 items-center justify-center rounded-full bg-black/35 text-white backdrop-blur-sm transition-all duration-200 hover:bg-black/55 disabled:opacity-0 disabled:pointer-events-none"
+              >
+                <IconChevronRight size={20} stroke={2.2} />
+              </button>
+            </div>
+          </motion.figure>
+        </AnimatePresence>
+      </div>
+
+      {/* Dot indicators + swipe hint */}
+      <div className="mt-4 flex flex-col items-center gap-2">
+        <div className="flex items-center gap-2" role="tablist" aria-label="Moment indicators">
+          {moments.map((_, i) => (
+            <button
+              key={i}
+              role="tab"
+              aria-selected={i === activeIndex}
+              aria-label={`Go to moment ${i + 1}`}
+              onClick={() => goTo(i)}
+              className={`h-1.5 rounded-full transition-all duration-300 ${
+                i === activeIndex
+                  ? "w-8 bg-secondary"
+                  : "w-3 bg-foreground/20 dark:bg-white/25 hover:bg-foreground/40 dark:hover:bg-white/50"
+              }`}
+            />
+          ))}
+        </div>
+        <p className="text-[11px] text-foreground/40 dark:text-white/30 tracking-wide">
+          swipe or tap arrows to navigate
+        </p>
+      </div>
+    </div>
+  );
+};
+
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+
 function getNextSaturday(locale: Locale): string {
   const today = new Date();
   const dayOfWeek = today.getDay(); // 0 = Sunday, 6 = Saturday
@@ -163,9 +324,15 @@ function getNextSaturday(locale: Locale): string {
   });
 }
 
+// ─── Main Component ───────────────────────────────────────────────────────────
+
 const Rundown = () => {
   const { locale, messages: t } = useLanguage();
   const [openSheet, setOpenSheet] = useState<number | null>(null);
+  // isMobile starts false (matches SSR) and is updated after mount via MediaQueryList.
+  // This avoids a hydration mismatch while still adapting to the real screen size.
+  const [isMobile, setIsMobile] = useState(false);
+
   const scrollStackRef = useRef<HTMLDivElement | null>(null);
   const shouldReduceMotion = useReducedMotion() ?? false;
   const { scrollYProgress } = useScroll({
@@ -173,9 +340,9 @@ const Rundown = () => {
     offset: ["start start", "end end"],
   });
   const smoothScrollProgress = useSpring(scrollYProgress, {
-    stiffness: 110,
-    damping: 26,
-    mass: 0.35,
+    stiffness: 280,
+    damping: 32,
+    mass: 0.15,
   });
 
   // DB participant name lookup: service_key -> role_key -> participant_name
@@ -212,6 +379,15 @@ const Rundown = () => {
           );
         }
       });
+  }, []);
+
+  // Detect mobile breakpoint (< 640px = Tailwind's `sm`) after mount.
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 639px)");
+    setIsMobile(mq.matches);
+    const handler = (e: MediaQueryListEvent) => setIsMobile(e.matches);
+    mq.addEventListener("change", handler);
+    return () => mq.removeEventListener("change", handler);
   }, []);
 
   const rundownItems = RUNDOWN_ITEMS.map((item, index) => {
@@ -398,25 +574,34 @@ const Rundown = () => {
             </h2>
           </motion.div>
 
-          <div
-            ref={scrollStackRef}
-            className="relative mt-10 h-[260vh] sm:h-[300vh] lg:h-[340vh]"
-          >
-            <div className="sticky top-16 flex h-[76vh] items-center justify-center">
-              <div className="relative h-full w-full px-2 sm:px-4">
-                {scrollMoments.map((item, index) => (
-                  <ScrollStackCard
-                    key={item.label}
-                    item={item}
-                    index={index}
-                    total={SCROLL_MOMENTS.length}
-                    progress={smoothScrollProgress}
-                    reduceMotion={shouldReduceMotion}
-                  />
-                ))}
+          {/* Mobile: swipeable carousel */}
+          {isMobile ? (
+            <MobileCardCarousel
+              moments={scrollMoments}
+              reduceMotion={shouldReduceMotion}
+            />
+          ) : (
+            /* Desktop: scroll-driven stack */
+            <div
+              ref={scrollStackRef}
+              className="relative mt-10 h-[260vh] sm:h-[300vh] lg:h-[340vh]"
+            >
+              <div className="sticky top-16 flex h-[76vh] items-center justify-center">
+                <div className="relative h-full w-full px-2 sm:px-4">
+                  {scrollMoments.map((item, index) => (
+                    <ScrollStackCard
+                      key={item.label}
+                      item={item}
+                      index={index}
+                      total={SCROLL_MOMENTS.length}
+                      progress={smoothScrollProgress}
+                      reduceMotion={shouldReduceMotion}
+                    />
+                  ))}
+                </div>
               </div>
             </div>
-          </div>
+          )}
         </div>
       </div>
     </div>

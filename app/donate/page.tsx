@@ -38,7 +38,10 @@ export default function DonatePage() {
   return (
     <>
       {/* Hero banner – full-width breakout from container */}
-      <section className="relative left-1/2 -translate-x-1/2 w-screen overflow-hidden -mt-16 pt-28 pb-24">
+      <section
+        className="relative w-screen overflow-hidden -mt-16 pt-28 pb-24"
+        style={{ marginLeft: "calc(50% - 50vw)" }}
+      >
  
 
         <div className="relative mx-auto max-w-4xl px-6 text-center">

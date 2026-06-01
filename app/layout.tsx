@@ -78,7 +78,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html suppressHydrationWarning lang="id">
+    <html suppressHydrationWarning lang="id" className="overflow-x-hidden">
       <head>
         <Script
           id="json-ld-church"
