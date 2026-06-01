@@ -86,12 +86,13 @@ export const Navbar = () => {
           className={clsx("gap-3 max-w-fit", isTransparent && "text-white")}
         >
           <NextLink className="flex justify-start items-center gap-1" href="/">
-            <span className="flex items-center justify-center rounded-md bg-white p-1">
+            <span className="flex shrink-0 items-center justify-center rounded-lg bg-white p-1.5">
               <Image
                 src={AdventistLogo}
                 alt="Adventist Logo"
-                height={30}
-                width={30}
+                height={20}
+                width={20}
+                className="h-5 w-5"
               />
             </span>
             <p className="ml-3 font-bold text-inherit leading-4">

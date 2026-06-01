@@ -83,7 +83,7 @@ const Hero = () => {
   return (
     <section
       ref={heroRef}
-      className="relative left-1/2 z-10 -mt-16 mb-48 min-h-svh w-screen -translate-x-1/2 overflow-hidden bg-slate-950 text-white"
+      className="relative left-1/2 -mt-16 mb-48 min-h-svh w-screen -translate-x-1/2 overflow-hidden bg-slate-950 text-white"
     >
       <motion.div
         className="absolute inset-x-0 -inset-y-16 overflow-hidden will-change-transform"
