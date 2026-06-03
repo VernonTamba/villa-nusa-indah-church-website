@@ -32,8 +32,8 @@ import { Accordion, AccordionItem } from "@heroui/react";
 import {
   AnimatePresence,
   motion,
+  useMotionValue,
   useReducedMotion,
-  useScroll,
   useSpring,
   useTransform,
   type MotionValue,
@@ -110,7 +110,7 @@ const ScrollStackCard = ({
 
   return (
     <motion.figure
-      className="absolute inset-0 mx-auto h-full w-full max-w-4xl origin-top transform-gpu will-change-transform"
+      className="absolute inset-0 w-full origin-top transform-gpu will-change-transform"
       style={{ scale, y, opacity, rotate, zIndex: index + 1 }}
     >
       <div className="relative flex h-full overflow-hidden rounded-[32px] border border-white/20 bg-slate-950 shadow-[0_28px_80px_rgba(2,6,23,0.28)]">
@@ -195,34 +195,32 @@ const MobileCardCarousel = ({ moments, reduceMotion }: MobileCardCarouselProps) 
 
   return (
     <div className="mt-6 select-none">
-      {/* Card area */}
-      <div className="relative h-[65vh] overflow-hidden rounded-[28px]">
-        <AnimatePresence custom={direction} mode="wait" initial={false}>
-          <motion.figure
-            key={activeIndex}
-            custom={direction}
-            variants={reduceMotion ? undefined : cardVariants}
-            initial={reduceMotion ? { opacity: 0 } : "enter"}
-            animate={reduceMotion ? { opacity: 1 } : "center"}
-            exit={reduceMotion ? { opacity: 0 } : "exit"}
-            // Swipe gesture
-            drag={!reduceMotion ? "x" : undefined}
-            dragConstraints={{ left: 0, right: 0 }}
-            dragElastic={0.18}
-            onDragEnd={(_, info) => {
-              const THRESHOLD = 48;
-              if (info.offset.x < -THRESHOLD && activeIndex < total - 1) {
-                goTo(activeIndex + 1);
-              } else if (info.offset.x > THRESHOLD && activeIndex > 0) {
-                goTo(activeIndex - 1);
-              }
-            }}
-            className="absolute inset-0 cursor-grab active:cursor-grabbing"
-            style={{ touchAction: "pan-y" }}
-          >
-            <div className="relative flex h-full overflow-hidden rounded-[28px] border border-white/20 bg-slate-950 shadow-[0_28px_80px_rgba(2,6,23,0.28)]">
-              {/* Image — pointer-events-none prevents the browser's default image-drag from
-                  interfering with the Framer Motion drag gesture */}
+      {/* Card area — pure image, no text overlay */}
+      <div className="relative w-full" style={{ aspectRatio: "16/9" }}>
+        <div className="absolute inset-0 overflow-hidden rounded-[20px] shadow-[0_20px_60px_rgba(2,6,23,0.32)]">
+          <AnimatePresence custom={direction} mode="wait" initial={false}>
+            <motion.figure
+              key={activeIndex}
+              custom={direction}
+              variants={reduceMotion ? undefined : cardVariants}
+              initial={reduceMotion ? { opacity: 0 } : "enter"}
+              animate={reduceMotion ? { opacity: 1 } : "center"}
+              exit={reduceMotion ? { opacity: 0 } : "exit"}
+              drag={!reduceMotion ? "x" : undefined}
+              dragConstraints={{ left: 0, right: 0 }}
+              dragElastic={0.18}
+              onDragEnd={(_, info) => {
+                const THRESHOLD = 48;
+                if (info.offset.x < -THRESHOLD && activeIndex < total - 1) {
+                  goTo(activeIndex + 1);
+                } else if (info.offset.x > THRESHOLD && activeIndex > 0) {
+                  goTo(activeIndex - 1);
+                }
+              }}
+              className="absolute inset-0 cursor-grab active:cursor-grabbing"
+              style={{ touchAction: "pan-y" }}
+            >
+              {/* Clean image — no caption overlay */}
               <img
                 src={current.image}
                 alt={current.title}
@@ -230,74 +228,91 @@ const MobileCardCarousel = ({ moments, reduceMotion }: MobileCardCarouselProps) 
                 draggable={false}
                 className="h-full w-full object-cover pointer-events-none"
               />
+            </motion.figure>
+          </AnimatePresence>
 
-              {/* Overlays */}
-              <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(2,6,23,0.08),rgba(2,6,23,0.76))]" />
-              <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.22),transparent_28%),radial-gradient(circle_at_bottom_right,rgba(248,167,36,0.22),transparent_32%)]" />
+          {/* Subtle vignette so arrows stay readable */}
+          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_60%,rgba(2,6,23,0.35))]" />
 
-              {/* Caption */}
-              <figcaption className="absolute inset-x-0 bottom-0 space-y-3 p-5">
-                <div className="flex items-center justify-between gap-3">
-                  <span className="inline-flex rounded-full border border-white/20 bg-white/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.24em] text-white backdrop-blur-sm">
-                    {current.label}
-                  </span>
-                  <span className="text-xs font-semibold tracking-[0.35em] text-white/70">
-                    {String(activeIndex + 1).padStart(2, "0")} / {String(total).padStart(2, "0")}
-                  </span>
-                </div>
-                <div className="space-y-2">
-                  <h3 className="text-xl font-bold leading-tight text-white">
-                    {current.title}
-                  </h3>
-                  <p className="text-sm leading-6 text-white/80">
-                    {current.description}
-                  </p>
-                </div>
-              </figcaption>
+          {/* Prev arrow */}
+          <button
+            onClick={() => goTo(activeIndex - 1)}
+            disabled={activeIndex === 0}
+            aria-label="Previous moment"
+            className="absolute left-2 top-1/2 z-10 -translate-y-1/2 flex h-8 w-8 items-center justify-center rounded-full bg-black/30 text-white backdrop-blur-sm transition-all duration-200 hover:bg-black/50 disabled:opacity-0 disabled:pointer-events-none"
+          >
+            <IconChevronLeft size={16} stroke={2.5} />
+          </button>
 
-              {/* Prev button */}
-              <button
-                onClick={() => goTo(activeIndex - 1)}
-                disabled={activeIndex === 0}
-                aria-label="Previous moment"
-                className="absolute left-3 top-1/2 z-10 -translate-y-1/2 flex h-10 w-10 items-center justify-center rounded-full bg-black/35 text-white backdrop-blur-sm transition-all duration-200 hover:bg-black/55 disabled:opacity-0 disabled:pointer-events-none"
-              >
-                <IconChevronLeft size={20} stroke={2.2} />
-              </button>
-
-              {/* Next button */}
-              <button
-                onClick={() => goTo(activeIndex + 1)}
-                disabled={activeIndex === total - 1}
-                aria-label="Next moment"
-                className="absolute right-3 top-1/2 z-10 -translate-y-1/2 flex h-10 w-10 items-center justify-center rounded-full bg-black/35 text-white backdrop-blur-sm transition-all duration-200 hover:bg-black/55 disabled:opacity-0 disabled:pointer-events-none"
-              >
-                <IconChevronRight size={20} stroke={2.2} />
-              </button>
-            </div>
-          </motion.figure>
-        </AnimatePresence>
+          {/* Next arrow */}
+          <button
+            onClick={() => goTo(activeIndex + 1)}
+            disabled={activeIndex === total - 1}
+            aria-label="Next moment"
+            className="absolute right-2 top-1/2 z-10 -translate-y-1/2 flex h-8 w-8 items-center justify-center rounded-full bg-black/30 text-white backdrop-blur-sm transition-all duration-200 hover:bg-black/50 disabled:opacity-0 disabled:pointer-events-none"
+          >
+            <IconChevronRight size={16} stroke={2.5} />
+          </button>
+        </div>
       </div>
 
-      {/* Dot indicators + swipe hint */}
-      <div className="mt-4 flex flex-col items-center gap-2">
-        <div className="flex items-center gap-2" role="tablist" aria-label="Moment indicators">
-          {moments.map((_, i) => (
-            <button
-              key={i}
-              role="tab"
-              aria-selected={i === activeIndex}
-              aria-label={`Go to moment ${i + 1}`}
-              onClick={() => goTo(i)}
-              className={`h-1.5 rounded-full transition-all duration-300 ${
-                i === activeIndex
-                  ? "w-8 bg-secondary"
-                  : "w-3 bg-foreground/20 dark:bg-white/25 hover:bg-foreground/40 dark:hover:bg-white/50"
-              }`}
-            />
-          ))}
+      {/* ── Text content below the image ─────────────────────────────────── */}
+      <div className="mt-4 px-1">
+        {/* Label row + counter */}
+        <div className="flex items-center justify-between gap-3">
+          <AnimatePresence mode="wait">
+            <motion.span
+              key={`label-${activeIndex}`}
+              initial={{ opacity: 0, y: 6 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -6 }}
+              transition={{ duration: 0.22 }}
+              className="inline-flex rounded-full border border-secondary/40 bg-secondary/10 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.22em] text-secondary"
+            >
+              {current.label}
+            </motion.span>
+          </AnimatePresence>
+
+          {/* Dot indicators */}
+          <div className="flex items-center gap-1.5" role="tablist" aria-label="Moment indicators">
+            {moments.map((_, i) => (
+              <button
+                key={i}
+                role="tab"
+                aria-selected={i === activeIndex}
+                aria-label={`Go to moment ${i + 1}`}
+                onClick={() => goTo(i)}
+                className={`h-1 rounded-full transition-all duration-300 ${
+                  i === activeIndex
+                    ? "w-6 bg-secondary"
+                    : "w-2 bg-foreground/20 dark:bg-white/30 hover:bg-foreground/40"
+                }`}
+              />
+            ))}
+          </div>
         </div>
-        <p className="text-[11px] text-foreground/40 dark:text-white/30 tracking-wide">
+
+        {/* Title + description — animate on slide change */}
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={`text-${activeIndex}`}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
+            className="mt-2 space-y-1"
+          >
+            <h3 className="text-lg font-bold leading-snug text-primary dark:text-white">
+              {current.title}
+            </h3>
+            <p className="text-sm leading-relaxed text-foreground/70 dark:text-white/65 line-clamp-3">
+              {current.description}
+            </p>
+          </motion.div>
+        </AnimatePresence>
+
+        {/* Swipe hint */}
+        <p className="mt-3 text-center text-[10px] tracking-wide text-foreground/35 dark:text-white/30">
           swipe or tap arrows to navigate
         </p>
       </div>
@@ -335,15 +350,30 @@ const Rundown = () => {
 
   const scrollStackRef = useRef<HTMLDivElement | null>(null);
   const shouldReduceMotion = useReducedMotion() ?? false;
-  const { scrollYProgress } = useScroll({
-    target: scrollStackRef,
-    offset: ["start start", "end end"],
+
+  // Manual scroll tracking — more reliable than useScroll({target}) when the
+  // scroll stack lives outside a constrained parent container.
+  const rawProgress = useMotionValue(0);
+  const smoothScrollProgress = useSpring(rawProgress, {
+    stiffness: 60,
+    damping: 22,
+    mass: 0.9,
   });
-  const smoothScrollProgress = useSpring(scrollYProgress, {
-    stiffness: 280,
-    damping: 32,
-    mass: 0.15,
-  });
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const el = scrollStackRef.current;
+      if (!el) return;
+      const rect = el.getBoundingClientRect();
+      const total = el.offsetHeight - window.innerHeight;
+      // scrolled = how far the element's top has moved above the viewport top
+      const scrolled = -rect.top;
+      rawProgress.set(total > 0 ? Math.max(0, Math.min(1, scrolled / total)) : 0);
+    };
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    handleScroll(); // seed initial value
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [rawProgress]);
 
   // DB participant name lookup: service_key -> role_key -> participant_name
   const [dbParticipants, setDbParticipants] = useState<Record<string, Record<string, string>>>({});
@@ -558,6 +588,7 @@ const Rundown = () => {
       </div>
 
       <div className="mt-28">
+        {/* Heading stays within the narrow centred column */}
         <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-0">
           <motion.div
             className="space-y-3 text-center w-full"
@@ -573,21 +604,26 @@ const Rundown = () => {
               {t.rundown.momentsTitle}
             </h2>
           </motion.div>
+        </div>
 
-          {/* Mobile: swipeable carousel */}
-          {isMobile ? (
+        {/* Mobile: swipeable carousel */}
+        {isMobile ? (
+          <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-0">
             <MobileCardCarousel
               moments={scrollMoments}
               reduceMotion={shouldReduceMotion}
             />
-          ) : (
-            /* Desktop: scroll-driven stack */
-            <div
-              ref={scrollStackRef}
-              className="relative mt-10 h-[260vh] sm:h-[300vh] lg:h-[340vh]"
-            >
-              <div className="sticky top-16 flex h-[76vh] items-center justify-center">
-                <div className="relative h-full w-full px-2 sm:px-4">
+          </div>
+        ) : (
+          /* Desktop: scroll-driven stack — intentionally full-width */
+          <div
+            ref={scrollStackRef}
+            className="relative mt-10 h-[320vh] sm:h-[380vh] lg:h-[440vh]"
+          >
+            <div className="sticky top-0 flex h-screen items-center justify-center">
+              {/* Fills nearly the full viewport width; height driven by 16/9 ratio */}
+              <div className="relative w-full max-w-[95vw] xl:max-w-7xl px-2 sm:px-4">
+                <div className="relative w-full" style={{ aspectRatio: "16/9" }}>
                   {scrollMoments.map((item, index) => (
                     <ScrollStackCard
                       key={item.label}
@@ -601,8 +637,8 @@ const Rundown = () => {
                 </div>
               </div>
             </div>
-          )}
-        </div>
+          </div>
+        )}
       </div>
     </div>
   );
