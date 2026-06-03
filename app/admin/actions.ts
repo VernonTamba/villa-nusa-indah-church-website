@@ -76,7 +76,7 @@ export async function addMember(formData: FormData) {
     const path = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
     const { error: uploadError } = await supabase.storage
       .from("member-photos")
-      .upload(path, imageFile, { contentType: imageFile.type });
+      .upload(path, imageFile, { contentType: imageFile.type, upsert: true });
 
     if (uploadError) throw new Error(uploadError.message);
 
@@ -109,7 +109,7 @@ export async function updateMemberImage(id: string, imageFile: File) {
 
   const { error: uploadError } = await supabase.storage
     .from("member-photos")
-    .upload(path, imageFile, { contentType: imageFile.type });
+    .upload(path, imageFile, { contentType: imageFile.type, upsert: true });
 
   if (uploadError) throw new Error(uploadError.message);
 
@@ -145,7 +145,7 @@ export async function addHeroImage(formData: FormData) {
 
   const { error: uploadError } = await supabase.storage
     .from("hero-images")
-    .upload(path, file, { contentType: file.type });
+    .upload(path, file, { contentType: file.type, upsert: true });
 
   if (uploadError) throw new Error(uploadError.message);
 
@@ -206,7 +206,7 @@ export async function addSabbathMoment(formData: FormData) {
 
   const { error: uploadError } = await supabase.storage
     .from("sabbath-moments")
-    .upload(path, file, { contentType: file.type });
+    .upload(path, file, { contentType: file.type, upsert: true });
 
   if (uploadError) throw new Error(uploadError.message);
 
