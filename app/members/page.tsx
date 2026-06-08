@@ -9,12 +9,23 @@ export const metadata: Metadata = {
 };
 
 export default async function MembersPage() {
-  const supabase = await createClient();
+  let members: { id: string; name: string; position: string; image_url: string | null }[] = [];
 
-  const { data: members } = await supabase
-    .from("members")
-    .select("id, name, position, image_url")
-    .order("display_order", { ascending: true });
+  try {
+    const supabase = await createClient();
+    const { data, error } = await supabase
+      .from("members")
+      .select("id, name, position, image_url")
+      .order("display_order", { ascending: true });
 
-  return <MembersDirectory dbMembers={members ?? []} />;
+    if (error) {
+      console.error("[MembersPage] Supabase error:", error.message);
+    } else {
+      members = data ?? [];
+    }
+  } catch (err) {
+    console.error("[MembersPage] Unexpected error:", err);
+  }
+
+  return <MembersDirectory dbMembers={members} />;
 }

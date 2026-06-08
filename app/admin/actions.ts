@@ -84,7 +84,15 @@ export async function addMember(formData: FormData) {
     image_url = urlData.publicUrl;
   }
 
-  const { error } = await supabase.from("members").insert({ name, position, image_url });
+  // Calculate the next display_order (append to end of list)
+  const { data: existing } = await supabase
+    .from("members")
+    .select("display_order")
+    .order("display_order", { ascending: false })
+    .limit(1);
+  const nextOrder = (existing?.[0]?.display_order ?? -1) + 1;
+
+  const { error } = await supabase.from("members").insert({ name, position, image_url, display_order: nextOrder });
   if (error) throw new Error(error.message);
 
   revalidatePath("/members");

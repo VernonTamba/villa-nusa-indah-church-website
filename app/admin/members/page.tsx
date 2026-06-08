@@ -15,11 +15,23 @@ export type MemberRow = {
 };
 
 export default async function AdminMembersPage() {
-  const supabase = await createClient();
-  const { data: members } = await supabase
-    .from("members")
-    .select("*")
-    .order("display_order", { ascending: true });
+  let members: MemberRow[] = [];
 
-  return <MembersManager initialMembers={members ?? []} />;
+  try {
+    const supabase = await createClient();
+    const { data, error } = await supabase
+      .from("members")
+      .select("*")
+      .order("display_order", { ascending: true });
+
+    if (error) {
+      console.error("[AdminMembersPage] Supabase error:", error.message);
+    } else {
+      members = data ?? [];
+    }
+  } catch (err) {
+    console.error("[AdminMembersPage] Unexpected error:", err);
+  }
+
+  return <MembersManager initialMembers={members} />;
 }
