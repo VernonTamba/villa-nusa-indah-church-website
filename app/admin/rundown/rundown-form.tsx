@@ -15,6 +15,7 @@ import {
   IconPackage,
   IconScanPosition,
   IconSparkles,
+  IconTag,
   IconUser,
   IconUsersGroup,
 } from "@tabler/icons-react";
@@ -42,16 +43,22 @@ function toKey(s: string) {
 type Props = {
   rundownItems: typeof RUNDOWN_ITEMS;
   dbLookup: Record<string, Record<string, string>>;
+  labelLookup: Record<string, Record<string, string>>;
+};
+
+type RoleState = {
+  participantName: string;
+  roleLabel: string;
 };
 
 type ServiceState = {
   [serviceKey: string]: {
-    [roleKey: string]: string;
+    [roleKey: string]: RoleState;
   };
 };
 
-export default function RundownForm({ rundownItems, dbLookup }: Props) {
-  // Initialize local state from DB (fall back to constants participant name)
+export default function RundownForm({ rundownItems, dbLookup, labelLookup }: Props) {
+  // Initialize local state from DB (fall back to constants participant name / role label)
   const [state, setState] = useState<ServiceState>(() => {
     const init: ServiceState = {};
     for (const item of rundownItems) {
@@ -59,7 +66,10 @@ export default function RundownForm({ rundownItems, dbLookup }: Props) {
       init[sk] = {};
       for (const p of item.participants) {
         const rk = toKey(p.rundown);
-        init[sk][rk] = dbLookup[sk]?.[rk] ?? p.participant;
+        init[sk][rk] = {
+          participantName: dbLookup[sk]?.[rk] ?? p.participant,
+          roleLabel: labelLookup[sk]?.[rk] ?? p.rundown,
+        };
       }
     }
     return init;
@@ -83,22 +93,41 @@ export default function RundownForm({ rundownItems, dbLookup }: Props) {
     setOpenSections((prev) => ({ ...prev, [key]: !prev[key] }));
   };
 
-  const handleChange = (serviceKey: string, roleKey: string, value: string) => {
+  const handleParticipantChange = (serviceKey: string, roleKey: string, value: string) => {
     setState((prev) => ({
       ...prev,
-      [serviceKey]: { ...prev[serviceKey], [roleKey]: value },
+      [serviceKey]: {
+        ...prev[serviceKey],
+        [roleKey]: { ...prev[serviceKey][roleKey], participantName: value },
+      },
     }));
     setSavedSections((prev) => ({ ...prev, [serviceKey]: false }));
     setGlobalSaved(false);
   };
 
-  const handleSaveSection = (serviceKey: string) => {
-    const section = state[serviceKey];
-    const payload = Object.entries(section).map(([roleKey, participantName]) => ({
+  const handleRoleLabelChange = (serviceKey: string, roleKey: string, value: string) => {
+    setState((prev) => ({
+      ...prev,
+      [serviceKey]: {
+        ...prev[serviceKey],
+        [roleKey]: { ...prev[serviceKey][roleKey], roleLabel: value },
+      },
+    }));
+    setSavedSections((prev) => ({ ...prev, [serviceKey]: false }));
+    setGlobalSaved(false);
+  };
+
+  const buildPayload = (serviceKey: string) => {
+    return Object.entries(state[serviceKey]).map(([roleKey, role]) => ({
       service_key: serviceKey,
       role_key: roleKey,
-      participant_name: participantName,
+      participant_name: role.participantName,
+      role_label: role.roleLabel,
     }));
+  };
+
+  const handleSaveSection = (serviceKey: string) => {
+    const payload = buildPayload(serviceKey);
 
     startTransition(async () => {
       try {
@@ -112,13 +141,7 @@ export default function RundownForm({ rundownItems, dbLookup }: Props) {
   };
 
   const handleSaveAll = () => {
-    const payload = Object.entries(state).flatMap(([serviceKey, roles]) =>
-      Object.entries(roles).map(([roleKey, participantName]) => ({
-        service_key: serviceKey,
-        role_key: roleKey,
-        participant_name: participantName,
-      })),
-    );
+    const payload = Object.keys(state).flatMap((serviceKey) => buildPayload(serviceKey));
 
     startTransition(async () => {
       try {
@@ -147,7 +170,7 @@ export default function RundownForm({ rundownItems, dbLookup }: Props) {
             Peserta Ibadah
           </h1>
           <p className="mt-1 text-sm text-white/50">
-            Edit nama peserta untuk setiap bagian ibadah. Perubahan akan langsung tampil di website.
+            Edit nama peran dan peserta untuk setiap bagian ibadah. Perubahan akan langsung tampil di website.
           </p>
         </div>
         <button
@@ -218,29 +241,59 @@ export default function RundownForm({ rundownItems, dbLookup }: Props) {
               {/* Section body */}
               {isOpen && (
                 <div className="border-t border-white/8 px-5 py-4">
+                  {/* Column headers */}
+                  <div className="mb-2 hidden sm:grid sm:grid-cols-2 sm:gap-3 sm:pl-11">
+                    <span className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-widest text-white/30">
+                      <IconTag size={10} /> Nama Peran
+                    </span>
+                    <span className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-widest text-white/30">
+                      <IconUser size={10} /> Peserta
+                    </span>
+                  </div>
                   <div className="space-y-3">
                     {item.participants.map((p) => {
                       const rk = toKey(p.rundown);
+                      const roleState = state[sk]?.[rk];
                       return (
-                        <div key={rk} className="flex items-center gap-3">
-                          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white/6 text-white/30">
+                        <div key={rk} className="flex items-start gap-3">
+                          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white/6 text-white/30 mt-1.5">
                             <IconUser size={14} stroke={1.8} />
                           </div>
-                          <div className="flex flex-1 flex-col gap-1 sm:flex-row sm:items-center sm:gap-3">
-                            <label
-                              htmlFor={`participant-${sk}-${rk}`}
-                              className="w-full text-xs font-medium text-white/50 sm:w-44 sm:shrink-0"
-                            >
-                              {p.rundown}
-                            </label>
-                            <input
-                              id={`participant-${sk}-${rk}`}
-                              type="text"
-                              value={state[sk]?.[rk] ?? ""}
-                              onChange={(e) => handleChange(sk, rk, e.target.value)}
-                              placeholder={p.participant}
-                              className="flex-1 rounded-xl border border-white/10 bg-white/6 px-3 py-2 text-sm text-white placeholder-white/25 outline-none transition-all focus:border-emerald-500/50 focus:bg-white/10 focus:ring-2 focus:ring-emerald-500/15"
-                            />
+                          <div className="flex flex-1 flex-col gap-2 sm:grid sm:grid-cols-2 sm:gap-3">
+                            {/* Role label input */}
+                            <div className="flex flex-col gap-1">
+                              <label
+                                htmlFor={`role-label-${sk}-${rk}`}
+                                className="text-[10px] font-semibold uppercase tracking-widest text-white/30 sm:hidden"
+                              >
+                                Nama Peran
+                              </label>
+                              <input
+                                id={`role-label-${sk}-${rk}`}
+                                type="text"
+                                value={roleState?.roleLabel ?? ""}
+                                onChange={(e) => handleRoleLabelChange(sk, rk, e.target.value)}
+                                placeholder={p.rundown}
+                                className="w-full rounded-xl border border-white/10 bg-white/6 px-3 py-2 text-sm text-white placeholder-white/25 outline-none transition-all focus:border-amber-500/50 focus:bg-white/10 focus:ring-2 focus:ring-amber-500/15"
+                              />
+                            </div>
+                            {/* Participant name input */}
+                            <div className="flex flex-col gap-1">
+                              <label
+                                htmlFor={`participant-${sk}-${rk}`}
+                                className="text-[10px] font-semibold uppercase tracking-widest text-white/30 sm:hidden"
+                              >
+                                Peserta
+                              </label>
+                              <input
+                                id={`participant-${sk}-${rk}`}
+                                type="text"
+                                value={roleState?.participantName ?? ""}
+                                onChange={(e) => handleParticipantChange(sk, rk, e.target.value)}
+                                placeholder={p.participant}
+                                className="w-full rounded-xl border border-white/10 bg-white/6 px-3 py-2 text-sm text-white placeholder-white/25 outline-none transition-all focus:border-emerald-500/50 focus:bg-white/10 focus:ring-2 focus:ring-emerald-500/15"
+                              />
+                            </div>
                           </div>
                         </div>
                       );

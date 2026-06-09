@@ -36,7 +36,7 @@ export async function upsertRundownParticipant(
 }
 
 export async function upsertAllRundownParticipants(
-  participants: { service_key: string; role_key: string; participant_name: string }[],
+  participants: { service_key: string; role_key: string; participant_name: string; role_label?: string }[],
 ) {
   const supabase = await createClient();
 
@@ -142,6 +142,22 @@ export async function deleteMember(id: string) {
   const supabase = await createClient();
   const { error } = await supabase.from("members").delete().eq("id", id);
   if (error) throw new Error(error.message);
+  revalidatePath("/members");
+  revalidatePath("/admin/members");
+}
+
+export async function updateMembersOrder(
+  updates: { id: string; display_order: number }[],
+) {
+  const supabase = await createClient();
+  // Run all updates in parallel
+  const results = await Promise.all(
+    updates.map(({ id, display_order }) =>
+      supabase.from("members").update({ display_order }).eq("id", id),
+    ),
+  );
+  const firstError = results.find((r) => r.error)?.error;
+  if (firstError) throw new Error(firstError.message);
   revalidatePath("/members");
   revalidatePath("/admin/members");
 }

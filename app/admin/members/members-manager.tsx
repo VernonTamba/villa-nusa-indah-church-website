@@ -3,8 +3,10 @@
 import { useRef, useState, useTransition } from "react";
 import Image from "next/image";
 import {
+  IconArrowsSort,
   IconCheck,
   IconDeviceFloppy,
+  IconGripVertical,
   IconLoader2,
   IconPencil,
   IconPhoto,
@@ -15,7 +17,7 @@ import {
   IconUsersGroup,
   IconX,
 } from "@tabler/icons-react";
-import { addMember, deleteMember, updateMember, updateMemberImage } from "../actions";
+import { addMember, deleteMember, updateMember, updateMemberImage, updateMembersOrder } from "../actions";
 import type { MemberRow } from "./page";
 
 // Position options matching the existing i18n keys
@@ -327,6 +329,13 @@ export default function MembersManager({ initialMembers }: { initialMembers: Mem
   const [deleteError, setDeleteError] = useState<string | null>(null);
   const [savedId, setSavedId] = useState<string | null>(null);
 
+  // ── Reorder mode state ────────────────────────────────────────────────────
+  const [isReordering, setIsReordering] = useState(false);
+  const [reorderSaved, setReorderSaved] = useState(false);
+  const [reorderError, setReorderError] = useState<string | null>(null);
+  const dragItem = useRef<number | null>(null);
+  const dragOverItem = useRef<number | null>(null);
+
   const filtered = members.filter(
     (m) =>
       m.name.toLowerCase().includes(search.toLowerCase()) ||
@@ -360,6 +369,52 @@ export default function MembersManager({ initialMembers }: { initialMembers: Mem
     setTimeout(() => setSavedId(null), 2000);
   };
 
+  // ── Drag handlers ─────────────────────────────────────────────────────────
+  const handleDragStart = (index: number) => {
+    dragItem.current = index;
+  };
+
+  const handleDragEnter = (index: number) => {
+    dragOverItem.current = index;
+    if (dragItem.current === null || dragItem.current === index) return;
+    setMembers((prev) => {
+      const next = [...prev];
+      const dragged = next.splice(dragItem.current!, 1)[0];
+      next.splice(index, 0, dragged);
+      dragItem.current = index;
+      return next;
+    });
+  };
+
+  const handleDragEnd = () => {
+    dragItem.current = null;
+    dragOverItem.current = null;
+    setReorderSaved(false);
+  };
+
+  const handleSaveOrder = () => {
+    const updates = members.map((m, i) => ({ id: m.id, display_order: i }));
+    startTransition(async () => {
+      try {
+        setReorderError(null);
+        await updateMembersOrder(updates);
+        // Update local display_order to match saved values
+        setMembers((prev) => prev.map((m, i) => ({ ...m, display_order: i })));
+        setReorderSaved(true);
+        setTimeout(() => setReorderSaved(false), 2500);
+      } catch (e: unknown) {
+        setReorderError(e instanceof Error ? e.message : "Gagal menyimpan urutan");
+      }
+    });
+  };
+
+  const handleToggleReorder = () => {
+    setIsReordering((v) => !v);
+    setReorderSaved(false);
+    setReorderError(null);
+    setSearch("");
+  };
+
   return (
     <>
       {showAdd && (
@@ -386,51 +441,114 @@ export default function MembersManager({ initialMembers }: { initialMembers: Mem
               Tambah, edit, atau hapus anggota jemaat. Total: {members.length} anggota.
             </p>
           </div>
-          <button
-            id="add-member-btn"
-            onClick={() => setShowAdd(true)}
-            className="inline-flex shrink-0 items-center gap-2 rounded-xl bg-gradient-to-r from-emerald-700 to-emerald-600 px-5 py-2.5 text-sm font-bold text-white shadow-[0_4px_16px_rgba(1,75,63,0.35)] transition-all hover:-translate-y-0.5"
-          >
-            <IconPlus size={16} /> Tambah Anggota
-          </button>
+          <div className="flex shrink-0 items-center gap-2">
+            <button
+              id="reorder-members-btn"
+              onClick={handleToggleReorder}
+              className={`inline-flex items-center gap-2 rounded-xl border px-4 py-2.5 text-sm font-semibold transition-all hover:-translate-y-0.5 ${
+                isReordering
+                  ? "border-amber-500/40 bg-amber-500/15 text-amber-400 hover:bg-amber-500/25"
+                  : "border-white/12 bg-white/6 text-white/60 hover:bg-white/12 hover:text-white"
+              }`}
+            >
+              <IconArrowsSort size={16} />
+              {isReordering ? "Selesai Atur" : "Atur Urutan"}
+            </button>
+            {!isReordering && (
+              <button
+                id="add-member-btn"
+                onClick={() => setShowAdd(true)}
+                className="inline-flex shrink-0 items-center gap-2 rounded-xl bg-gradient-to-r from-emerald-700 to-emerald-600 px-5 py-2.5 text-sm font-bold text-white shadow-[0_4px_16px_rgba(1,75,63,0.35)] transition-all hover:-translate-y-0.5"
+              >
+                <IconPlus size={16} /> Tambah Anggota
+              </button>
+            )}
+            {isReordering && (
+              <button
+                id="save-order-btn"
+                onClick={handleSaveOrder}
+                disabled={isPending}
+                className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-emerald-700 to-emerald-600 px-5 py-2.5 text-sm font-bold text-white shadow-[0_4px_16px_rgba(1,75,63,0.35)] transition-all hover:-translate-y-0.5 disabled:opacity-60 disabled:translate-y-0"
+              >
+                {isPending ? (
+                  <IconLoader2 size={16} className="animate-spin" />
+                ) : reorderSaved ? (
+                  <IconCheck size={16} />
+                ) : (
+                  <IconDeviceFloppy size={16} />
+                )}
+                {reorderSaved ? "Tersimpan!" : "Simpan Urutan"}
+              </button>
+            )}
+          </div>
         </div>
 
         {deleteError && (
           <div className="rounded-xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-400">{deleteError}</div>
         )}
 
-        {/* Search */}
-        <div className="relative">
-          <span className="pointer-events-none absolute inset-y-0 left-4 flex items-center text-white/30">
-            <IconSearch size={16} stroke={1.8} />
-          </span>
-          <input
-            id="member-search"
-            type="search"
-            placeholder="Cari nama atau jabatan..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="w-full rounded-2xl border border-white/10 bg-white/5 py-3 pl-10 pr-4 text-sm text-white placeholder-white/25 outline-none focus:border-emerald-500/40 focus:ring-2 focus:ring-emerald-500/15"
-          />
-        </div>
+        {reorderError && (
+          <div className="rounded-xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-400">{reorderError}</div>
+        )}
+
+        {/* Reorder mode banner */}
+        {isReordering && (
+          <div className="flex items-center gap-3 rounded-xl border border-amber-500/20 bg-amber-500/8 px-4 py-3">
+            <IconGripVertical size={16} className="shrink-0 text-amber-400" />
+            <p className="text-sm text-amber-300/80">
+              Seret kartu untuk mengubah urutan tampil. Klik <strong>Simpan Urutan</strong> untuk menyimpan perubahan.
+            </p>
+          </div>
+        )}
+
+        {/* Search — hidden in reorder mode */}
+        {!isReordering && (
+          <div className="relative">
+            <span className="pointer-events-none absolute inset-y-0 left-4 flex items-center text-white/30">
+              <IconSearch size={16} stroke={1.8} />
+            </span>
+            <input
+              id="member-search"
+              type="search"
+              placeholder="Cari nama atau jabatan..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="w-full rounded-2xl border border-white/10 bg-white/5 py-3 pl-10 pr-4 text-sm text-white placeholder-white/25 outline-none focus:border-emerald-500/40 focus:ring-2 focus:ring-emerald-500/15"
+            />
+          </div>
+        )}
 
         {/* Members grid */}
-        {filtered.length === 0 ? (
+        {(isReordering ? members : filtered).length === 0 ? (
           <div className="flex min-h-48 flex-col items-center justify-center rounded-2xl border border-dashed border-white/10 text-white/30">
             <IconUsersGroup size={36} stroke={1.4} />
             <p className="mt-3 text-sm">Tidak ada anggota ditemukan</p>
           </div>
         ) : (
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {filtered.map((member) => (
+            {(isReordering ? members : filtered).map((member, index) => (
               <div
                 key={member.id}
+                draggable={isReordering}
+                onDragStart={isReordering ? () => handleDragStart(index) : undefined}
+                onDragEnter={isReordering ? () => handleDragEnter(index) : undefined}
+                onDragEnd={isReordering ? handleDragEnd : undefined}
+                onDragOver={isReordering ? (e) => e.preventDefault() : undefined}
                 className={`group relative flex items-center gap-3 overflow-hidden rounded-2xl border bg-white/4 p-4 transition-all duration-200 ${
-                  savedId === member.id
+                  isReordering
+                    ? "cursor-grab border-amber-500/20 bg-amber-500/4 hover:border-amber-500/40 active:cursor-grabbing active:scale-[0.98] active:opacity-70"
+                    : savedId === member.id
                     ? "border-emerald-500/40 bg-emerald-500/8"
                     : "border-white/8 hover:border-white/16"
                 }`}
               >
+                {/* Drag handle — only in reorder mode */}
+                {isReordering && (
+                  <div className="flex shrink-0 items-center text-amber-400/60">
+                    <IconGripVertical size={18} stroke={1.8} />
+                  </div>
+                )}
+
                 {/* Avatar */}
                 <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-xl bg-white/8">
                   {member.image_url ? (
@@ -463,30 +581,32 @@ export default function MembersManager({ initialMembers }: { initialMembers: Mem
                   </p>
                 </div>
 
-                {/* Actions */}
-                <div className="flex items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100">
-                  <button
-                    id={`edit-member-${member.id}`}
-                    onClick={() => setEditMember(member)}
-                    className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/8 text-white/50 hover:bg-white/16 hover:text-white transition-colors"
-                    aria-label={`Edit ${member.name}`}
-                  >
-                    <IconPencil size={14} stroke={1.8} />
-                  </button>
-                  <button
-                    id={`delete-member-${member.id}`}
-                    onClick={() => handleDelete(member.id)}
-                    disabled={isPending && deletingId === member.id}
-                    className="flex h-8 w-8 items-center justify-center rounded-lg bg-red-500/10 text-red-400/70 hover:bg-red-500/20 hover:text-red-400 disabled:opacity-50 transition-colors"
-                    aria-label={`Hapus ${member.name}`}
-                  >
-                    {isPending && deletingId === member.id ? (
-                      <IconLoader2 size={14} className="animate-spin" />
-                    ) : (
-                      <IconTrash size={14} stroke={1.8} />
-                    )}
-                  </button>
-                </div>
+                {/* Actions — only in normal mode */}
+                {!isReordering && (
+                  <div className="flex items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100">
+                    <button
+                      id={`edit-member-${member.id}`}
+                      onClick={() => setEditMember(member)}
+                      className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/8 text-white/50 hover:bg-white/16 hover:text-white transition-colors"
+                      aria-label={`Edit ${member.name}`}
+                    >
+                      <IconPencil size={14} stroke={1.8} />
+                    </button>
+                    <button
+                      id={`delete-member-${member.id}`}
+                      onClick={() => handleDelete(member.id)}
+                      disabled={isPending && deletingId === member.id}
+                      className="flex h-8 w-8 items-center justify-center rounded-lg bg-red-500/10 text-red-400/70 hover:bg-red-500/20 hover:text-red-400 disabled:opacity-50 transition-colors"
+                      aria-label={`Hapus ${member.name}`}
+                    >
+                      {isPending && deletingId === member.id ? (
+                        <IconLoader2 size={14} className="animate-spin" />
+                      ) : (
+                        <IconTrash size={14} stroke={1.8} />
+                      )}
+                    </button>
+                  </div>
+                )}
               </div>
             ))}
           </div>
