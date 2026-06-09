@@ -74,14 +74,14 @@ function AddMemberModal({ onClose, onAdded }: { onClose: () => void; onAdded: (m
 
     startTransition(async () => {
       try {
-        await addMember(fd);
-        // Optimistic: create a temp member row for UI
+        const real = await addMember(fd);
+        // Use the real DB row so edits immediately after adding work correctly
         onAdded({
-          id: `temp-${Date.now()}`,
-          name: name.trim(),
-          position,
-          image_url: imagePreview,
-          display_order: 9999,
+          id: real.id,
+          name: real.name,
+          position: real.position,
+          image_url: real.image_url ?? imagePreview,
+          display_order: real.display_order,
         });
         onClose();
       } catch (e: unknown) {

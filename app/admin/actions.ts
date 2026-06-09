@@ -92,11 +92,17 @@ export async function addMember(formData: FormData) {
     .limit(1);
   const nextOrder = (existing?.[0]?.display_order ?? -1) + 1;
 
-  const { error } = await supabase.from("members").insert({ name, position, image_url, display_order: nextOrder });
+  const { data: inserted, error } = await supabase
+    .from("members")
+    .insert({ name, position, image_url, display_order: nextOrder })
+    .select()
+    .single();
   if (error) throw new Error(error.message);
 
   revalidatePath("/members");
   revalidatePath("/admin/members");
+
+  return inserted as { id: string; name: string; position: string; image_url: string | null; display_order: number };
 }
 
 export async function updateMember(
