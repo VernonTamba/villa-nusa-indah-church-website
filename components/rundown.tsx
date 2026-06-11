@@ -32,8 +32,8 @@ import { Accordion, AccordionItem } from "@heroui/react";
 import {
   AnimatePresence,
   motion,
-  useMotionValue,
   useReducedMotion,
+  useScroll,
   useSpring,
   useTransform,
   type MotionValue,
@@ -71,41 +71,41 @@ const ScrollStackCard = ({
 }: ScrollStackCardProps) => {
   const segment = 1 / total;
   const start = index * segment;
-  const settle = start + segment * 0.26;
-  const hold = start + segment * 0.72;
+  const settle = start + segment * 0.30;
+  const hold = start + segment * 0.76;
   const end = start + segment;
-  const enter = start - segment * 0.55;
-  const exit = end + segment * 0.45;
+  const enter = start - segment * 0.65;
+  const exit = end + segment * 0.55;
   const direction = index % 2 === 0 ? 1 : -1;
   const scale = useTransform(
     progress,
     [enter, start, hold, end, exit],
-    reduceMotion ? [1.04, 1, 1, 0.96, 0.92] : [1.16, 1, 1, 0.88, 0.8],
+    reduceMotion ? [1.03, 1, 1, 0.97, 0.94] : [1.10, 1, 1, 0.92, 0.86],
   );
   const y = useTransform(
     progress,
     [enter, start, settle, end, exit],
-    reduceMotion ? [24, 0, 0, -8, -18] : [120, 0, 0, -18, -58],
+    reduceMotion ? [20, 0, 0, -6, -14] : [72, 0, 0, -14, -42],
   );
   const opacity = useTransform(
     progress,
     [enter, start, hold, exit],
-    reduceMotion ? [0, 1, 1, 0.72] : [0, 1, 1, 0.4],
+    reduceMotion ? [0, 1, 1, 0.78] : [0, 1, 1, 0.45],
   );
   const rotate = useTransform(
     progress,
     [enter, start, exit],
-    reduceMotion ? [0, 0, 0] : [3 * direction, 0, -2 * direction],
+    reduceMotion ? [0, 0, 0] : [1.5 * direction, 0, -1 * direction],
   );
   const imageScale = useTransform(
     progress,
     [start, hold, exit],
-    reduceMotion ? [1.02, 1.01, 1] : [1.08, 1.04, 1],
+    reduceMotion ? [1.02, 1.01, 1] : [1.05, 1.02, 1],
   );
   const contentOpacity = useTransform(
     progress,
     [enter, start, end],
-    reduceMotion ? [0.85, 1, 0.95] : [0.5, 1, 0.84],
+    reduceMotion ? [0.85, 1, 0.95] : [0.55, 1, 0.88],
   );
 
   return (
@@ -351,29 +351,18 @@ const Rundown = () => {
   const scrollStackRef = useRef<HTMLDivElement | null>(null);
   const shouldReduceMotion = useReducedMotion() ?? false;
 
-  // Manual scroll tracking — more reliable than useScroll({target}) when the
-  // scroll stack lives outside a constrained parent container.
-  const rawProgress = useMotionValue(0);
-  const smoothScrollProgress = useSpring(rawProgress, {
-    stiffness: 60,
-    damping: 22,
-    mass: 0.9,
+  // useScroll tracks scroll progress against the sticky section — RAF-synced,
+  // no layout thrashing. offset: ["start start", "end end"] means 0 when the
+  // element top hits the viewport top, 1 when the element bottom hits the bottom.
+  const { scrollYProgress } = useScroll({
+    target: scrollStackRef,
+    offset: ["start start", "end end"],
   });
-
-  useEffect(() => {
-    const handleScroll = () => {
-      const el = scrollStackRef.current;
-      if (!el) return;
-      const rect = el.getBoundingClientRect();
-      const total = el.offsetHeight - window.innerHeight;
-      // scrolled = how far the element's top has moved above the viewport top
-      const scrolled = -rect.top;
-      rawProgress.set(total > 0 ? Math.max(0, Math.min(1, scrolled / total)) : 0);
-    };
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    handleScroll(); // seed initial value
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, [rawProgress]);
+  const smoothScrollProgress = useSpring(scrollYProgress, {
+    stiffness: 120,
+    damping: 26,
+    mass: 0.5,
+  });
 
   // DB participant name lookup: service_key -> role_key -> participant_name
   const [dbParticipants, setDbParticipants] = useState<Record<string, Record<string, string>>>({});

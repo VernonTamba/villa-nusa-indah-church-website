@@ -177,7 +177,7 @@ export default function AdminShell({ children, user }: AdminShellProps) {
           </div>
         </header>
 
-        <main className="flex-1 overflow-y-auto p-6 lg:p-8">{children}</main>
+        <main data-scroll-lock-target className="flex-1 overflow-y-auto p-6 lg:p-8">{children}</main>
       </div>
     </div>
   );

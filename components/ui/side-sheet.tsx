@@ -35,9 +35,31 @@ const SideSheet = ({
   }, [open, onClose]);
 
   useEffect(() => {
-    document.body.style.overflow = open ? "hidden" : "";
+    if (open) {
+      // Lock body (mobile / public pages)
+      document.body.style.overflow = "hidden";
+      // Also lock the html element to cover cases where html is the scroller
+      document.documentElement.style.overflow = "hidden";
+      // Lock any overflow-y-auto ancestor (e.g. <main> in admin shell)
+      const scrollParent = panelRef.current?.closest<HTMLElement>(
+        "[data-scroll-lock-target]",
+      );
+      if (scrollParent) scrollParent.style.overflowY = "hidden";
+    } else {
+      document.body.style.overflow = "";
+      document.documentElement.style.overflow = "";
+      const scrollParent = panelRef.current?.closest<HTMLElement>(
+        "[data-scroll-lock-target]",
+      );
+      if (scrollParent) scrollParent.style.overflowY = "";
+    }
     return () => {
       document.body.style.overflow = "";
+      document.documentElement.style.overflow = "";
+      const scrollParent = panelRef.current?.closest<HTMLElement>(
+        "[data-scroll-lock-target]",
+      );
+      if (scrollParent) scrollParent.style.overflowY = "";
     };
   }, [open]);
 
