@@ -18,7 +18,7 @@ import NextLink from "next/link";
 import clsx from "clsx";
 
 import { siteConfig } from "@/config/site";
-import { ThemeSwitch } from "@/components/theme-switch";
+// ThemeSwitch import removed — dark mode is forced, toggle hidden for now
 import { HeartFilledIcon } from "@/components/icons";
 import { LanguageToggle } from "@/components/language-toggle";
 import { useLanguage } from "@/lib/i18n";
@@ -40,7 +40,9 @@ export const Navbar = () => {
   const navItems = [
     { label: t.nav.home, href: "/" },
     { label: t.nav.members, href: "/members" },
+    { label: t.gallery.nav, href: "/gallery" },
   ];
+
 
   // Close the mobile menu whenever the route changes.
   useEffect(() => {
@@ -145,9 +147,7 @@ export const Navbar = () => {
         className="hidden sm:flex basis-1/5 sm:basis-full"
         justify="end"
       >
-        <NavbarItem className="hidden sm:flex gap-2">
-          <ThemeSwitch />
-        </NavbarItem>
+        {/* ThemeSwitch hidden — dark mode locked */}
         <NavbarItem className="hidden sm:flex">
           <LanguageToggle />
         </NavbarItem>
@@ -165,7 +165,6 @@ export const Navbar = () => {
       </NavbarContent>
 
       <NavbarContent className="sm:hidden basis-1 pl-4" justify="end">
-        <ThemeSwitch />
         <LanguageToggle />
         <NavbarMenuToggle />
       </NavbarContent>

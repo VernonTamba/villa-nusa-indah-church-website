@@ -235,6 +235,59 @@
       "member": "Church Member"
     }
   },
+  "gallery": {
+    "nav": "Gallery",
+    "eyebrow": "Life at VNI",
+    "titleStart": "Our",
+    "titleEmphasis": " Gallery",
+    "description": "A glimpse into the vibrant life, heartfelt worship, and warm community of GMAHK Villa Nusa Indah.",
+    "filters": {
+      "all": "All",
+      "worship": "Worship",
+      "activities": "Activities",
+      "potluck": "Potluck",
+      "youth": "Youth",
+      "children": "Children",
+      "building": "Building"
+    },
+    "lightbox": {
+      "close": "Close",
+      "prev": "Previous photo",
+      "next": "Next photo"
+    },
+    "captions": {
+      "photo1": "Sabbath worship together as one congregation",
+      "photo2": "Voices lifted in praise during morning service",
+      "photo3": "A moment of prayer and reverence",
+      "photo4": "The Word of God proclaimed with joy",
+      "photo5": "Church community gathering for a special event",
+      "photo6": "Serving one another with love and dedication",
+      "photo7": "Outreach and ministry in the community",
+      "photo8": "A joyful celebration of faith in action",
+      "photo9": "Sharing a meal together after Sabbath worship",
+      "photo10": "Potluck fellowship — good food, warm hearts",
+      "photo11": "Laughter, warmth, and community around the table",
+      "photo12": "Adventist Youth — full of energy and purpose",
+      "photo13": "Youth worship and spiritual reflection",
+      "photo14": "Young hearts committed to God",
+      "photo15": "AY fellowship closing the Sabbath with joy",
+      "photo16": "Children's ministry — nurturing the next generation",
+      "photo17": "Little ones learning about God's love",
+      "photo18": "Children's Sabbath — a celebration of faith",
+      "photo19": "Our church — a place of worship and belonging",
+      "photo20": "A home for our congregation and our hope",
+      "photo21": "Together in service and fellowship",
+      "photo22": "Hands joined in ministry and care",
+      "photo23": "A moment of joyful celebration together",
+      "photo24": "Community spirit in full bloom",
+      "photo25": "Serving one another with gladness",
+      "photo26": "Activity and laughter in Christ's name",
+      "photo27": "Building bonds through shared purpose",
+      "photo28": "Faith expressed through action and love",
+      "photo29": "A gathering of hearts for God's glory",
+      "photo30": "United in mission and fellowship"
+    }
+  },
   "donate": {
     "eyebrow": "Church Construction Fund",
     "titleStart": "Build",

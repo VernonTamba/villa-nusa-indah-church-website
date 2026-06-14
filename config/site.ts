@@ -13,6 +13,10 @@ export const siteConfig = {
       label: "Members",
       href: "/members",
     },
+    {
+      label: "Gallery",
+      href: "/gallery",
+    },
   ],
   navMenuItems: [
     {
@@ -22,6 +26,10 @@ export const siteConfig = {
     {
       label: "Members",
       href: "/members",
+    },
+    {
+      label: "Gallery",
+      href: "/gallery",
     },
   ],
   links: {

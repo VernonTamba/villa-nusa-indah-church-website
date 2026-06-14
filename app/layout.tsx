@@ -45,10 +45,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "white" },
-    { media: "(prefers-color-scheme: dark)", color: "black" },
-  ],
+  themeColor: [{ color: "black" }],
 };
 
 const jsonLd = {
@@ -93,7 +90,7 @@ export default function RootLayout({
           fontInter.variable,
         )}
       >
-        <Providers themeProps={{ attribute: "class", defaultTheme: "dark" }}>
+        <Providers themeProps={{ attribute: "class", defaultTheme: "dark", forcedTheme: "dark" }}>
           <ConditionalShell>{children}</ConditionalShell>
         </Providers>
         {/* Google Analytics */}

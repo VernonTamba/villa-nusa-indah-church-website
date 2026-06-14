@@ -235,6 +235,59 @@
       "member": "Anggota Jemaat"
     }
   },
+  "gallery": {
+    "nav": "Galeri",
+    "eyebrow": "Kehidupan di VNI",
+    "titleStart": "Galeri",
+    "titleEmphasis": " Kami",
+    "description": "Sekilas pandang tentang kehidupan yang bersemangat, ibadah yang tulus, dan komunitas yang hangat di GMAHK Villa Nusa Indah.",
+    "filters": {
+      "all": "Semua",
+      "worship": "Ibadah",
+      "activities": "Kegiatan",
+      "potluck": "Makan Bersama",
+      "youth": "Pemuda",
+      "children": "Anak-Anak",
+      "building": "Gedung"
+    },
+    "lightbox": {
+      "close": "Tutup",
+      "prev": "Foto sebelumnya",
+      "next": "Foto berikutnya"
+    },
+    "captions": {
+      "photo1": "Ibadah Sabat bersama sebagai satu jemaat",
+      "photo2": "Suara pujian terangkat dalam kebaktian pagi",
+      "photo3": "Momen doa dan khidmat bersama",
+      "photo4": "Firman Tuhan disampaikan dengan sukacita",
+      "photo5": "Komunitas gereja berkumpul dalam acara istimewa",
+      "photo6": "Melayani satu sama lain dengan kasih dan dedikasi",
+      "photo7": "Pelayanan dan penjangkauan di masyarakat",
+      "photo8": "Perayaan iman yang penuh sukacita",
+      "photo9": "Makan bersama setelah ibadah Sabat",
+      "photo10": "Makan siang bersama — makanan dan persekutuan",
+      "photo11": "Tawa, kehangatan, dan kebersamaan di meja makan",
+      "photo12": "Pemuda Advent — penuh semangat dan tujuan",
+      "photo13": "Ibadah pemuda dan refleksi rohani",
+      "photo14": "Hati muda yang berkomitmen kepada Tuhan",
+      "photo15": "Persekutuan PA menutup Sabat dengan sukacita",
+      "photo16": "Pelayanan anak — membina generasi berikutnya",
+      "photo17": "Si kecil belajar tentang kasih Tuhan",
+      "photo18": "Sabat anak — perayaan iman bersama",
+      "photo19": "Gereja kami — tempat ibadah dan kebersamaan",
+      "photo20": "Rumah bagi jemaat dan harapan kami",
+      "photo21": "Bersama dalam pelayanan dan persekutuan",
+      "photo22": "Tangan yang bersatu dalam pelayanan dan kasih",
+      "photo23": "Momen perayaan penuh sukacita bersama",
+      "photo24": "Semangat komunitas yang mekar bersama",
+      "photo25": "Melayani satu sama lain dengan sukacita",
+      "photo26": "Kegiatan dan tawa dalam nama Kristus",
+      "photo27": "Mempererat ikatan melalui tujuan bersama",
+      "photo28": "Iman yang dinyatakan melalui tindakan dan kasih",
+      "photo29": "Perkumpulan hati untuk kemuliaan Tuhan",
+      "photo30": "Bersatu dalam misi dan persekutuan"
+    }
+  },
   "donate": {
     "eyebrow": "Dana Pembangunan Gereja",
     "titleStart": "Bangun",

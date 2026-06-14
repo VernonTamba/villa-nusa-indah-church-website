@@ -7,6 +7,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const nextConfig = {
   outputFileTracingRoot: __dirname,
   images: {
+    qualities: [35, 40, 75, 90],
     remotePatterns: [
       {
         protocol: "https",
