@@ -1,9 +1,14 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import Image, { type StaticImageData } from "next/image";
 import { Input } from "@heroui/input";
 import { IconSearch, IconUserOff, IconUsersGroup } from "@tabler/icons-react";
+import {
+  motion,
+  AnimatePresence,
+  useReducedMotion,
+} from "framer-motion";
 
 import { useLanguage } from "@/lib/i18n";
 import memberPlaceholder from "@/public/images/member-placeholder.svg";
@@ -73,6 +78,136 @@ const STATIC_MEMBERS: Member[] = [
   { id: 48, name: "Teresa Lumbanraja", position: "member", image: memberPlaceholder },
 ];
 
+// ─── Animation Variants ──────────────────────────────────────────────────────
+
+const fadeUp = (reduced: boolean) => ({
+  hidden: { opacity: 0, y: reduced ? 0 : 30 },
+  visible: { opacity: 1, y: 0, transition: { duration: reduced ? 0 : 0.55, ease: [0.22, 1, 0.36, 1] } },
+});
+
+const headerContainer = {
+  hidden: {},
+  visible: { transition: { staggerChildren: 0.1 } },
+};
+
+const cardVariant = (reduced: boolean) => ({
+  hidden: { opacity: 0, y: reduced ? 0 : 40, scale: reduced ? 1 : 0.96 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    scale: 1,
+    transition: { duration: reduced ? 0 : 0.5, ease: [0.22, 1, 0.36, 1] },
+  },
+  exit: {
+    opacity: 0,
+    scale: reduced ? 1 : 0.92,
+    transition: { duration: reduced ? 0 : 0.22 },
+  },
+});
+
+// ─── Spotlight Card Component ─────────────────────────────────────────────────
+
+function MemberSpotlightCard({
+  member,
+  positionLabel,
+  photoAlt,
+  index,
+  reduced,
+}: {
+  member: Member;
+  positionLabel: string;
+  photoAlt: string;
+  index: number;
+  reduced: boolean;
+}) {
+  const cardRef = useRef<HTMLDivElement>(null);
+  const [spotlight, setSpotlight] = useState({ x: 50, y: 50, opacity: 0 });
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (reduced) return;
+    const rect = cardRef.current?.getBoundingClientRect();
+    if (!rect) return;
+    const x = ((e.clientX - rect.left) / rect.width) * 100;
+    const y = ((e.clientY - rect.top) / rect.height) * 100;
+    setSpotlight({ x, y, opacity: 1 });
+  };
+
+  const handleMouseLeave = () => {
+    setSpotlight((prev) => ({ ...prev, opacity: 0 }));
+  };
+
+  const cardAnim = cardVariant(reduced);
+
+  return (
+    <motion.div
+      ref={cardRef}
+      layout
+      variants={cardAnim}
+      initial="hidden"
+      whileInView="visible"
+      exit="exit"
+      viewport={{ once: true, amount: 0.15 }}
+      // Entrance stagger — kept separate so hover spring is independent
+      transition={{ delay: reduced ? 0 : Math.min(index * 0.045, 0.6), duration: reduced ? 0 : 0.5, ease: [0.22, 1, 0.36, 1] }}
+      // Scale up smoothly on hover using spring physics
+      whileHover={reduced ? {} : { scale: 1.045, transition: { type: "spring", stiffness: 400, damping: 25 } }}
+      onMouseMove={handleMouseMove}
+      onMouseLeave={handleMouseLeave}
+      className="group relative flex flex-col items-center overflow-hidden rounded-[26px] border border-primary/10 bg-white/80 p-5 text-center shadow-[0_18px_45px_rgba(15,23,42,0.08)] backdrop-blur-sm hover:shadow-[0_28px_64px_rgba(1,75,63,0.18)] dark:border-white/10 dark:bg-white/8 dark:shadow-[0_22px_55px_rgba(2,6,23,0.26)]"
+      style={{ originX: 0.5, originY: 0.5, transition: "box-shadow 0.4s ease" } as React.CSSProperties}
+      aria-label={`${member.name} — ${positionLabel}`}
+    >
+      {/* Spotlight overlay */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 rounded-[26px]"
+        style={{
+          opacity: spotlight.opacity,
+          background: `radial-gradient(280px circle at ${spotlight.x}% ${spotlight.y}%, rgba(1,140,100,0.13) 0%, rgba(1,75,63,0.07) 40%, transparent 70%)`,
+          transition: reduced ? "none" : "opacity 0.35s ease",
+        }}
+      />
+
+      {/* Avatar with glowing ring on hover */}
+      <div
+        className="relative h-28 w-28 sm:h-32 sm:w-32"
+        style={{
+          borderRadius: 20,
+          boxShadow:
+            spotlight.opacity > 0
+              ? "0 0 0 2.5px rgba(1,120,90,0.55), 0 0 24px 6px rgba(1,75,63,0.18)"
+              : "0 0 0 0px rgba(1,75,63,0), 0 12px 28px rgba(1,75,63,0.12)",
+          transition: reduced ? "none" : "box-shadow 0.4s ease",
+        }}
+      >
+        <div className="relative h-full w-full overflow-hidden rounded-[20px] bg-primary-muted dark:bg-white/10">
+          <Image
+            fill
+            alt={photoAlt}
+            className="object-cover transition-transform duration-500 group-hover:scale-[1.07]"
+            priority={typeof member.id === "number" ? member.id <= 8 : false}
+            sizes="(min-width: 640px) 8rem, 7rem"
+            src={member.image}
+            unoptimized={typeof member.image === "string" && member.image.startsWith("http")}
+          />
+          <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-primary/18 to-transparent dark:from-black/24" />
+        </div>
+      </div>
+
+      <div className="relative z-10 px-1 pt-4">
+        <h2 className="text-lg font-bold leading-tight text-primary dark:text-white">
+          {member.name}
+        </h2>
+        <p className="mt-2 inline-flex rounded-full border border-primary/10 bg-secondary-muted px-3 py-1 text-xs font-semibold text-primary dark:border-white/10 dark:bg-secondary/12 dark:text-secondary">
+          {positionLabel}
+        </p>
+      </div>
+    </motion.div>
+  );
+}
+
+// ─── Main Component ───────────────────────────────────────────────────────────
+
 const MembersDirectory = ({ dbMembers }: { dbMembers: DbMember[] }) => {
   // Use DB members if available; fall back to static members
   const MEMBERS: Member[] =
@@ -87,18 +222,17 @@ const MembersDirectory = ({ dbMembers }: { dbMembers: DbMember[] }) => {
 
   const { messages: t } = useLanguage();
   const [searchQuery, setSearchQuery] = useState("");
+  const reduced = useReducedMotion() ?? false;
 
   const filteredMembers = useMemo(() => {
     const query = searchQuery.trim().toLowerCase();
-
-    if (!query) {
-      return MEMBERS;
-    }
-
+    if (!query) return MEMBERS;
     return MEMBERS.filter((member) =>
       member.name.toLowerCase().includes(query),
     );
   }, [searchQuery, MEMBERS]);
+
+  const fadeUpVariant = fadeUp(reduced);
 
   return (
     <section
@@ -106,25 +240,38 @@ const MembersDirectory = ({ dbMembers }: { dbMembers: DbMember[] }) => {
       className="px-4 py-12 sm:px-6 lg:px-10"
     >
       <div className="mx-auto max-w-7xl">
-        <div className="flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
-          <div className="max-w-3xl">
-            <span className="inline-flex items-center gap-2 rounded-full border border-primary/10 bg-white/80 px-4 py-1 text-[11px] font-semibold uppercase tracking-[0.28em] text-primary/70 backdrop-blur-sm dark:border-white/10 dark:bg-white/8 dark:text-white/70">
+        {/* ── Animated Header ── */}
+        <motion.div
+          variants={headerContainer}
+          initial="hidden"
+          animate="visible"
+          className="flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between"
+        >
+          <motion.div variants={fadeUpVariant} className="max-w-3xl">
+            <motion.span
+              variants={fadeUpVariant}
+              className="inline-flex items-center gap-2 rounded-full border border-primary/10 bg-white/80 px-4 py-1 text-[11px] font-semibold uppercase tracking-[0.28em] text-primary/70 backdrop-blur-sm dark:border-white/10 dark:bg-white/8 dark:text-white/70"
+            >
               <IconUsersGroup size={16} stroke={1.8} />
               {t.members.eyebrow}
-            </span>
-            <h1
+            </motion.span>
+            <motion.h1
               id="members-heading"
+              variants={fadeUpVariant}
               className="mt-6 text-4xl font-black tracking-tight text-primary sm:text-5xl dark:text-white"
             >
               {t.members.titleStart}
               <span className="text-secondary">{t.members.titleEmphasis}</span>
-            </h1>
-            <p className="mt-4 max-w-2xl text-sm leading-7 text-foreground sm:text-base dark:text-white">
+            </motion.h1>
+            <motion.p
+              variants={fadeUpVariant}
+              className="mt-4 max-w-2xl text-sm leading-7 text-foreground sm:text-base dark:text-white"
+            >
               {t.members.description}
-            </p>
-          </div>
+            </motion.p>
+          </motion.div>
 
-          <div className="w-full lg:max-w-md">
+          <motion.div variants={fadeUpVariant} className="w-full lg:max-w-md">
             <Input
               aria-label={t.members.searchAria}
               classNames={{
@@ -153,57 +300,57 @@ const MembersDirectory = ({ dbMembers }: { dbMembers: DbMember[] }) => {
                 .replace("{filtered}", String(filteredMembers.length))
                 .replace("{total}", String(MEMBERS.length))}
             </p>
-          </div>
-        </div>
+          </motion.div>
+        </motion.div>
 
-        {filteredMembers.length > 0 ? (
-          <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
-            {filteredMembers.map((member) => (
-              <article
-                key={member.id}
-                className="group flex flex-col items-center overflow-hidden rounded-[26px] border border-primary/10 bg-white/80 p-5 text-center shadow-[0_18px_45px_rgba(15,23,42,0.08)] backdrop-blur-sm transition-all duration-300 hover:-translate-y-1.5 hover:shadow-[0_26px_60px_rgba(1,75,63,0.14)] dark:border-white/10 dark:bg-white/8 dark:shadow-[0_22px_55px_rgba(2,6,23,0.26)]"
-              >
-                <div className="relative h-28 w-28 overflow-hidden rounded-[20px] bg-primary-muted shadow-[0_12px_28px_rgba(1,75,63,0.12)] sm:h-32 sm:w-32 dark:bg-white/10">
-                  <Image
-                    fill
-                    alt={t.members.photoAlt.replace("{name}", member.name)}
-                    className="object-cover transition-transform duration-500 group-hover:scale-105"
-                    priority={typeof member.id === "number" ? member.id <= 8 : false}
-                    sizes="(min-width: 640px) 8rem, 7rem"
-                    src={member.image}
-                    unoptimized={typeof member.image === "string" && member.image.startsWith("http")}
+        {/* ── Members Grid with AnimatePresence ── */}
+        <AnimatePresence mode="popLayout">
+          {filteredMembers.length > 0 ? (
+            <motion.div
+              key="grid"
+              layout
+              className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4"
+            >
+              <AnimatePresence mode="popLayout">
+                {filteredMembers.map((member, index) => (
+                  <MemberSpotlightCard
+                    key={member.id}
+                    member={member}
+                    positionLabel={
+                      t.members.positions[
+                        member.position as keyof typeof t.members.positions
+                      ] ?? member.position
+                    }
+                    photoAlt={t.members.photoAlt.replace("{name}", member.name)}
+                    index={index}
+                    reduced={reduced}
                   />
-                  <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-primary/18 to-transparent dark:from-black/24" />
-                </div>
-
-                <div className="px-1 pt-4">
-                  <h2 className="text-lg font-bold leading-tight text-primary dark:text-white">
-                    {member.name}
-                  </h2>
-                  <p className="mt-2 inline-flex rounded-full border border-primary/10 bg-secondary-muted px-3 py-1 text-xs font-semibold text-primary dark:border-white/10 dark:bg-secondary/12 dark:text-secondary">
-                    {t.members.positions[
-                      member.position as keyof typeof t.members.positions
-                    ] ?? member.position}
-                  </p>
-                </div>
-              </article>
-            ))}
-          </div>
-        ) : (
-          <div className="mt-10 flex min-h-80 flex-col items-center justify-center rounded-[26px] border border-dashed border-primary/20 bg-white/70 px-6 text-center dark:border-white/16 dark:bg-white/8">
-            <IconUserOff
-              className="text-primary/50 dark:text-white/54"
-              size={48}
-              stroke={1.6}
-            />
-            <h2 className="mt-5 text-xl font-bold text-primary dark:text-white">
-              {t.members.notFoundTitle}
-            </h2>
-            <p className="mt-2 max-w-md text-sm leading-6 text-foreground dark:text-white">
-              {t.members.notFoundDescription}
-            </p>
-          </div>
-        )}
+                ))}
+              </AnimatePresence>
+            </motion.div>
+          ) : (
+            <motion.div
+              key="empty"
+              initial={{ opacity: 0, y: reduced ? 0 : 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: reduced ? 0 : 0.3 }}
+              className="mt-10 flex min-h-80 flex-col items-center justify-center rounded-[26px] border border-dashed border-primary/20 bg-white/70 px-6 text-center dark:border-white/16 dark:bg-white/8"
+            >
+              <IconUserOff
+                className="text-primary/50 dark:text-white/54"
+                size={48}
+                stroke={1.6}
+              />
+              <h2 className="mt-5 text-xl font-bold text-primary dark:text-white">
+                {t.members.notFoundTitle}
+              </h2>
+              <p className="mt-2 max-w-md text-sm leading-6 text-foreground dark:text-white">
+                {t.members.notFoundDescription}
+              </p>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </section>
   );

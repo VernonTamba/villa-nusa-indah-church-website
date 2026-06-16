@@ -16,7 +16,13 @@ import {
   IconUpload,
   IconUsersGroup,
   IconX,
+  IconAlertTriangle,
 } from "@tabler/icons-react";
+import {
+  motion,
+  AnimatePresence,
+  useReducedMotion,
+} from "framer-motion";
 import { addMember, deleteMember, updateMember, updateMemberImage, updateMembersOrder } from "../actions";
 import type { MemberRow } from "./page";
 
@@ -46,9 +52,150 @@ function getPositionLabel(value: string) {
   return POSITIONS.find((p) => p.value === value)?.label ?? value;
 }
 
+// ─── Error Helper ─────────────────────────────────────────────────────────────
+
+const MAX_IMAGE_SIZE_MB = 4;
+const MAX_IMAGE_SIZE_BYTES = MAX_IMAGE_SIZE_MB * 1024 * 1024;
+
+/**
+ * Converts an error (which may include HTTP status codes) into a
+ * user-friendly Indonesian message.
+ */
+function parseUploadError(e: unknown): string {
+  const msg = e instanceof Error ? e.message : String(e);
+
+  // Match status codes embedded in the error message
+  if (msg.includes("413") || /too large|entity too large|body.*limit/i.test(msg)) {
+    return `Gagal upload: File terlalu besar (413). Maksimal ukuran foto adalah ${MAX_IMAGE_SIZE_MB} MB.`;
+  }
+  if (msg.includes("400") || /bad request/i.test(msg)) {
+    return "Gagal upload: Permintaan tidak valid (400). Pastikan format file didukung dan coba lagi.";
+  }
+  if (msg.includes("401") || /unauthorized/i.test(msg)) {
+    return "Gagal upload: Sesi tidak valid (401). Silakan login ulang.";
+  }
+  if (msg.includes("403") || /forbidden/i.test(msg)) {
+    return "Gagal upload: Akses ditolak (403). Anda tidak memiliki izin.";
+  }
+  if (msg.includes("404") || /not found/i.test(msg)) {
+    return "Gagal upload: Sumber daya tidak ditemukan (404). Hubungi administrator.";
+  }
+  if (msg.includes("500") || /internal server/i.test(msg)) {
+    return "Gagal upload: Terjadi kesalahan di server (500). Coba lagi beberapa saat.";
+  }
+  if (msg.includes("503") || /service unavailable/i.test(msg)) {
+    return "Gagal upload: Server sedang tidak tersedia (503). Coba lagi nanti.";
+  }
+
+  // Fall back to the raw message if no code is matched
+  return msg || "Terjadi kesalahan yang tidak diketahui.";
+}
+
+// ─── Toast System ─────────────────────────────────────────────────────────────
+
+type Toast = { id: number; message: string; type: "success" | "error" };
+
+function ToastContainer({ toasts, onRemove }: { toasts: Toast[]; onRemove: (id: number) => void }) {
+  return (
+    <div className="pointer-events-none fixed bottom-6 right-6 z-[100] flex flex-col gap-2 items-end">
+      <AnimatePresence>
+        {toasts.map((toast) => (
+          <motion.div
+            key={toast.id}
+            initial={{ opacity: 0, x: 80, scale: 0.9 }}
+            animate={{ opacity: 1, x: 0, scale: 1 }}
+            exit={{ opacity: 0, x: 80, scale: 0.9 }}
+            transition={{ type: "spring", stiffness: 380, damping: 30 }}
+            className={`pointer-events-auto flex items-center gap-3 rounded-2xl border px-4 py-3 text-sm font-semibold shadow-2xl backdrop-blur-md ${
+              toast.type === "success"
+                ? "border-emerald-500/30 bg-slate-900/90 text-emerald-400"
+                : "border-red-500/30 bg-slate-900/90 text-red-400"
+            }`}
+          >
+            {toast.type === "success" ? (
+              <span className="flex h-5 w-5 items-center justify-center rounded-full bg-emerald-500/20">
+                <IconCheck size={12} />
+              </span>
+            ) : (
+              <span className="flex h-5 w-5 items-center justify-center rounded-full bg-red-500/20">
+                <IconX size={12} />
+              </span>
+            )}
+            {toast.message}
+            <button
+              onClick={() => onRemove(toast.id)}
+              className="ml-1 text-white/30 hover:text-white/70 transition-colors"
+              aria-label="Tutup"
+            >
+              <IconX size={13} />
+            </button>
+          </motion.div>
+        ))}
+      </AnimatePresence>
+    </div>
+  );
+}
+
+// ─── Shimmer Skeleton Card ────────────────────────────────────────────────────
+
+function MemberCardSkeleton() {
+  return (
+    <div className="relative flex items-center gap-3 overflow-hidden rounded-2xl border border-white/8 bg-white/4 p-4">
+      {/* shimmer overlay */}
+      <div
+        className="absolute inset-0 -translate-x-full animate-[shimmer_1.6s_infinite]"
+        style={{
+          background:
+            "linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.06) 50%, transparent 100%)",
+        }}
+      />
+      <div className="h-12 w-12 shrink-0 rounded-xl bg-white/8" />
+      <div className="flex-1 space-y-2">
+        <div className="h-3.5 w-2/3 rounded-full bg-white/8" />
+        <div className="h-2.5 w-1/2 rounded-full bg-white/6" />
+      </div>
+    </div>
+  );
+}
+
+// ─── Animated Modal Wrapper ───────────────────────────────────────────────────
+
+function ModalWrapper({ onClose, children, reduced }: { onClose: () => void; children: React.ReactNode; reduced: boolean }) {
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <motion.div
+        className="absolute inset-0 bg-black/70 backdrop-blur-sm"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        transition={{ duration: reduced ? 0 : 0.2 }}
+        onClick={onClose}
+        aria-hidden="true"
+      />
+      <motion.div
+        className="relative z-10 w-full max-w-md"
+        initial={{ opacity: 0, scale: reduced ? 1 : 0.92, y: reduced ? 0 : 16 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        exit={{ opacity: 0, scale: reduced ? 1 : 0.92, y: reduced ? 0 : 16 }}
+        transition={{ duration: reduced ? 0 : 0.28, ease: [0.22, 1, 0.36, 1] }}
+      >
+        {children}
+      </motion.div>
+    </div>
+  );
+}
+
 // ─── Add Member Modal ─────────────────────────────────────────────────────────
 
-function AddMemberModal({ onClose, onAdded }: { onClose: () => void; onAdded: (m: MemberRow) => void }) {
+function AddMemberModal({
+  onClose,
+  onAdded,
+  reduced,
+}: {
+  onClose: () => void;
+  onAdded: (m: MemberRow) => void;
+  reduced: boolean;
+}) {
   const [name, setName] = useState("");
   const [position, setPosition] = useState("member");
   const [imagePreview, setImagePreview] = useState<string | null>(null);
@@ -60,6 +207,12 @@ function AddMemberModal({ onClose, onAdded }: { onClose: () => void; onAdded: (m
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+    if (file.size > MAX_IMAGE_SIZE_BYTES) {
+      setError(`Ukuran foto terlalu besar. Maksimal ${MAX_IMAGE_SIZE_MB} MB (file Anda: ${(file.size / 1024 / 1024).toFixed(1)} MB).`);
+      e.target.value = "";
+      return;
+    }
+    setError(null);
     setImageFile(file);
     setImagePreview(URL.createObjectURL(file));
   };
@@ -87,18 +240,17 @@ function AddMemberModal({ onClose, onAdded }: { onClose: () => void; onAdded: (m
         });
         onClose();
       } catch (e: unknown) {
-        setError(e instanceof Error ? e.message : "Terjadi kesalahan");
+        setError(parseUploadError(e));
       }
     });
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={onClose} aria-hidden="true" />
-      <div className="relative z-10 w-full max-w-md overflow-hidden rounded-2xl border border-white/12 bg-slate-900 shadow-2xl">
+    <ModalWrapper onClose={onClose} reduced={reduced}>
+      <div className="overflow-hidden rounded-2xl border border-white/12 bg-slate-900 shadow-2xl">
         <div className="flex items-center justify-between border-b border-white/8 px-6 py-4">
           <h2 className="font-bold text-white">Tambah Anggota Baru</h2>
-          <button onClick={onClose} className="text-white/40 hover:text-white" aria-label="Tutup">
+          <button onClick={onClose} className="text-white/40 hover:text-white transition-colors" aria-label="Tutup">
             <IconX size={20} />
           </button>
         </div>
@@ -168,19 +320,29 @@ function AddMemberModal({ onClose, onAdded }: { onClose: () => void; onAdded: (m
             </select>
           </div>
 
-          {error && (
-            <p className="rounded-lg border border-red-500/20 bg-red-500/10 px-3 py-2 text-xs text-red-400">{error}</p>
-          )}
+          <AnimatePresence>
+            {error && (
+              <motion.p
+                initial={{ opacity: 0, y: -6 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -6 }}
+                transition={{ duration: reduced ? 0 : 0.2 }}
+                className="rounded-lg border border-red-500/20 bg-red-500/10 px-3 py-2 text-xs text-red-400"
+              >
+                {error}
+              </motion.p>
+            )}
+          </AnimatePresence>
 
           <div className="flex gap-3 pt-2">
-            <button type="button" onClick={onClose} className="flex-1 rounded-xl border border-white/10 py-2.5 text-sm text-white/60 hover:bg-white/6">
+            <button type="button" onClick={onClose} className="flex-1 rounded-xl border border-white/10 py-2.5 text-sm text-white/60 hover:bg-white/6 transition-colors">
               Batal
             </button>
             <button
               id="add-member-submit"
               type="submit"
               disabled={isPending}
-              className="flex-1 inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-emerald-700 to-emerald-600 py-2.5 text-sm font-bold text-white disabled:opacity-60"
+              className="flex-1 inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-emerald-700 to-emerald-600 py-2.5 text-sm font-bold text-white disabled:opacity-60 transition-opacity"
             >
               {isPending ? <IconLoader2 size={15} className="animate-spin" /> : <IconPlus size={15} />}
               {isPending ? "Menyimpan..." : "Tambah"}
@@ -188,7 +350,7 @@ function AddMemberModal({ onClose, onAdded }: { onClose: () => void; onAdded: (m
           </div>
         </form>
       </div>
-    </div>
+    </ModalWrapper>
   );
 }
 
@@ -198,10 +360,12 @@ function EditMemberModal({
   member,
   onClose,
   onUpdated,
+  reduced,
 }: {
   member: MemberRow;
   onClose: () => void;
   onUpdated: (m: MemberRow) => void;
+  reduced: boolean;
 }) {
   const [name, setName] = useState(member.name);
   const [position, setPosition] = useState(member.position);
@@ -214,6 +378,12 @@ function EditMemberModal({
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+    if (file.size > MAX_IMAGE_SIZE_BYTES) {
+      setError(`Ukuran foto terlalu besar. Maksimal ${MAX_IMAGE_SIZE_MB} MB (file Anda: ${(file.size / 1024 / 1024).toFixed(1)} MB).`);
+      e.target.value = "";
+      return;
+    }
+    setError(null);
     setImageFile(file);
     setImagePreview(URL.createObjectURL(file));
   };
@@ -226,22 +396,31 @@ function EditMemberModal({
     startTransition(async () => {
       try {
         await updateMember(member.id, { name: name.trim(), position });
-        if (imageFile) await updateMemberImage(member.id, imageFile);
-        onUpdated({ ...member, name: name.trim(), position, image_url: imagePreview });
+
+        let finalImageUrl = member.image_url; // keep existing URL by default
+        if (imageFile) {
+          // Must use FormData — Next.js cannot serialize File as a plain argument
+          const fd = new FormData();
+          fd.append("id", member.id);
+          fd.append("image", imageFile);
+          const result = await updateMemberImage(fd);
+          finalImageUrl = result.publicUrl;
+        }
+
+        onUpdated({ ...member, name: name.trim(), position, image_url: finalImageUrl });
         onClose();
       } catch (e: unknown) {
-        setError(e instanceof Error ? e.message : "Terjadi kesalahan");
+        setError(parseUploadError(e));
       }
     });
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={onClose} aria-hidden="true" />
-      <div className="relative z-10 w-full max-w-md overflow-hidden rounded-2xl border border-white/12 bg-slate-900 shadow-2xl">
+    <ModalWrapper onClose={onClose} reduced={reduced}>
+      <div className="overflow-hidden rounded-2xl border border-white/12 bg-slate-900 shadow-2xl">
         <div className="flex items-center justify-between border-b border-white/8 px-6 py-4">
           <h2 className="font-bold text-white">Edit Anggota</h2>
-          <button onClick={onClose} className="text-white/40 hover:text-white" aria-label="Tutup">
+          <button onClick={onClose} className="text-white/40 hover:text-white transition-colors" aria-label="Tutup">
             <IconX size={20} />
           </button>
         </div>
@@ -295,17 +474,27 @@ function EditMemberModal({
             </select>
           </div>
 
-          {error && (
-            <p className="rounded-lg border border-red-500/20 bg-red-500/10 px-3 py-2 text-xs text-red-400">{error}</p>
-          )}
+          <AnimatePresence>
+            {error && (
+              <motion.p
+                initial={{ opacity: 0, y: -6 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -6 }}
+                transition={{ duration: reduced ? 0 : 0.2 }}
+                className="rounded-lg border border-red-500/20 bg-red-500/10 px-3 py-2 text-xs text-red-400"
+              >
+                {error}
+              </motion.p>
+            )}
+          </AnimatePresence>
 
           <div className="flex gap-3 pt-2">
-            <button type="button" onClick={onClose} className="flex-1 rounded-xl border border-white/10 py-2.5 text-sm text-white/60 hover:bg-white/6">Batal</button>
+            <button type="button" onClick={onClose} className="flex-1 rounded-xl border border-white/10 py-2.5 text-sm text-white/60 hover:bg-white/6 transition-colors">Batal</button>
             <button
               id="edit-member-submit"
               type="submit"
               disabled={isPending}
-              className="flex-1 inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-emerald-700 to-emerald-600 py-2.5 text-sm font-bold text-white disabled:opacity-60"
+              className="flex-1 inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-emerald-700 to-emerald-600 py-2.5 text-sm font-bold text-white disabled:opacity-60 transition-opacity"
             >
               {isPending ? <IconLoader2 size={15} className="animate-spin" /> : <IconDeviceFloppy size={15} />}
               {isPending ? "Menyimpan..." : "Simpan"}
@@ -313,11 +502,13 @@ function EditMemberModal({
           </div>
         </form>
       </div>
-    </div>
+    </ModalWrapper>
   );
 }
 
 // ─── Main Component ───────────────────────────────────────────────────────────
+
+let toastCounter = 0;
 
 export default function MembersManager({ initialMembers }: { initialMembers: MemberRow[] }) {
   const [members, setMembers] = useState<MemberRow[]>(initialMembers);
@@ -325,9 +516,12 @@ export default function MembersManager({ initialMembers }: { initialMembers: Mem
   const [showAdd, setShowAdd] = useState(false);
   const [editMember, setEditMember] = useState<MemberRow | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
   const [deleteError, setDeleteError] = useState<string | null>(null);
   const [savedId, setSavedId] = useState<string | null>(null);
+  const [toasts, setToasts] = useState<Toast[]>([]);
+  const reduced = useReducedMotion() ?? false;
 
   // ── Reorder mode state ────────────────────────────────────────────────────
   const [isReordering, setIsReordering] = useState(false);
@@ -335,6 +529,7 @@ export default function MembersManager({ initialMembers }: { initialMembers: Mem
   const [reorderError, setReorderError] = useState<string | null>(null);
   const dragItem = useRef<number | null>(null);
   const dragOverItem = useRef<number | null>(null);
+  const [draggingIndex, setDraggingIndex] = useState<number | null>(null);
 
   const filtered = members.filter(
     (m) =>
@@ -342,15 +537,28 @@ export default function MembersManager({ initialMembers }: { initialMembers: Mem
       getPositionLabel(m.position).toLowerCase().includes(search.toLowerCase()),
   );
 
+  // ── Toast helpers ─────────────────────────────────────────────────────────
+  const pushToast = (message: string, type: "success" | "error" = "success") => {
+    const id = ++toastCounter;
+    setToasts((prev) => [...prev, { id, message, type }]);
+    setTimeout(() => setToasts((prev) => prev.filter((t) => t.id !== id)), 3200);
+  };
+
+  const removeToast = (id: number) => setToasts((prev) => prev.filter((t) => t.id !== id));
+
   const handleDelete = (id: string) => {
     setDeletingId(id);
+    setConfirmDeleteId(null);
     startTransition(async () => {
       try {
         await deleteMember(id);
         setMembers((prev) => prev.filter((m) => m.id !== id));
         setDeleteError(null);
+        pushToast("Anggota berhasil dihapus");
       } catch (e: unknown) {
-        setDeleteError(e instanceof Error ? e.message : "Gagal menghapus");
+        const msg = e instanceof Error ? e.message : "Gagal menghapus";
+        setDeleteError(msg);
+        pushToast(msg, "error");
       } finally {
         setDeletingId(null);
       }
@@ -361,17 +569,20 @@ export default function MembersManager({ initialMembers }: { initialMembers: Mem
     setMembers((prev) => [...prev, m]);
     setSavedId(m.id);
     setTimeout(() => setSavedId(null), 2000);
+    pushToast(`${m.name} berhasil ditambahkan`);
   };
 
   const handleUpdated = (m: MemberRow) => {
     setMembers((prev) => prev.map((x) => (x.id === m.id ? m : x)));
     setSavedId(m.id);
     setTimeout(() => setSavedId(null), 2000);
+    pushToast(`${m.name} berhasil diperbarui`);
   };
 
   // ── Drag handlers ─────────────────────────────────────────────────────────
   const handleDragStart = (index: number) => {
     dragItem.current = index;
+    setDraggingIndex(index);
   };
 
   const handleDragEnter = (index: number) => {
@@ -389,6 +600,7 @@ export default function MembersManager({ initialMembers }: { initialMembers: Mem
   const handleDragEnd = () => {
     dragItem.current = null;
     dragOverItem.current = null;
+    setDraggingIndex(null);
     setReorderSaved(false);
   };
 
@@ -401,9 +613,12 @@ export default function MembersManager({ initialMembers }: { initialMembers: Mem
         // Update local display_order to match saved values
         setMembers((prev) => prev.map((m, i) => ({ ...m, display_order: i })));
         setReorderSaved(true);
+        pushToast("Urutan anggota berhasil disimpan");
         setTimeout(() => setReorderSaved(false), 2500);
       } catch (e: unknown) {
-        setReorderError(e instanceof Error ? e.message : "Gagal menyimpan urutan");
+        const msg = e instanceof Error ? e.message : "Gagal menyimpan urutan";
+        setReorderError(msg);
+        pushToast(msg, "error");
       }
     });
   };
@@ -413,24 +628,70 @@ export default function MembersManager({ initialMembers }: { initialMembers: Mem
     setReorderSaved(false);
     setReorderError(null);
     setSearch("");
+    setConfirmDeleteId(null);
   };
+
+  // ── Animation variants ────────────────────────────────────────────────────
+  const cardIn = (i: number) => ({
+    initial: { opacity: 0, y: reduced ? 0 : 22, scale: reduced ? 1 : 0.97 },
+    animate: {
+      opacity: 1,
+      y: 0,
+      scale: 1,
+      transition: {
+        delay: reduced ? 0 : Math.min(i * 0.04, 0.5),
+        duration: reduced ? 0 : 0.38,
+        ease: [0.22, 1, 0.36, 1],
+      },
+    },
+    exit: {
+      opacity: 0,
+      scale: reduced ? 1 : 0.94,
+      transition: { duration: reduced ? 0 : 0.2 },
+    },
+  });
 
   return (
     <>
-      {showAdd && (
-        <AddMemberModal onClose={() => setShowAdd(false)} onAdded={handleAdded} />
-      )}
-      {editMember && (
-        <EditMemberModal
-          member={editMember}
-          onClose={() => setEditMember(null)}
-          onUpdated={handleUpdated}
-        />
-      )}
+      {/* Toast container */}
+      <ToastContainer toasts={toasts} onRemove={removeToast} />
+
+      <AnimatePresence>
+        {showAdd && (
+          <AddMemberModal
+            key="add-modal"
+            onClose={() => setShowAdd(false)}
+            onAdded={handleAdded}
+            reduced={reduced}
+          />
+        )}
+        {editMember && (
+          <EditMemberModal
+            key="edit-modal"
+            member={editMember}
+            onClose={() => setEditMember(null)}
+            onUpdated={handleUpdated}
+            reduced={reduced}
+          />
+        )}
+      </AnimatePresence>
+
+      {/* Shimmer keyframe injection */}
+      <style>{`
+        @keyframes shimmer {
+          0%   { transform: translateX(-100%); }
+          100% { transform: translateX(200%); }
+        }
+      `}</style>
 
       <div className="mx-auto max-w-4xl space-y-6">
         {/* Header */}
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+        <motion.div
+          initial={{ opacity: 0, y: reduced ? 0 : 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: reduced ? 0 : 0.4, ease: [0.22, 1, 0.36, 1] }}
+          className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between"
+        >
           <div>
             <div className="flex items-center gap-2 text-emerald-400">
               <IconUsersGroup size={20} stroke={1.8} />
@@ -481,134 +742,257 @@ export default function MembersManager({ initialMembers }: { initialMembers: Mem
               </button>
             )}
           </div>
-        </div>
+        </motion.div>
 
-        {deleteError && (
-          <div className="rounded-xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-400">{deleteError}</div>
-        )}
-
-        {reorderError && (
-          <div className="rounded-xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-400">{reorderError}</div>
-        )}
+        <AnimatePresence>
+          {deleteError && (
+            <motion.div
+              initial={{ opacity: 0, y: -8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: reduced ? 0 : 0.2 }}
+              className="rounded-xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-400"
+            >
+              {deleteError}
+            </motion.div>
+          )}
+          {reorderError && (
+            <motion.div
+              initial={{ opacity: 0, y: -8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: reduced ? 0 : 0.2 }}
+              className="rounded-xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-400"
+            >
+              {reorderError}
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* Reorder mode banner */}
-        {isReordering && (
-          <div className="flex items-center gap-3 rounded-xl border border-amber-500/20 bg-amber-500/8 px-4 py-3">
-            <IconGripVertical size={16} className="shrink-0 text-amber-400" />
-            <p className="text-sm text-amber-300/80">
-              Seret kartu untuk mengubah urutan tampil. Klik <strong>Simpan Urutan</strong> untuk menyimpan perubahan.
-            </p>
-          </div>
-        )}
+        <AnimatePresence>
+          {isReordering && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: reduced ? 0 : 0.25 }}
+              className="overflow-hidden"
+            >
+              <div className="flex items-center gap-3 rounded-xl border border-amber-500/20 bg-amber-500/8 px-4 py-3">
+                <IconGripVertical size={16} className="shrink-0 text-amber-400" />
+                <p className="text-sm text-amber-300/80">
+                  Seret kartu untuk mengubah urutan tampil. Klik <strong>Simpan Urutan</strong> untuk menyimpan perubahan.
+                </p>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* Search — hidden in reorder mode */}
-        {!isReordering && (
-          <div className="relative">
-            <span className="pointer-events-none absolute inset-y-0 left-4 flex items-center text-white/30">
-              <IconSearch size={16} stroke={1.8} />
-            </span>
-            <input
-              id="member-search"
-              type="search"
-              placeholder="Cari nama atau jabatan..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="w-full rounded-2xl border border-white/10 bg-white/5 py-3 pl-10 pr-4 text-sm text-white placeholder-white/25 outline-none focus:border-emerald-500/40 focus:ring-2 focus:ring-emerald-500/15"
-            />
-          </div>
-        )}
+        <AnimatePresence>
+          {!isReordering && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: reduced ? 0 : 0.2 }}
+              className="relative"
+            >
+              <span className="pointer-events-none absolute inset-y-0 left-4 flex items-center text-white/30">
+                <IconSearch size={16} stroke={1.8} />
+              </span>
+              <input
+                id="member-search"
+                type="search"
+                placeholder="Cari nama atau jabatan..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="w-full rounded-2xl border border-white/10 bg-white/5 py-3 pl-10 pr-4 text-sm text-white placeholder-white/25 outline-none focus:border-emerald-500/40 focus:ring-2 focus:ring-emerald-500/15"
+              />
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* Members grid */}
         {(isReordering ? members : filtered).length === 0 ? (
-          <div className="flex min-h-48 flex-col items-center justify-center rounded-2xl border border-dashed border-white/10 text-white/30">
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="flex min-h-48 flex-col items-center justify-center rounded-2xl border border-dashed border-white/10 text-white/30"
+          >
             <IconUsersGroup size={36} stroke={1.4} />
             <p className="mt-3 text-sm">Tidak ada anggota ditemukan</p>
-          </div>
+          </motion.div>
         ) : (
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {(isReordering ? members : filtered).map((member, index) => (
-              <div
-                key={member.id}
-                draggable={isReordering}
-                onDragStart={isReordering ? () => handleDragStart(index) : undefined}
-                onDragEnter={isReordering ? () => handleDragEnter(index) : undefined}
-                onDragEnd={isReordering ? handleDragEnd : undefined}
-                onDragOver={isReordering ? (e) => e.preventDefault() : undefined}
-                className={`group relative flex items-center gap-3 overflow-hidden rounded-2xl border bg-white/4 p-4 transition-all duration-200 ${
-                  isReordering
-                    ? "cursor-grab border-amber-500/20 bg-amber-500/4 hover:border-amber-500/40 active:cursor-grabbing active:scale-[0.98] active:opacity-70"
-                    : savedId === member.id
-                    ? "border-emerald-500/40 bg-emerald-500/8"
-                    : "border-white/8 hover:border-white/16"
-                }`}
-              >
-                {/* Drag handle — only in reorder mode */}
-                {isReordering && (
-                  <div className="flex shrink-0 items-center text-amber-400/60">
-                    <IconGripVertical size={18} stroke={1.8} />
-                  </div>
-                )}
+            <AnimatePresence mode="popLayout">
+              {(isReordering ? members : filtered).map((member, index) => {
+                const anim = cardIn(index);
+                const isThisDragging = draggingIndex === index;
+                const isConfirmingDelete = confirmDeleteId === member.id;
 
-                {/* Avatar */}
-                <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-xl bg-white/8">
-                  {member.image_url ? (
-                    <Image
-                      src={member.image_url}
-                      alt={member.name}
-                      fill
-                      className="object-cover"
-                      sizes="48px"
-                    />
-                  ) : (
-                    <div className="flex h-full w-full items-center justify-center text-lg font-bold text-white/30">
-                      {member.name[0]}
-                    </div>
-                  )}
-                </div>
-
-                {/* Info */}
-                <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm font-semibold text-white">
-                    {member.name}
-                    {savedId === member.id && (
-                      <span className="ml-1 inline-flex items-center gap-0.5 text-[10px] text-emerald-400">
-                        <IconCheck size={10} /> Tersimpan
-                      </span>
-                    )}
-                  </p>
-                  <p className="mt-0.5 truncate text-xs text-white/40">
-                    {getPositionLabel(member.position)}
-                  </p>
-                </div>
-
-                {/* Actions — only in normal mode */}
-                {!isReordering && (
-                  <div className="flex items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100">
-                    <button
-                      id={`edit-member-${member.id}`}
-                      onClick={() => setEditMember(member)}
-                      className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/8 text-white/50 hover:bg-white/16 hover:text-white transition-colors"
-                      aria-label={`Edit ${member.name}`}
-                    >
-                      <IconPencil size={14} stroke={1.8} />
-                    </button>
-                    <button
-                      id={`delete-member-${member.id}`}
-                      onClick={() => handleDelete(member.id)}
-                      disabled={isPending && deletingId === member.id}
-                      className="flex h-8 w-8 items-center justify-center rounded-lg bg-red-500/10 text-red-400/70 hover:bg-red-500/20 hover:text-red-400 disabled:opacity-50 transition-colors"
-                      aria-label={`Hapus ${member.name}`}
-                    >
-                      {isPending && deletingId === member.id ? (
-                        <IconLoader2 size={14} className="animate-spin" />
-                      ) : (
-                        <IconTrash size={14} stroke={1.8} />
+                return (
+                  <motion.div
+                    key={member.id}
+                    layout
+                    {...anim}
+                    draggable={isReordering}
+                    onDragStart={isReordering ? () => handleDragStart(index) : undefined}
+                    onDragEnter={isReordering ? () => handleDragEnter(index) : undefined}
+                    onDragEnd={isReordering ? handleDragEnd : undefined}
+                    onDragOver={isReordering ? (e) => e.preventDefault() : undefined}
+                    animate={
+                      isThisDragging && isReordering && !reduced
+                        ? {
+                            opacity: 0.8,
+                            scale: 1.03,
+                            boxShadow: "0 20px 50px rgba(1,75,63,0.4)",
+                            zIndex: 10,
+                          }
+                        : {
+                            ...anim.animate,
+                            boxShadow: "none",
+                            zIndex: 1,
+                          }
+                    }
+                    className={`group relative flex flex-col overflow-hidden rounded-2xl border bg-white/4 transition-colors duration-200 ${
+                      isReordering
+                        ? "cursor-grab border-amber-500/20 bg-amber-500/4 hover:border-amber-500/40 active:cursor-grabbing"
+                        : savedId === member.id
+                        ? "border-emerald-500/40 bg-emerald-500/8"
+                        : "border-white/8 hover:border-white/16"
+                    }`}
+                  >
+                    {/* Main card row */}
+                    <div className="flex items-center gap-3 p-4">
+                      {/* Drag handle — only in reorder mode */}
+                      {isReordering && (
+                        <div className="flex shrink-0 items-center text-amber-400/60">
+                          <IconGripVertical size={18} stroke={1.8} />
+                        </div>
                       )}
-                    </button>
-                  </div>
-                )}
-              </div>
-            ))}
+
+                      {/* Avatar */}
+                      <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-xl bg-white/8">
+                        {member.image_url ? (
+                          <Image
+                            src={member.image_url}
+                            alt={member.name}
+                            fill
+                            className="object-cover"
+                            sizes="48px"
+                          />
+                        ) : (
+                          <div className="flex h-full w-full items-center justify-center text-lg font-bold text-white/30">
+                            {member.name[0]}
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Info */}
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate text-sm font-semibold text-white">
+                          {member.name}
+                          {savedId === member.id && (
+                            <span className="ml-1 inline-flex items-center gap-0.5 text-[10px] text-emerald-400">
+                              <IconCheck size={10} /> Tersimpan
+                            </span>
+                          )}
+                        </p>
+                        <p className="mt-0.5 truncate text-xs text-white/40">
+                          {getPositionLabel(member.position)}
+                        </p>
+                      </div>
+
+                      {/* Actions — only in normal mode */}
+                      {!isReordering && !isConfirmingDelete && (
+                        <div className="flex items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100">
+                          <button
+                            id={`edit-member-${member.id}`}
+                            onClick={() => setEditMember(member)}
+                            className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/8 text-white/50 hover:bg-white/16 hover:text-white transition-colors"
+                            aria-label={`Edit ${member.name}`}
+                          >
+                            <IconPencil size={14} stroke={1.8} />
+                          </button>
+                          <button
+                            id={`delete-member-${member.id}`}
+                            onClick={() => setConfirmDeleteId(member.id)}
+                            disabled={isPending && deletingId === member.id}
+                            className="flex h-8 w-8 items-center justify-center rounded-lg bg-red-500/10 text-red-400/70 hover:bg-red-500/20 hover:text-red-400 disabled:opacity-50 transition-colors"
+                            aria-label={`Hapus ${member.name}`}
+                          >
+                            {isPending && deletingId === member.id ? (
+                              <IconLoader2 size={14} className="animate-spin" />
+                            ) : (
+                              <IconTrash size={14} stroke={1.8} />
+                            )}
+                          </button>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Inline delete confirmation */}
+                    <AnimatePresence>
+                      {isConfirmingDelete && (
+                        <motion.div
+                          initial={{ opacity: 0, height: 0 }}
+                          animate={{ opacity: 1, height: "auto" }}
+                          exit={{ opacity: 0, height: 0 }}
+                          transition={{ duration: reduced ? 0 : 0.22, ease: [0.22, 1, 0.36, 1] }}
+                          className="overflow-hidden"
+                        >
+                          <div className="flex items-center gap-2 border-t border-red-500/15 bg-red-500/8 px-4 py-2.5">
+                            <IconAlertTriangle size={13} className="shrink-0 text-red-400" />
+                            <p className="flex-1 text-[11px] text-red-300/80">
+                              Hapus <span className="font-semibold">{member.name}</span>?
+                            </p>
+                            <button
+                              onClick={() => handleDelete(member.id)}
+                              disabled={isPending && deletingId === member.id}
+                              className="inline-flex items-center gap-1 rounded-lg bg-red-500/25 px-2.5 py-1 text-[11px] font-bold text-red-300 hover:bg-red-500/40 disabled:opacity-50 transition-colors"
+                            >
+                              {isPending && deletingId === member.id ? (
+                                <IconLoader2 size={11} className="animate-spin" />
+                              ) : (
+                                <IconCheck size={11} />
+                              )}
+                              Ya, hapus
+                            </button>
+                            <button
+                              onClick={() => setConfirmDeleteId(null)}
+                              className="inline-flex items-center gap-1 rounded-lg bg-white/8 px-2.5 py-1 text-[11px] font-semibold text-white/50 hover:bg-white/14 transition-colors"
+                            >
+                              <IconX size={11} /> Batal
+                            </button>
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </motion.div>
+                );
+              })}
+            </AnimatePresence>
+
+            {/* Skeleton placeholders — shown while a transition is pending */}
+            <AnimatePresence>
+              {isPending && !isReordering && (
+                <>
+                  {[0, 1, 2].map((i) => (
+                    <motion.div
+                      key={`skel-${i}`}
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      transition={{ delay: i * 0.05 }}
+                    >
+                      <MemberCardSkeleton />
+                    </motion.div>
+                  ))}
+                </>
+              )}
+            </AnimatePresence>
           </div>
         )}
 

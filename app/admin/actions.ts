@@ -110,14 +110,29 @@ export async function updateMember(
   updates: { name?: string; position?: string },
 ) {
   const supabase = await createClient();
-  const { error } = await supabase.from("members").update(updates).eq("id", id);
+  const { data, error } = await supabase
+    .from("members")
+    .update(updates)
+    .eq("id", id)
+    .select();
   if (error) throw new Error(error.message);
+  // If RLS blocks the UPDATE it returns no error but affects 0 rows
+  if (!data || data.length === 0) {
+    throw new Error(
+      "UPDATE gagal: tidak ada baris yang diperbarui. Periksa kebijakan RLS Supabase — tambahkan policy UPDATE untuk tabel 'members'."
+    );
+  }
   revalidatePath("/members");
   revalidatePath("/admin/members");
 }
 
-export async function updateMemberImage(id: string, imageFile: File) {
+export async function updateMemberImage(formData: FormData) {
   const supabase = await createClient();
+  const id = formData.get("id") as string;
+  const imageFile = formData.get("image") as File;
+
+  if (!imageFile || imageFile.size === 0) throw new Error("No file provided");
+
   const ext = imageFile.name.split(".").pop();
   const path = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
 
@@ -128,14 +143,23 @@ export async function updateMemberImage(id: string, imageFile: File) {
   if (uploadError) throw new Error(uploadError.message);
 
   const { data: urlData } = supabase.storage.from("member-photos").getPublicUrl(path);
-  const { error } = await supabase
+  const { data: updatedRows, error } = await supabase
     .from("members")
     .update({ image_url: urlData.publicUrl })
-    .eq("id", id);
+    .eq("id", id)
+    .select();
 
   if (error) throw new Error(error.message);
+  // If RLS blocks the UPDATE it returns no error but affects 0 rows
+  if (!updatedRows || updatedRows.length === 0) {
+    throw new Error(
+      "UPDATE image gagal: tidak ada baris yang diperbarui. Periksa kebijakan RLS Supabase — tambahkan policy UPDATE untuk tabel 'members'."
+    );
+  }
   revalidatePath("/members");
   revalidatePath("/admin/members");
+
+  return { publicUrl: urlData.publicUrl };
 }
 
 export async function deleteMember(id: string) {
