@@ -150,12 +150,12 @@ export default function DonatePage() {
             </p>
           </motion.div>
 
-          <div className="grid gap-5 sm:grid-cols-2">
+          <div className="flex justify-center">
             {accounts.map((account, index) => (
               <motion.div
                 key={account.bank}
                 variants={staggerItem}
-                className="group relative overflow-hidden rounded-[28px] border border-primary/15 bg-[linear-gradient(145deg,rgba(255,255,255,0.96),rgba(248,167,36,0.08),rgba(1,75,63,0.06))] p-6 shadow-[0_18px_45px_rgba(15,23,42,0.08)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_26px_60px_rgba(1,75,63,0.14)] dark:border-white/10 dark:bg-[linear-gradient(145deg,rgba(255,255,255,0.08),rgba(255,255,255,0.03))] dark:shadow-[0_22px_55px_rgba(2,6,23,0.28)]"
+                className="group relative w-full max-w-md overflow-hidden rounded-[28px] border border-primary/15 bg-[linear-gradient(145deg,rgba(255,255,255,0.96),rgba(248,167,36,0.08),rgba(1,75,63,0.06))] p-6 shadow-[0_18px_45px_rgba(15,23,42,0.08)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_26px_60px_rgba(1,75,63,0.14)] dark:border-white/10 dark:bg-[linear-gradient(145deg,rgba(255,255,255,0.08),rgba(255,255,255,0.03))] dark:shadow-[0_22px_55px_rgba(2,6,23,0.28)]"
               >
                 {/* Shimmer overlay */}
                 <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(248,167,36,0.14),transparent_40%),radial-gradient(circle_at_bottom_left,rgba(1,75,63,0.08),transparent_36%)]" />
@@ -227,7 +227,7 @@ export default function DonatePage() {
         {/* Notes section */}
         <motion.section
           aria-labelledby="notes-heading"
-          className="mt-14 rounded-[24px] border border-secondary/30 bg-secondary/8 p-6 dark:border-white/10 dark:bg-white/5"
+          className="mt-8 rounded-[24px] border border-secondary/30 bg-secondary/8 p-6 dark:border-white/10 dark:bg-white/5"
           variants={fadeUp}
           initial="hidden"
           whileInView="visible"
@@ -245,19 +245,45 @@ export default function DonatePage() {
                 {t.donate.noteTitle}
               </h3>
               <ul className="mt-3 space-y-2">
-                {t.donate.notes.map((note, i) => (
-                  <li
-                    key={i}
-                    className="flex items-start gap-2 text-sm leading-6 text-foreground/80 dark:text-white/70"
-                  >
-                    <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-secondary" />
-                    {note}
-                  </li>
-                ))}
+                {/* Note 1 – plain text */}
+                <li className="flex items-start gap-2 text-sm leading-6 text-foreground/80 dark:text-white/70">
+                  <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-secondary" />
+                  {t.donate.notes[0]}
+                </li>
+                {/* Note 2 – inline link to Get in Touch section */}
+                <li className="flex items-start gap-2 text-sm leading-6 text-foreground/80 dark:text-white/70">
+                  <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-secondary" />
+                  <span>
+                    {t.donate.notes[1]}
+                    <a
+                      href="/#get-in-touch"
+                      className="font-semibold text-primary underline underline-offset-2 decoration-primary/40 hover:decoration-primary transition-colors duration-200 dark:text-secondary dark:decoration-secondary/40 dark:hover:decoration-secondary"
+                    >
+                      {t.donate.notes[2]}
+                    </a>
+                    {t.donate.notes[3]}
+                  </span>
+                </li>
               </ul>
             </div>
           </div>
         </motion.section>
+
+        {/* Thank you section */}
+        <motion.div
+          className="mt-8 rounded-[24px] bg-[linear-gradient(135deg,rgba(1,75,63,0.12),rgba(248,167,36,0.10))] border border-primary/15 dark:border-white/10 dark:bg-[linear-gradient(135deg,rgba(1,75,63,0.25),rgba(248,167,36,0.10))] p-8 text-center"
+          variants={fadeUp}
+          initial="hidden"
+          whileInView="visible"
+          viewport={viewport}
+        >
+          <p className="text-xl font-bold text-primary dark:text-white">
+            {t.donate.thankYouTitle}
+          </p>
+          <p className="mt-3 text-sm leading-7 text-foreground/70 dark:text-white/60 max-w-lg mx-auto">
+            {t.donate.thankYouMessage}
+          </p>
+        </motion.div>
       </div>
     </>
   );

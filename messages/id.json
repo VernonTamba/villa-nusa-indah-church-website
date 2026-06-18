@@ -207,7 +207,7 @@
     "eyebrow": "Direktori Jemaat",
     "titleStart": "Anggota",
     "titleEmphasis": " Jemaat ",
-    "description": "Daftar anggota dan pelayan GMAHK Villa Nusa Indah tersusun dalam grid yang mudah dipindai. Gunakan pencarian untuk menemukan nama anggota tertentu.",
+    "description": "Kenali keluarga GMAHK Villa Nusa Indah — para anggota jemaat dan pelayan yang bersama-sama bertumbuh dalam iman, melayani dengan kasih, dan membangun komunitas yang hangat. Temukan nama yang Anda cari melalui kolom pencarian di bawah.",
     "searchAria": "Cari nama anggota",
     "searchPlaceholder": "Cari nama anggota...",
     "count": "{filtered} dari {total} anggota",
@@ -297,28 +297,26 @@
     "locationAddress": "Jatirasa, Bekasi, Jawa Barat",
     "locationDescription": "Gereja baru akan berlokasi di Jatirasa, Bekasi, Jawa Barat. Ini akan menjadi rumah permanen bagi jemaat kami dan tempat ibadah bagi komunitas sekitarnya.",
     "accountTitle": "Rekening Gereja",
-    "accountSubtitle": "Silakan transfer ke salah satu rekening berikut dan simpan bukti transfernya.",
+    "accountSubtitle": "Silakan transfer ke rekening berikut dan simpan bukti transfernya.",
     "bankLabel": "Bank",
     "accountNumberLabel": "Nomor Rekening",
     "accountHolderLabel": "Nama Rekening",
     "copyButton": "Salin",
     "copiedButton": "Tersalin!",
+    "thankYouTitle": "Terima Kasih atas Dukungan Anda 🙏",
+    "thankYouMessage": "Setiap persembahan yang Anda berikan adalah cerminan iman dan kasih kepada Tuhan. Kiranya Tuhan memberkati Anda berlipat ganda atas setiap kebaikan yang Anda wujudkan bagi jemaat ini.",
     "noteTitle": "Catatan Penting",
     "notes": [
-      "Mohon cantumkan nama dan keperluan transfer di keterangan transfer.",
-      "Untuk persepuluhan dan persembahan, mohon beri keterangan yang sesuai (mis. 'Persepuluhan – [Nama Anda]').",
-      "Hubungi bendahara gereja untuk konfirmasi setelah melakukan transfer."
+      "Mohon cantumkan nama lengkap Anda di keterangan transfer.",
+      "Setelah melakukan transfer, kirimkan bukti pembayaran kepada kami melalui Gmail, direct message Instagram atau Facebook, atau media sosial lainnya yang tertera di bagian ",
+      "Hubungi Kami",
+      " di halaman utama. Anda juga dapat menghubungi bendahara gereja secara langsung untuk konfirmasi."
     ],
     "accounts": [
       {
-        "bank": "Bank Central Asia (BCA)",
-        "accountNumber": "1234567890",
-        "accountHolder": "Gereja Masehi Advent Hari Ketujuh VNI"
-      },
-      {
         "bank": "Bank Mandiri",
-        "accountNumber": "0987654321",
-        "accountHolder": "Gereja Masehi Advent Hari Ketujuh VNI"
+        "accountNumber": "1330029497823",
+        "accountHolder": "GEREJA MAHK VILLA NU (GMAHK Villa Nusa Indah)"
       }
     ]
   }
