@@ -29,7 +29,7 @@ export const metadata: Metadata = {
     description: siteConfig.description,
     images: [
       {
-        url: "/images/hero-1.jpeg",
+        url: "/images/hero-1.webp",
         width: 1200,
         height: 630,
         alt: "GMAHK Villa Nusa Indah Church",
@@ -40,7 +40,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: siteConfig.name,
     description: siteConfig.description,
-    images: ["/images/hero-1.jpeg"],
+    images: ["/images/hero-1.webp"],
   },
 };
 

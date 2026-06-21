@@ -9,7 +9,7 @@ import { useLanguage } from "@/lib/i18n";
 /** Full pool of all gallery images for the background collage. */
 const ALL_BG_IMAGES = Array.from(
   { length: 30 },
-  (_, i) => `/images/gallery/gallery_${i + 1}.webp`,
+  (_, i) => `/images/gallery-opt/gallery_${i + 1}.webp`,
 );
 
 /** Shuffle an array using Fisher-Yates and return the first `count` items. */

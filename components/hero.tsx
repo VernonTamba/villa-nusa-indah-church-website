@@ -20,10 +20,10 @@ import { useLanguage } from "@/lib/i18n";
 import { createClient } from "@/utils/supabase/client";
 
 const FALLBACK_SLIDES = [
-  { src: "/images/hero-1.jpeg" },
-  { src: "/images/hero-2.jpeg" },
-  { src: "/images/hero-3.jpeg" },
-  { src: "/images/hero-4.jpeg" },
+  { src: "/images/hero-1.webp" },
+  { src: "/images/hero-2.webp" },
+  { src: "/images/hero-3.webp" },
+  { src: "/images/hero-4.webp" },
 ];
 
 const HERO_LINKS = [
@@ -50,6 +50,8 @@ const Hero = () => {
   const [activeSlide, setActiveSlide] = useState(0);
   const [heroSlides, setHeroSlides] = useState<{ src: string }[]>(FALLBACK_SLIDES);
   const shouldReduceMotion = useReducedMotion() ?? false;
+  // Detect mobile to skip expensive parallax on low-end devices
+  const [isMobile, setIsMobile] = useState(false);
   const { scrollYProgress } = useScroll({
     target: heroRef,
     offset: ["start start", "end start"],
@@ -70,6 +72,15 @@ const Hero = () => {
       });
   }, []);
 
+  // Detect mobile breakpoint (<640px) after mount to disable heavy parallax
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 639px)");
+    setIsMobile(mq.matches);
+    const handler = (e: MediaQueryListEvent) => setIsMobile(e.matches);
+    mq.addEventListener("change", handler);
+    return () => mq.removeEventListener("change", handler);
+  }, []);
+
   useEffect(() => {
     if (shouldReduceMotion) return;
 
@@ -88,7 +99,7 @@ const Hero = () => {
     >
       <motion.div
         className="absolute inset-x-0 -inset-y-16 overflow-hidden will-change-transform"
-        style={{ y: shouldReduceMotion ? 0 : backgroundY }}
+        style={{ y: (shouldReduceMotion || isMobile) ? 0 : backgroundY }}
         aria-hidden="true"
       >
         {heroSlides.map((slide, index) => (
@@ -97,7 +108,8 @@ const Hero = () => {
             className="absolute inset-0"
             animate={{
               opacity: activeSlide === index ? 1 : 0,
-              scale: activeSlide === index && !shouldReduceMotion ? 1.04 : 1,
+              // Disable Ken-Burns zoom on mobile to reduce GPU load
+              scale: activeSlide === index && !shouldReduceMotion && !isMobile ? 1.04 : 1,
             }}
             initial={false}
             transition={{
