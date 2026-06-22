@@ -148,7 +148,7 @@ function MemberSpotlightCard({
       // On mobile: skip entrance animation entirely (instant render).
       // On desktop: simple staggered opacity fade on mount — no IntersectionObserver.
       initial={isMobile ? false : "hidden"}
-      animate={isMobile ? undefined : "visible"}
+      animate="visible"
       exit="exit"
       // Cap stagger so cards don't queue up
       transition={{
