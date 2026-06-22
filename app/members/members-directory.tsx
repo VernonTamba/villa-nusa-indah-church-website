@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Image, { type StaticImageData } from "next/image";
 import { Input } from "@heroui/input";
 import { IconSearch, IconUserOff, IconUsersGroup } from "@tabler/icons-react";
@@ -78,6 +78,8 @@ const STATIC_MEMBERS: Member[] = [
   { id: 48, name: "Teresa Lumbanraja", position: "member", image: memberPlaceholder },
 ];
 
+const PAGE_SIZE = 12;
+
 // ─── Animation Variants ──────────────────────────────────────────────────────
 
 const fadeUp = (reduced: boolean) => ({
@@ -91,17 +93,17 @@ const headerContainer = {
 };
 
 const cardVariant = (reduced: boolean) => ({
-  hidden: { opacity: 0, y: reduced ? 0 : 40, scale: reduced ? 1 : 0.96 },
+  hidden: { opacity: 0, y: reduced ? 0 : 32, scale: reduced ? 1 : 0.96 },
   visible: {
     opacity: 1,
     y: 0,
     scale: 1,
-    transition: { duration: reduced ? 0 : 0.5, ease: [0.22, 1, 0.36, 1] },
+    transition: { duration: reduced ? 0 : 0.45, ease: [0.22, 1, 0.36, 1] },
   },
   exit: {
     opacity: 0,
-    scale: reduced ? 1 : 0.92,
-    transition: { duration: reduced ? 0 : 0.22 },
+    scale: reduced ? 1 : 0.93,
+    transition: { duration: reduced ? 0 : 0.18 },
   },
 });
 
@@ -113,18 +115,21 @@ function MemberSpotlightCard({
   photoAlt,
   index,
   reduced,
+  isMobile,
 }: {
   member: Member;
   positionLabel: string;
   photoAlt: string;
   index: number;
   reduced: boolean;
+  isMobile: boolean;
 }) {
+  const disableEffects = reduced || isMobile;
   const cardRef = useRef<HTMLDivElement>(null);
   const [spotlight, setSpotlight] = useState({ x: 50, y: 50, opacity: 0 });
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (reduced) return;
+    if (disableEffects) return;
     const rect = cardRef.current?.getBoundingClientRect();
     if (!rect) return;
     const x = ((e.clientX - rect.left) / rect.width) * 100;
@@ -133,6 +138,7 @@ function MemberSpotlightCard({
   };
 
   const handleMouseLeave = () => {
+    if (disableEffects) return;
     setSpotlight((prev) => ({ ...prev, opacity: 0 }));
   };
 
@@ -141,40 +147,55 @@ function MemberSpotlightCard({
   return (
     <motion.div
       ref={cardRef}
-      layout
       variants={cardAnim}
       initial="hidden"
       whileInView="visible"
       exit="exit"
-      viewport={{ once: true, amount: 0.15 }}
-      // Entrance stagger — kept separate so hover spring is independent
-      transition={{ delay: reduced ? 0 : Math.min(index * 0.045, 0.6), duration: reduced ? 0 : 0.5, ease: [0.22, 1, 0.36, 1] }}
-      // Scale up smoothly on hover using spring physics
-      whileHover={reduced ? {} : { scale: 1.045, transition: { type: "spring", stiffness: 400, damping: 25 } }}
+      viewport={{ once: true, amount: 0.1 }}
+      // Cap the stagger so later cards don't wait >0.5 s to appear
+      transition={{
+        delay: reduced ? 0 : Math.min(index * 0.04, 0.44),
+        duration: reduced ? 0 : 0.45,
+        ease: [0.22, 1, 0.36, 1],
+      }}
+      // Scale hover only on desktop
+      whileHover={
+        disableEffects
+          ? {}
+          : { scale: 1.045, transition: { type: "spring", stiffness: 400, damping: 25 } }
+      }
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
       className="group relative flex flex-col items-center overflow-hidden rounded-[26px] border border-primary/10 bg-white/80 p-5 text-center shadow-[0_18px_45px_rgba(15,23,42,0.08)] backdrop-blur-sm hover:shadow-[0_28px_64px_rgba(1,75,63,0.18)] dark:border-white/10 dark:bg-white/8 dark:shadow-[0_22px_55px_rgba(2,6,23,0.26)]"
-      style={{ originX: 0.5, originY: 0.5, transition: "box-shadow 0.4s ease" } as React.CSSProperties}
+      style={{
+        originX: 0.5,
+        originY: 0.5,
+        // Avoid promoting every card to its own compositor layer on mobile
+        willChange: disableEffects ? "auto" : "transform",
+        transition: "box-shadow 0.4s ease",
+      } as React.CSSProperties}
       aria-label={`${member.name} — ${positionLabel}`}
     >
-      {/* Spotlight overlay */}
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-0 rounded-[26px]"
-        style={{
-          opacity: spotlight.opacity,
-          background: `radial-gradient(280px circle at ${spotlight.x}% ${spotlight.y}%, rgba(1,140,100,0.13) 0%, rgba(1,75,63,0.07) 40%, transparent 70%)`,
-          transition: reduced ? "none" : "opacity 0.35s ease",
-        }}
-      />
+      {/* Spotlight overlay — desktop only */}
+      {!isMobile && (
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0 rounded-[26px]"
+          style={{
+            opacity: spotlight.opacity,
+            background: `radial-gradient(280px circle at ${spotlight.x}% ${spotlight.y}%, rgba(1,140,100,0.13) 0%, rgba(1,75,63,0.07) 40%, transparent 70%)`,
+            transition: reduced ? "none" : "opacity 0.35s ease",
+          }}
+        />
+      )}
 
-      {/* Avatar with glowing ring on hover */}
+      {/* Avatar */}
       <div
         className="relative h-28 w-28 sm:h-32 sm:w-32"
         style={{
           borderRadius: 20,
           boxShadow:
-            spotlight.opacity > 0
+            !isMobile && spotlight.opacity > 0
               ? "0 0 0 2.5px rgba(1,120,90,0.55), 0 0 24px 6px rgba(1,75,63,0.18)"
               : "0 0 0 0px rgba(1,75,63,0), 0 12px 28px rgba(1,75,63,0.12)",
           transition: reduced ? "none" : "box-shadow 0.4s ease",
@@ -222,7 +243,18 @@ const MembersDirectory = ({ dbMembers }: { dbMembers: DbMember[] }) => {
 
   const { messages: t } = useLanguage();
   const [searchQuery, setSearchQuery] = useState("");
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
+  const [isMobile, setIsMobile] = useState(false);
   const reduced = useReducedMotion() ?? false;
+
+  // Detect mobile after mount to avoid hydration mismatch
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 639px)");
+    setIsMobile(mq.matches);
+    const handler = (e: MediaQueryListEvent) => setIsMobile(e.matches);
+    mq.addEventListener("change", handler);
+    return () => mq.removeEventListener("change", handler);
+  }, []);
 
   const filteredMembers = useMemo(() => {
     const query = searchQuery.trim().toLowerCase();
@@ -231,6 +263,19 @@ const MembersDirectory = ({ dbMembers }: { dbMembers: DbMember[] }) => {
       member.name.toLowerCase().includes(query),
     );
   }, [searchQuery, MEMBERS]);
+
+  // Reset visible count when search changes
+  useEffect(() => {
+    setVisibleCount(PAGE_SIZE);
+  }, [searchQuery]);
+
+  const visibleMembers = filteredMembers.slice(0, visibleCount);
+  const remainingCount = filteredMembers.length - visibleCount;
+  const hasMore = remainingCount > 0;
+
+  const handleLoadMore = useCallback(() => {
+    setVisibleCount((prev) => prev + PAGE_SIZE);
+  }, []);
 
   const fadeUpVariant = fadeUp(reduced);
 
@@ -303,30 +348,32 @@ const MembersDirectory = ({ dbMembers }: { dbMembers: DbMember[] }) => {
           </motion.div>
         </motion.div>
 
-        {/* ── Members Grid with AnimatePresence ── */}
-        <AnimatePresence mode="popLayout">
-          {filteredMembers.length > 0 ? (
+        {/* ── Members Grid ── */}
+        <AnimatePresence mode="wait">
+          {visibleMembers.length > 0 ? (
             <motion.div
               key="grid"
-              layout
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: reduced ? 0 : 0.2 }}
               className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4"
             >
-              <AnimatePresence mode="popLayout">
-                {filteredMembers.map((member, index) => (
-                  <MemberSpotlightCard
-                    key={member.id}
-                    member={member}
-                    positionLabel={
-                      t.members.positions[
-                        member.position as keyof typeof t.members.positions
-                      ] ?? member.position
-                    }
-                    photoAlt={t.members.photoAlt.replace("{name}", member.name)}
-                    index={index}
-                    reduced={reduced}
-                  />
-                ))}
-              </AnimatePresence>
+              {visibleMembers.map((member, index) => (
+                <MemberSpotlightCard
+                  key={member.id}
+                  member={member}
+                  positionLabel={
+                    t.members.positions[
+                      member.position as keyof typeof t.members.positions
+                    ] ?? member.position
+                  }
+                  photoAlt={t.members.photoAlt.replace("{name}", member.name)}
+                  index={index}
+                  reduced={reduced}
+                  isMobile={isMobile}
+                />
+              ))}
             </motion.div>
           ) : (
             <motion.div
@@ -351,6 +398,30 @@ const MembersDirectory = ({ dbMembers }: { dbMembers: DbMember[] }) => {
             </motion.div>
           )}
         </AnimatePresence>
+
+        {/* ── Load More button ── */}
+        {hasMore && (
+          <motion.div
+            className="mt-12 flex flex-col items-center gap-3"
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4 }}
+          >
+            <button
+              id="members-load-more"
+              onClick={handleLoadMore}
+              className="group flex items-center gap-2.5 rounded-full border border-secondary/40 bg-secondary/10 px-7 py-3 text-sm font-semibold text-secondary shadow-sm transition-all duration-300 hover:bg-secondary hover:text-secondary-foreground hover:shadow-[0_8px_24px_rgba(248,167,36,0.3)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-secondary"
+            >
+              Load {Math.min(PAGE_SIZE, remainingCount)} more
+              <span className="text-xs opacity-60">
+                ({remainingCount} remaining)
+              </span>
+            </button>
+            <p className="text-xs text-foreground/40">
+              Showing {visibleCount} of {filteredMembers.length} members
+            </p>
+          </motion.div>
+        )}
       </div>
     </section>
   );
