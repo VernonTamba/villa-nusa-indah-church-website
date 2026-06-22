@@ -93,17 +93,14 @@ const headerContainer = {
 };
 
 const cardVariant = (reduced: boolean) => ({
-  hidden: { opacity: 0, y: reduced ? 0 : 32, scale: reduced ? 1 : 0.96 },
+  hidden: { opacity: 0 },
   visible: {
     opacity: 1,
-    y: 0,
-    scale: 1,
-    transition: { duration: reduced ? 0 : 0.45, ease: [0.22, 1, 0.36, 1] },
+    transition: { duration: reduced ? 0 : 0.35, ease: "easeOut" },
   },
   exit: {
     opacity: 0,
-    scale: reduced ? 1 : 0.93,
-    transition: { duration: reduced ? 0 : 0.18 },
+    transition: { duration: reduced ? 0 : 0.15 },
   },
 });
 
@@ -148,15 +145,14 @@ function MemberSpotlightCard({
     <motion.div
       ref={cardRef}
       variants={cardAnim}
-      initial="hidden"
-      whileInView="visible"
+      // On mobile: skip entrance animation entirely (instant render).
+      // On desktop: simple staggered opacity fade on mount — no IntersectionObserver.
+      initial={isMobile ? false : "hidden"}
+      animate={isMobile ? undefined : "visible"}
       exit="exit"
-      viewport={{ once: true, amount: 0.1 }}
-      // Cap the stagger so later cards don't wait >0.5 s to appear
+      // Cap stagger so cards don't queue up
       transition={{
-        delay: reduced ? 0 : Math.min(index * 0.04, 0.44),
-        duration: reduced ? 0 : 0.45,
-        ease: [0.22, 1, 0.36, 1],
+        delay: (reduced || isMobile) ? 0 : Math.min(index * 0.04, 0.44),
       }}
       // Scale hover only on desktop
       whileHover={
