@@ -117,7 +117,10 @@ const ScrollStackCard = ({
         <motion.img
           src={item.image}
           alt={`${item.title} placeholder image`}
+          // Eagerly load only the first card; all others are deferred until
+          // the user scrolls the rundown section into view.
           loading={index === 0 ? "eager" : "lazy"}
+          decoding="async"
           className="h-full w-full object-cover"
           style={{ scale: imageScale }}
         />
@@ -224,7 +227,8 @@ const MobileCardCarousel = ({ moments, reduceMotion }: MobileCardCarouselProps) 
               <img
                 src={current.image}
                 alt={current.title}
-                loading="eager"
+                loading="lazy"
+                decoding="async"
                 draggable={false}
                 className="h-full w-full object-cover pointer-events-none"
               />

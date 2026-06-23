@@ -36,22 +36,35 @@ function PhotoCard({ photo, index, caption, categoryLabel, onOpen, isMobile }: P
   const [isHovered, setIsHovered] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
 
+  // Ref to track a pending RAF so we can cancel it on unmount / leave
+  const rafRef = useRef<number | null>(null);
+
   const handleMouseMove = useCallback(
     (e: MouseEvent<HTMLDivElement>) => {
       if (disableTilt || !cardRef.current) return;
-      const rect = cardRef.current.getBoundingClientRect();
-      const cx = rect.left + rect.width / 2;
-      const cy = rect.top + rect.height / 2;
-      const dx = e.clientX - cx;
-      const dy = e.clientY - cy;
-      // Normalize to ±1 then multiply for max tilt degrees
-      const rotY = (dx / (rect.width / 2)) * 7;
-      const rotX = -(dy / (rect.height / 2)) * 7;
-      // Glow position as percentage
-      const glowX = ((e.clientX - rect.left) / rect.width) * 100;
-      const glowY = ((e.clientY - rect.top) / rect.height) * 100;
-      setTilt({ x: rotX, y: rotY });
-      setGlowPos({ x: glowX, y: glowY });
+      // Throttle to one state update per animation frame.
+      // Without this, React re-renders on every raw mousemove event (up to 200+/s).
+      // Storing clientX/Y in local variables avoids the synthetic event being nullified.
+      const clientX = e.clientX;
+      const clientY = e.clientY;
+      if (rafRef.current !== null) return; // already a frame queued
+      rafRef.current = requestAnimationFrame(() => {
+        rafRef.current = null;
+        if (!cardRef.current) return;
+        const rect = cardRef.current.getBoundingClientRect();
+        const cx = rect.left + rect.width / 2;
+        const cy = rect.top + rect.height / 2;
+        const dx = clientX - cx;
+        const dy = clientY - cy;
+        // Normalize to ±1 then multiply for max tilt degrees
+        const rotY = (dx / (rect.width / 2)) * 7;
+        const rotX = -(dy / (rect.height / 2)) * 7;
+        // Glow position as percentage
+        const glowX = ((clientX - rect.left) / rect.width) * 100;
+        const glowY = ((clientY - rect.top) / rect.height) * 100;
+        setTilt({ x: rotX, y: rotY });
+        setGlowPos({ x: glowX, y: glowY });
+      });
     },
     [disableTilt],
   );
@@ -61,6 +74,11 @@ function PhotoCard({ photo, index, caption, categoryLabel, onOpen, isMobile }: P
   }, [disableTilt]);
 
   const handleMouseLeave = useCallback(() => {
+    // Cancel any queued frame so no stale tilt/glow update fires after leave
+    if (rafRef.current !== null) {
+      cancelAnimationFrame(rafRef.current);
+      rafRef.current = null;
+    }
     setIsHovered(false);
     setTilt({ x: 0, y: 0 });
     setGlowPos({ x: 50, y: 50 });

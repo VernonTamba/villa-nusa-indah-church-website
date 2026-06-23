@@ -16,7 +16,6 @@
     "@react-aria/visually-hidden": "3.8.31",
     "@supabase/ssr": "^0.10.3",
     "@supabase/supabase-js": "^2.105.4",
-    "@tabler/icons": "^3.40.0",
     "@tabler/icons-react": "^3.40.0",
     "@vercel/analytics": "^2.0.1",
     "class-variance-authority": "^0.7.1",

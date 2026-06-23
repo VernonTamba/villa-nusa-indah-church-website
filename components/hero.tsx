@@ -58,6 +58,12 @@ const Hero = () => {
   });
   const backgroundY = useTransform(scrollYProgress, [0, 1], ["0%", "12%"]);
 
+  // Track which slide indices have been rendered in the DOM.
+  // We start with the first two so slide 0 loads eagerly and slide 1 is
+  // pre-fetched before the first auto-advance fires (~5.6 s).
+  // All other slides are added lazily as the carousel reaches them.
+  const [renderedSlides, setRenderedSlides] = useState(() => new Set([0, 1]));
+
   // Fetch hero images from Supabase; fall back to local images if empty
   useEffect(() => {
     const supabase = createClient();
@@ -85,7 +91,16 @@ const Hero = () => {
     if (shouldReduceMotion) return;
 
     const carouselTimer = window.setInterval(() => {
-      setActiveSlide((currentSlide) => (currentSlide + 1) % heroSlides.length);
+      setActiveSlide((currentSlide) => {
+        const next = (currentSlide + 1) % heroSlides.length;
+        // Lazily register the next+1 slide so it pre-fetches before it's needed
+        const afterNext = (next + 1) % heroSlides.length;
+        setRenderedSlides((prev) => {
+          if (prev.has(next) && prev.has(afterNext)) return prev;
+          return new Set([...prev, next, afterNext]);
+        });
+        return next;
+      });
     }, 5600);
 
     return () => window.clearInterval(carouselTimer);
@@ -102,31 +117,40 @@ const Hero = () => {
         style={{ y: (shouldReduceMotion || isMobile) ? 0 : backgroundY }}
         aria-hidden="true"
       >
-        {heroSlides.map((slide, index) => (
-          <motion.div
-            key={slide.src}
-            className="absolute inset-0"
-            animate={{
-              opacity: activeSlide === index ? 1 : 0,
-              // Disable Ken-Burns zoom on mobile to reduce GPU load
-              scale: activeSlide === index && !shouldReduceMotion && !isMobile ? 1.04 : 1,
-            }}
-            initial={false}
-            transition={{
-              opacity: { duration: 1.1, ease: "easeInOut" },
-              scale: { duration: 6.2, ease: "easeOut" },
-            }}
-          >
-            <Image
-              fill
-              priority={index === 0}
-              src={slide.src}
-              alt={`${t.hero.eyebrow} — slide ${index + 1}`}
-              sizes="100vw"
-              className="object-cover object-[center_38%]"
-            />
-          </motion.div>
-        ))}
+        {heroSlides.map((slide, index) => {
+          // Skip slides that haven't been queued for rendering yet.
+          // This prevents the browser from loading all 4 images on first paint —
+          // only the current and next slide are ever in the DOM simultaneously
+          // until the carousel naturally cycles through all of them.
+          if (!renderedSlides.has(index)) return null;
+
+          return (
+            <motion.div
+              key={slide.src}
+              className="absolute inset-0"
+              animate={{
+                opacity: activeSlide === index ? 1 : 0,
+                // Disable Ken-Burns zoom on mobile to reduce GPU load
+                scale: activeSlide === index && !shouldReduceMotion && !isMobile ? 1.04 : 1,
+              }}
+              initial={false}
+              transition={{
+                opacity: { duration: 1.1, ease: "easeInOut" },
+                scale: { duration: 6.2, ease: "easeOut" },
+              }}
+            >
+              <Image
+                fill
+                priority={index === 0}
+                src={slide.src}
+                alt={`${t.hero.eyebrow} — slide ${index + 1}`}
+                sizes="100vw"
+                className="object-cover object-[center_38%]"
+              />
+            </motion.div>
+          );
+        })}
+
       </motion.div>
 
       <div className="absolute inset-0 overflow-hidden">

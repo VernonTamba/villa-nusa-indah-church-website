@@ -222,34 +222,34 @@ export const SCROLL_MOMENTS: ScrollMoment[] = [
     title: "A soft start before worship begins",
     description:
       "Temporary image placeholder for the welcome moments, greetings, and early arrivals before the service starts.",
-    image: "https://picsum.photos/seed/vni-rundown-1/1400/1800",
+    image: "https://picsum.photos/seed/vni-rundown-1/1200/675",
   },
   {
     label: "Moment 02",
     title: "Voices rising together in praise",
     description:
       "This is standing in for future worship photos and helps the section feel alive while the real gallery is being prepared.",
-    image: "https://picsum.photos/seed/vni-rundown-2/1400/1800",
+    image: "https://picsum.photos/seed/vni-rundown-2/1200/675",
   },
   {
     label: "Moment 03",
     title: "Scripture, stillness, and reflection",
     description:
       "A placeholder frame for the quieter parts of the day, where the room settles and attention turns toward the message.",
-    image: "https://picsum.photos/seed/vni-rundown-3/1400/1800",
+    image: "https://picsum.photos/seed/vni-rundown-3/1200/675",
   },
   {
     label: "Moment 04",
     title: "Shared meals and joyful conversations",
     description:
       "This will eventually be swapped for fellowship photography, but for now it keeps the story of the day flowing visually.",
-    image: "https://picsum.photos/seed/vni-rundown-4/1400/1800",
+    image: "https://picsum.photos/seed/vni-rundown-4/1200/675",
   },
   {
     label: "Moment 05",
     title: "Ending the Sabbath with warmth",
     description:
       "A final placeholder image for the closing rhythm of the day, leaving the section with a calm and gracious finish.",
-    image: "https://picsum.photos/seed/vni-rundown-5/1400/1800",
+    image: "https://picsum.photos/seed/vni-rundown-5/1200/675",
   },
 ];
