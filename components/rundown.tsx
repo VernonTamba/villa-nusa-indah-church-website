@@ -615,8 +615,8 @@ const Rundown = () => {
           >
             <div className="sticky top-0 flex h-screen items-center justify-center">
               {/* Fills nearly the full viewport width; height driven by 16/9 ratio */}
-              <div className="relative w-full max-w-[88vw] xl:max-w-6xl px-3 sm:px-6">
-                <div className="relative w-full" style={{ aspectRatio: "16/9" }}>
+              <div className="relative w-full max-w-[72vw] xl:max-w-5xl px-3 sm:px-6">
+                <div className="relative w-full" style={{ aspectRatio: "16/9", maxHeight: "72vh" }}>
                   {scrollMoments.map((item, index) => (
                     <ScrollStackCard
                       key={item.label}
