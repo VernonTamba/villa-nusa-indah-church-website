@@ -7,7 +7,8 @@ import {
   IconChevronDown,
   IconMail,
   IconMapPin,
-  IconSparkles,
+  IconPlayerPause,
+  IconPlayerPlay,
 } from "@tabler/icons-react";
 import {
   motion,
@@ -17,6 +18,7 @@ import {
 } from "framer-motion";
 
 import { useLanguage } from "@/lib/i18n";
+import { CHURCH_LOCATION } from "@/constants/location";
 import { createClient } from "@/utils/supabase/client";
 
 const FALLBACK_SLIDES = [
@@ -48,7 +50,9 @@ const Hero = () => {
   const { messages: t } = useLanguage();
   const heroRef = useRef<HTMLElement>(null);
   const [activeSlide, setActiveSlide] = useState(0);
-  const [heroSlides, setHeroSlides] = useState<{ src: string }[]>(FALLBACK_SLIDES);
+  const [paused, setPaused] = useState(false);
+  const [heroSlides, setHeroSlides] =
+    useState<{ src: string }[]>(FALLBACK_SLIDES);
   const shouldReduceMotion = useReducedMotion() ?? false;
   // Detect mobile to skip expensive parallax on low-end devices
   const [isMobile, setIsMobile] = useState(false);
@@ -67,6 +71,7 @@ const Hero = () => {
   // Fetch hero images from Supabase; fall back to local images if empty
   useEffect(() => {
     const supabase = createClient();
+
     supabase
       .from("hero_images")
       .select("public_url")
@@ -81,41 +86,46 @@ const Hero = () => {
   // Detect mobile breakpoint (<640px) after mount to disable heavy parallax
   useEffect(() => {
     const mq = window.matchMedia("(max-width: 639px)");
+
     setIsMobile(mq.matches);
     const handler = (e: MediaQueryListEvent) => setIsMobile(e.matches);
+
     mq.addEventListener("change", handler);
+
     return () => mq.removeEventListener("change", handler);
   }, []);
 
   useEffect(() => {
-    if (shouldReduceMotion) return;
+    if (shouldReduceMotion || paused) return;
 
     const carouselTimer = window.setInterval(() => {
       setActiveSlide((currentSlide) => {
         const next = (currentSlide + 1) % heroSlides.length;
         // Lazily register the next+1 slide so it pre-fetches before it's needed
         const afterNext = (next + 1) % heroSlides.length;
+
         setRenderedSlides((prev) => {
           if (prev.has(next) && prev.has(afterNext)) return prev;
+
           return new Set([...prev, next, afterNext]);
         });
+
         return next;
       });
     }, 5600);
 
     return () => window.clearInterval(carouselTimer);
-  }, [shouldReduceMotion, heroSlides.length]);
+  }, [shouldReduceMotion, paused, heroSlides.length]);
 
   return (
     <section
       ref={heroRef}
-      className="relative w-screen -mt-16 mb-48 min-h-svh overflow-hidden bg-slate-950 text-white"
-      style={{ marginLeft: "calc(50% - 50vw)" }}
+      className="relative -mt-16 min-h-[min(900px,100svh)] overflow-hidden bg-background text-white"
     >
       <motion.div
-        className="absolute inset-x-0 -inset-y-16 overflow-hidden will-change-transform"
-        style={{ y: (shouldReduceMotion || isMobile) ? 0 : backgroundY }}
         aria-hidden="true"
+        className="absolute inset-x-0 -inset-y-16 overflow-hidden will-change-transform"
+        style={{ y: shouldReduceMotion || isMobile ? 0 : backgroundY }}
       >
         {heroSlides.map((slide, index) => {
           // Skip slides that haven't been queued for rendering yet.
@@ -127,12 +137,15 @@ const Hero = () => {
           return (
             <motion.div
               key={slide.src}
-              className="absolute inset-0"
               animate={{
                 opacity: activeSlide === index ? 1 : 0,
                 // Disable Ken-Burns zoom on mobile to reduce GPU load
-                scale: activeSlide === index && !shouldReduceMotion && !isMobile ? 1.04 : 1,
+                scale:
+                  activeSlide === index && !shouldReduceMotion && !isMobile
+                    ? 1.04
+                    : 1,
               }}
+              className="absolute inset-0"
               initial={false}
               transition={{
                 opacity: { duration: 1.1, ease: "easeInOut" },
@@ -141,43 +154,29 @@ const Hero = () => {
             >
               <Image
                 fill
-                priority={index === 0}
-                src={slide.src}
                 alt={`${t.hero.eyebrow} — slide ${index + 1}`}
-                sizes="100vw"
                 className="object-cover object-[center_38%]"
+                priority={index === 0}
+                sizes="100vw"
+                src={slide.src}
               />
             </motion.div>
           );
         })}
-
       </motion.div>
 
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(1,31,26,0.88)_0%,rgba(1,75,63,0.66)_42%,rgba(1,31,26,0.22)_100%)]" />
-        <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(2,6,23,0.16)_0%,rgba(2,6,23,0.12)_45%,rgba(2,6,23,0.5)_100%)]" />
-      </div>
+      <div aria-hidden="true" className="absolute inset-0 bg-black/65" />
 
-      <div className="relative z-30 mx-auto flex min-h-svh w-full max-w-7xl flex-col px-6 py-12 sm:px-10 sm:py-16 lg:px-12">
-        <div className="flex flex-1 items-center py-8 sm:py-10">
-          <div className="max-w-4xl space-y-7">
-            <motion.p
-              className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.28em] text-secondary backdrop-blur-md"
-              initial={{ opacity: 0, y: 18 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, ease: "easeOut" }}
-            >
-              <IconSparkles size={16} />
-              {t.hero.eyebrow}
-            </motion.p>
-
+      <div className="ns-container relative z-30 flex min-h-[min(900px,100svh)] flex-col pt-28 pb-6 md:pt-36 md:pb-8">
+        <div className="flex flex-1 items-center py-6 md:py-10">
+          <div className="max-w-3xl space-y-6">
             <motion.div
-              className="space-y-5"
-              initial={{ opacity: 0, y: 26 }}
               animate={{ opacity: 1, y: 0 }}
+              className="space-y-5"
+              initial={false}
               transition={{ delay: 0.12, duration: 0.7, ease: "easeOut" }}
             >
-              <h1 className="max-w-4xl text-4xl font-black leading-[1.02] tracking-normal text-white sm:text-6xl lg:text-7xl">
+              <h1 className="ns-display max-w-3xl text-white">
                 GMAHK Villa Nusa Indah
               </h1>
               <p className="max-w-2xl text-base leading-7 text-white sm:text-lg sm:leading-8">
@@ -186,9 +185,9 @@ const Hero = () => {
             </motion.div>
 
             <motion.div
-              className="grid max-w-3xl gap-3 pt-2 sm:grid-cols-3"
-              initial={{ opacity: 0, y: 22 }}
               animate={{ opacity: 1, y: 0 }}
+              className="ns-actions pt-2"
+              initial={false}
               transition={{ delay: 0.22, duration: 0.7, ease: "easeOut" }}
             >
               {HERO_LINKS.map((item) => {
@@ -197,50 +196,84 @@ const Hero = () => {
                 return (
                   <a
                     key={item.href}
+                    className={
+                      item.labelKey === "rundown"
+                        ? "ns-primary w-full sm:w-auto"
+                        : "ns-secondary w-full sm:w-auto bg-background/70"
+                    }
                     href={item.href}
-                    className="group flex items-center gap-3 border border-white/20 bg-white/10 px-4 py-3 shadow-[0_18px_45px_rgba(0,0,0,0.18)] backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:border-secondary/70 hover:bg-white/15 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-secondary rounded-xl"
                   >
-                    <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-secondary text-secondary-foreground transition-transform duration-300 group-hover:scale-110">
+                    <span className="flex shrink-0 items-center justify-center">
                       <Icon size={20} />
                     </span>
-                    <span className="text-sm font-semibold text-white">
+                    <span className="text-base font-semibold">
                       {t.hero.links[item.labelKey]}
                     </span>
                   </a>
                 );
               })}
             </motion.div>
+            <div className="space-y-2 border-t border-white/25 pt-5 text-sm text-white">
+              <p className="font-semibold">{t.location.worshipHoursValue}</p>
+              <a
+                className="inline-flex min-h-11 max-w-xl items-center gap-2 underline decoration-white/40"
+                href="#location"
+              >
+                <IconMapPin className="shrink-0" size={18} />
+                {CHURCH_LOCATION.address}
+              </a>
+            </div>
           </div>
         </div>
 
-        <div className="mt-auto flex items-end justify-between gap-6">
-          <div className="hidden items-center gap-2 sm:flex" aria-label="Slide indicators">
+        <div className="mt-auto flex flex-wrap items-end justify-between gap-6">
+          <div
+            aria-label={t.common.slide.replace(
+              "{count}",
+              String(activeSlide + 1),
+            )}
+            className="flex max-w-full flex-wrap items-center gap-1"
+          >
             {heroSlides.map((slide, index) => (
               <button
                 key={slide.src + index}
-                onClick={() => setActiveSlide(index)}
-                aria-label={`Go to slide ${index + 1}`}
                 aria-current={activeSlide === index ? "true" : undefined}
-                className={`h-1 rounded-full transition-all duration-500 cursor-pointer ${
-                  activeSlide === index
-                    ? "w-12 bg-secondary"
-                    : "w-6 bg-white/40 hover:bg-white/70"
-                }`}
+                aria-label={t.common.slide.replace(
+                  "{count}",
+                  String(index + 1),
+                )}
+                className={`relative h-11 w-11 rounded-lg after:absolute after:inset-x-2 after:top-5 after:h-1 after:rounded-full ${activeSlide === index ? "after:bg-secondary" : "after:bg-white/60"}`}
+                onClick={() => {
+                  setRenderedSlides((prev) => new Set([...prev, index]));
+                  setActiveSlide(index);
+                }}
               />
             ))}
+            <button
+              aria-label={paused ? t.common.play : t.common.pause}
+              className="flex h-11 w-11 items-center justify-center rounded-lg"
+              type="button"
+              onClick={() => setPaused((value) => !value)}
+            >
+              {paused ? (
+                <IconPlayerPlay size={20} />
+              ) : (
+                <IconPlayerPause size={20} />
+              )}
+            </button>
           </div>
 
-          <div className="ml-auto flex items-center gap-3 text-sm font-semibold text-white">
+          <div className="ml-auto hidden sm:flex items-center gap-3 text-sm font-semibold text-white">
             <span>{t.hero.scroll}</span>
             <motion.span
-              aria-hidden="true"
               animate={shouldReduceMotion ? undefined : { y: [0, 7, 0] }}
+              aria-hidden="true"
+              className="flex h-10 w-10 items-center justify-center"
               transition={{
                 duration: 1.6,
                 repeat: Infinity,
                 ease: "easeInOut",
               }}
-              className="flex h-10 w-10 items-center justify-center rounded-full border border-white/20 bg-white/10 backdrop-blur-md"
             >
               <IconChevronDown size={20} />
             </motion.span>

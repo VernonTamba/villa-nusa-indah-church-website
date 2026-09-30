@@ -44,3 +44,10 @@ bun.lockb
 
 # editor
 .vscode/
+
+# Local browser verification artifacts
+/.playwright-mcp/
+
+# Locally installed design tooling and its hooks
+/.agents/skills/impeccable/
+/.codex/hooks.json

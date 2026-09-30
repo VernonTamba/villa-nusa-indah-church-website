@@ -86,13 +86,35 @@
         "title": "Sabbath School",
         "detail": "Sabbath School discussions to start the Sabbath on a spiritual note.",
         "subdetail": "In Sabbath School worship, we start off with a few songs. The Sabbath School leader opens with a welcome and prayer. We have a mission story, special song, offering assisted by deacons and deaconesses, a lesson discussion, stewardship moment, and a closing prayer.",
-        "participants": ["Song Leader", "Pianist", "Sabbath School Leader", "Memory Verse & Opening Prayer", "Mission Story", "Special Song", "Deacons/Deaconesses", "Sabbath School Discussion", "Personal Ministry / Family & Health", "Closing Prayer"]
+        "participants": [
+          "Song Leader",
+          "Pianist",
+          "Sabbath School Leader",
+          "Memory Verse & Opening Prayer",
+          "Mission Story",
+          "Special Song",
+          "Deacons/Deaconesses",
+          "Sabbath School Discussion",
+          "Personal Ministry / Family & Health",
+          "Closing Prayer"
+        ]
       },
       {
         "title": "Divine Service",
         "detail": "Praise, prayer, and the main sermon for the day.",
         "subdetail": "Divine Service opens with congregational singing and piano accompaniment. The service includes responsive reading, intercessory prayer, offering with prayer, assistance from deacons and deaconesses, a children's story, special song, the main sermon, and a closing benediction.",
-        "participants": ["Song Leader", "Pianist", "Responsive Reading", "Intercessory Prayer", "Offering Reading & Prayer", "Deacons/Deaconesses", "Children's Story", "Special Song", "Sermon", "Benediction"]
+        "participants": [
+          "Song Leader",
+          "Pianist",
+          "Responsive Reading",
+          "Intercessory Prayer",
+          "Offering Reading & Prayer",
+          "Deacons/Deaconesses",
+          "Children's Story",
+          "Special Song",
+          "Sermon",
+          "Benediction"
+        ]
       },
       {
         "title": "Potluck Fellowship",
@@ -110,7 +132,18 @@
         "title": "Adventist Youth Fellowship",
         "detail": "Youth-led worship, activities, and spiritual reflection.",
         "subdetail": "Youth fellowship closes the Sabbath with praise, Bible reflection, group activities, games, and a time of prayerful commitment together.",
-        "participants": ["Song Leader", "Pianist", "MC", "AY Motto, Aim & Pledge", "Memory Verse & Opening Prayer", "Energizer", "Bible Games", "Special Song", "Main Program", "Devotional"]
+        "participants": [
+          "Song Leader",
+          "Pianist",
+          "MC",
+          "AY Motto, Aim & Pledge",
+          "Memory Verse & Opening Prayer",
+          "Energizer",
+          "Bible Games",
+          "Special Song",
+          "Main Program",
+          "Devotional"
+        ]
       }
     ],
     "moments": [
@@ -157,7 +190,11 @@
     "gmailLabel": "Contact us through Gmail",
     "whatsappLabel": "Contact us through WhatsApp",
     "visitLabel": "Visit",
-    "messageTypes": ["Prayer requests", "Questions", "Greetings"]
+    "messageTypes": [
+      "Prayer requests",
+      "Questions",
+      "Greetings"
+    ]
   },
   "faq": {
     "titleStart": "Frequently Asked",
@@ -209,6 +246,7 @@
     "titleEmphasis": " Members ",
     "description": "Get to know the family of GMAHK Villa Nusa Indah — the members and ministry leaders who grow together in faith, serve with love, and build a warm and welcoming community. Use the search below to find someone you're looking for.",
     "searchAria": "Search member name",
+    "clearSearch": "Clear member search",
     "searchPlaceholder": "Search member name...",
     "count": "{filtered} of {total} members",
     "photoAlt": "Photo of {name}",
@@ -319,5 +357,37 @@
         "accountHolder": "GEREJA MAHK VILLA NU (GMAHK Villa Nusa Indah)"
       }
     ]
+  },
+  "common": {
+    "skipContent": "Skip to main content",
+    "close": "Close",
+    "menu": "Open menu",
+    "closeMenu": "Close menu",
+    "language": "Choose language",
+    "loadMore": "Load {count} more",
+    "remaining": "{count} remaining",
+    "showingMembers": "Showing {count} of {total} members",
+    "showingPhotos": "Showing {count} of {total} photos",
+    "filterPhotos": "Filter photos by category",
+    "slide": "Show photo {count}",
+    "pause": "Pause slideshow",
+    "play": "Play slideshow",
+    "copyFailed": "Could not copy. Select the account number and copy it manually.",
+    "loading": "Loading page",
+    "errorTitle": "This page could not be displayed",
+    "errorDescription": "Please try again. If the problem continues, return home to contact us.",
+    "retry": "Try again",
+    "home": "Return home"
+  },
+  "login": {
+    "email": "Email",
+    "password": "Password",
+    "show": "Show password",
+    "hide": "Hide password",
+    "error": "Incorrect email or password. Please try again.",
+    "submit": "Sign in to Admin Panel",
+    "loading": "Signing in...",
+    "description": "Sign in to manage the church website content",
+    "restricted": "Access restricted to VNI church administrators"
   }
 }

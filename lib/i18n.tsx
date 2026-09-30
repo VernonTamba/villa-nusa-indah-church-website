@@ -6,6 +6,7 @@ import {
   useEffect,
   useMemo,
   useState,
+  startTransition,
   type ReactNode,
 } from "react";
 
@@ -38,7 +39,8 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     const storedLocale = window.localStorage.getItem("vni-locale");
 
     if (isLocale(storedLocale)) {
-      setLocaleState(storedLocale);
+      // Allow server-rendered, lazy sections to hydrate before switching copy.
+      startTransition(() => setLocaleState(storedLocale));
     }
   }, []);
 

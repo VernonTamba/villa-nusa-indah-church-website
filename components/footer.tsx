@@ -1,8 +1,5 @@
 "use client";
 
-import AdventistLogo from "@/public/icons/advent.svg";
-import { CONTACT_DETAILS } from "@/constants/contact-details";
-import { WORSHIP_SCHEDULES } from "@/constants/footer";
 import { Button } from "@heroui/button";
 import { Card } from "@heroui/card";
 import Image from "next/image";
@@ -14,9 +11,18 @@ import {
   IconMapPinFilled,
   IconPhoneFilled,
 } from "@tabler/icons-react";
-import { useLanguage } from "@/lib/i18n";
 import { motion } from "framer-motion";
-import { fadeUp, fadeIn, staggerContainer, staggerItem, viewport } from "@/lib/animations";
+
+import { useLanguage } from "@/lib/i18n";
+import { WORSHIP_SCHEDULES } from "@/constants/footer";
+import { CONTACT_DETAILS } from "@/constants/contact-details";
+import AdventistLogo from "@/public/icons/advent.svg";
+import {
+  fadeIn,
+  staggerContainer,
+  staggerItem,
+  viewport,
+} from "@/lib/animations";
 import { siteConfig } from "@/config/site";
 
 const Footer = () => {
@@ -27,124 +33,131 @@ const Footer = () => {
   }));
 
   return (
-    <div className="container mx-auto max-w-9xl px-6">
+    <footer className="ns-container border-t border-border pt-12 md:pt-16">
       <motion.div
-        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-12"
+        animate="visible"
+        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 mb-8 md:gap-12"
+        initial={false}
         variants={staggerContainer}
-        initial="hidden"
-        whileInView="visible"
         viewport={viewport}
       >
-        <motion.div variants={staggerItem} className="flex flex-col gap-2 px-4 py-6">
+        <motion.div
+          className="flex min-w-0 flex-col gap-4 sm:col-span-2 lg:col-span-1"
+          variants={staggerItem}
+        >
           <div className="flex items-center gap-3 max-w-fit">
-            <span className="flex items-center justify-center rounded-md bg-white p-1">
+            <span className="flex shrink-0 items-center justify-center rounded-md bg-white p-1">
               <Image
-                src={AdventistLogo}
                 alt="Adventist Logo"
                 height={30}
+                src={AdventistLogo}
                 width={30}
               />
             </span>
-            <p className="font-bold text-inherit leading-4">
+            <p className="font-semibold text-inherit leading-snug">
               GMAHK Villa Nusa Indah
             </p>
           </div>
 
-          <p className="text-sm">
-            {t.footer.description}
-          </p>
+          <p className="ns-copy">{t.footer.description}</p>
 
-          <div className="flex items-center justify-start gap-4 mt-3">
+          <div className="ns-actions">
             <Button
               isIconOnly
-              variant="solid"
-              as="a"
-              href={siteConfig.links.facebook}
-              target="_blank"
-              rel="noopener noreferrer"
               aria-label="Facebook"
-              className="bg-primary text-primary-foreground"
+              as="a"
+              className="min-h-11 min-w-11 rounded-xl border border-border bg-surface text-secondary"
+              href={siteConfig.links.facebook}
+              rel="noopener noreferrer"
+              target="_blank"
+              variant="solid"
             >
               <IconBrandFacebook />
             </Button>
             <Button
               isIconOnly
-              variant="solid"
-              as="a"
-              href={siteConfig.links.instagram}
-              target="_blank"
-              rel="noopener noreferrer"
               aria-label="Instagram"
-              className="bg-primary text-primary-foreground"
+              as="a"
+              className="min-h-11 min-w-11 rounded-xl border border-border bg-surface text-secondary"
+              href={siteConfig.links.instagram}
+              rel="noopener noreferrer"
+              target="_blank"
+              variant="solid"
             >
               <IconBrandInstagram />
             </Button>
             <Button
               isIconOnly
-              variant="solid"
-              as="a"
-              href={siteConfig.links.youtube}
-              target="_blank"
-              rel="noopener noreferrer"
               aria-label="YouTube"
-              className="bg-primary text-primary-foreground"
+              as="a"
+              className="min-h-11 min-w-11 rounded-xl border border-border bg-surface text-secondary"
+              href={siteConfig.links.youtube}
+              rel="noopener noreferrer"
+              target="_blank"
+              variant="solid"
             >
               <IconBrandYoutube />
             </Button>
           </div>
         </motion.div>
-        <motion.div variants={staggerItem} className="px-4 py-6">
-          <p className="font-semibold my-2">{t.footer.contact}</p>
-          <div className="flex flex-col gap-2 mt-3">
-            <p className="text-sm flex items-center gap-2">
-              <IconMapPinFilled size={24} className="text-primary" />
+        <motion.div className="min-w-0" variants={staggerItem}>
+          <h2 className="ns-card-title">{t.footer.contact}</h2>
+          <div className="flex flex-col gap-4 mt-6">
+            <p className="text-sm flex items-start gap-3">
+              <IconMapPinFilled className="shrink-0 text-secondary" size={20} />
               {t.footer.address}
             </p>
-            <p className="text-sm flex items-center gap-2">
-              <IconPhoneFilled size={24} className="text-primary" />
+            <p className="text-sm flex items-start gap-3">
+              <IconPhoneFilled className="shrink-0 text-secondary" size={20} />
               {CONTACT_DETAILS.phone}
             </p>
-            <p className="text-sm flex items-center gap-2">
-              <IconMailFilled size={24} className="text-primary" />
+            <p className="text-sm flex items-start gap-3">
+              <IconMailFilled className="shrink-0 text-secondary" size={20} />
               {CONTACT_DETAILS.email}
             </p>
           </div>
         </motion.div>
-        <motion.div variants={staggerItem} className="px-4 py-6">
-          <p className="font-semibold my-2">{t.footer.schedule}</p>
-          <div className="flex flex-col gap-4 mt-4">
+        <motion.div className="min-w-0" variants={staggerItem}>
+          <h2 className="ns-card-title">{t.footer.schedule}</h2>
+          <div className="flex flex-col gap-4 mt-6">
             {schedules.map((item) => (
-              <Card key={item.title} className="w-full max-w-[400px] p-4">
-                <div className="flex justify-between items-start">
-                  <div>
+              <Card
+                key={item.title}
+                className="w-full p-4 rounded-xl border border-border bg-surface shadow-none"
+              >
+                <div className="flex justify-between items-start gap-3">
+                  <div className="min-w-0">
                     <p className="font-semibold">{item.title}</p>
-                    <p className="text-sm text-default-500">{item.time}</p>
+                    <p className="text-sm text-muted-foreground">{item.time}</p>
                   </div>
 
-                  {item.icon}
+                  <span aria-hidden="true" className="shrink-0">
+                    {item.icon}
+                  </span>
                 </div>
               </Card>
             ))}
           </div>
         </motion.div>
       </motion.div>
-      <motion.footer
-        className="w-full flex items-center justify-center gap-12 py-6 border-t border-primary/50"
+      <motion.div
+        animate="visible"
+        className="w-full flex flex-col sm:flex-row flex-wrap items-start justify-between gap-3 py-6 border-t border-border text-muted-foreground"
+        initial={false}
         variants={fadeIn}
-        initial="hidden"
-        whileInView="visible"
         viewport={viewport}
       >
         <p className="text-sm">
-          &copy; {new Date().getFullYear()} GMAHK Villa Nusa Indah.{" "}
-          All rights reserved.
+          &copy; {new Date().getFullYear()} GMAHK Villa Nusa Indah. All rights
+          reserved.
         </p>
 
-        <p className="text-sm ml-4">
-          Built with <span className="text-primary">♥</span> by the VNI Coms Team.
+        <p className="text-sm">
+          Built with <span className="text-primary">♥</span> by the VNI Coms
+          Team.
         </p>
-      </motion.footer>
-    </div>
+      </motion.div>
+    </footer>
   );
 };
 

@@ -86,13 +86,35 @@
         "title": "Sekolah Sabat",
         "detail": "Diskusi Sekolah Sabat untuk memulai hari Sabat dengan pertumbuhan rohani.",
         "subdetail": "Dalam ibadah Sekolah Sabat, kami memulai dengan beberapa lagu. Pemimpin Sekolah Sabat membuka dengan sambutan dan doa. Ada bacaan mission, lagu pujian, persembahan yang dibantu diakon dan diakones, diskusi pelajaran, pelayanan perorangan, dan doa penutup.",
-        "participants": ["Pemimpin Lagu", "Pianist", "Pemimpin Sekolah Sabat", "Ayat Inti dan Doa Buka", "Bacaan Mission", "Lagu Pujian", "Diakon/Diakones", "Diskusi Sekolah Sabat", "Pelayanan Perorangan/Rumah Tangga & Kesehatan", "Doa Tutup"]
+        "participants": [
+          "Pemimpin Lagu",
+          "Pianist",
+          "Pemimpin Sekolah Sabat",
+          "Ayat Inti dan Doa Buka",
+          "Bacaan Mission",
+          "Lagu Pujian",
+          "Diakon/Diakones",
+          "Diskusi Sekolah Sabat",
+          "Pelayanan Perorangan/Rumah Tangga & Kesehatan",
+          "Doa Tutup"
+        ]
       },
       {
         "title": "Khotbah",
         "detail": "Pujian, doa, dan khotbah utama pada hari Sabat.",
         "subdetail": "Khotbah dibuka dengan nyanyian jemaat dan iringan piano. Ibadah mencakup bacaan ayat bersahutan, doa syafaat, pembacaan dan doa persembahan, pelayanan diakon dan diakones, cerita anak-anak, lagu pujian, khotbah utama, dan doa berkat penutup.",
-        "participants": ["Pemimpin Lagu", "Pianist", "Bacaan Ayat Bersahutan", "Doa Syafaat", "Pembacaan dan Doa Persembahan", "Diakon/Diakones", "Cerita Anak-Anak", "Lagu Pujian", "Khotbah", "Doa Berkat"]
+        "participants": [
+          "Pemimpin Lagu",
+          "Pianist",
+          "Bacaan Ayat Bersahutan",
+          "Doa Syafaat",
+          "Pembacaan dan Doa Persembahan",
+          "Diakon/Diakones",
+          "Cerita Anak-Anak",
+          "Lagu Pujian",
+          "Khotbah",
+          "Doa Berkat"
+        ]
       },
       {
         "title": "Makan Siang Bersama",
@@ -110,7 +132,18 @@
         "title": "Acara Pemuda Advent",
         "detail": "Ibadah yang dipimpin pemuda, kegiatan bersama, dan renungan rohani.",
         "subdetail": "Persekutuan pemuda menutup hari Sabat dengan pujian, refleksi Alkitab, kegiatan kelompok, games, dan doa komitmen bersama.",
-        "participants": ["Pemimpin Lagu", "Pianist", "Pemimpin Acara", "Moto, Tujuan, dan Janji PA", "Ayat Inti dan Doa Buka", "Energizer", "Games Alkitab", "Lagu Pujian", "Acara Inti", "Renungan"]
+        "participants": [
+          "Pemimpin Lagu",
+          "Pianist",
+          "Pemimpin Acara",
+          "Moto, Tujuan, dan Janji PA",
+          "Ayat Inti dan Doa Buka",
+          "Energizer",
+          "Games Alkitab",
+          "Lagu Pujian",
+          "Acara Inti",
+          "Renungan"
+        ]
       }
     ],
     "moments": [
@@ -157,7 +190,11 @@
     "gmailLabel": "Hubungi kami melalui Gmail",
     "whatsappLabel": "Hubungi kami melalui WhatsApp",
     "visitLabel": "Kunjungi",
-    "messageTypes": ["Permohonan doa", "Pertanyaan", "Salam"]
+    "messageTypes": [
+      "Permohonan doa",
+      "Pertanyaan",
+      "Salam"
+    ]
   },
   "faq": {
     "titleStart": "Pertanyaan",
@@ -209,6 +246,7 @@
     "titleEmphasis": " Jemaat ",
     "description": "Kenali keluarga GMAHK Villa Nusa Indah — para anggota jemaat dan pelayan yang bersama-sama bertumbuh dalam iman, melayani dengan kasih, dan membangun komunitas yang hangat. Temukan nama yang Anda cari melalui kolom pencarian di bawah.",
     "searchAria": "Cari nama anggota",
+    "clearSearch": "Hapus pencarian anggota",
     "searchPlaceholder": "Cari nama anggota...",
     "count": "{filtered} dari {total} anggota",
     "photoAlt": "Foto {name}",
@@ -319,5 +357,37 @@
         "accountHolder": "GEREJA MAHK VILLA NU (GMAHK Villa Nusa Indah)"
       }
     ]
+  },
+  "common": {
+    "skipContent": "Lewati ke konten utama",
+    "close": "Tutup",
+    "menu": "Buka menu",
+    "closeMenu": "Tutup menu",
+    "language": "Pilih bahasa",
+    "loadMore": "Tampilkan {count} lagi",
+    "remaining": "{count} tersisa",
+    "showingMembers": "Menampilkan {count} dari {total} anggota",
+    "showingPhotos": "Menampilkan {count} dari {total} foto",
+    "filterPhotos": "Filter foto berdasarkan kategori",
+    "slide": "Tampilkan foto {count}",
+    "pause": "Jeda foto otomatis",
+    "play": "Putar foto otomatis",
+    "copyFailed": "Tidak dapat menyalin. Pilih nomor rekening dan salin secara manual.",
+    "loading": "Memuat halaman",
+    "errorTitle": "Halaman belum dapat ditampilkan",
+    "errorDescription": "Silakan coba lagi. Jika masalah berlanjut, kembali ke beranda untuk menghubungi kami.",
+    "retry": "Coba lagi",
+    "home": "Kembali ke beranda"
+  },
+  "login": {
+    "email": "Email",
+    "password": "Kata sandi",
+    "show": "Tampilkan kata sandi",
+    "hide": "Sembunyikan kata sandi",
+    "error": "Email atau password salah. Silakan coba lagi.",
+    "submit": "Masuk ke Admin Panel",
+    "loading": "Masuk...",
+    "description": "Masuk untuk mengelola konten website jemaat",
+    "restricted": "Akses terbatas untuk administrator jemaat VNI"
   }
 }

@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
 import Image from "next/image";
 
+import { useLanguage } from "@/lib/i18n";
 import AdventistLogo from "@/public/icons/advent.svg";
 
 /**
@@ -16,6 +17,7 @@ import AdventistLogo from "@/public/icons/advent.svg";
  */
 export default function PageLoader() {
   const pathname = usePathname();
+  const { messages: t } = useLanguage();
 
   // Track the "previous" pathname so we can detect a real route change.
   const prevPathRef = useRef<string>(pathname);
@@ -29,7 +31,8 @@ export default function PageLoader() {
 
   function startLoad() {
     // Cancel any in-flight animation
-    if (progressRafRef.current !== null) cancelAnimationFrame(progressRafRef.current);
+    if (progressRafRef.current !== null)
+      cancelAnimationFrame(progressRafRef.current);
     if (hideTimerRef.current !== null) clearTimeout(hideTimerRef.current);
 
     setProgress(0);
@@ -45,6 +48,7 @@ export default function PageLoader() {
       const t = Math.min(elapsed / DURATION, 1);
       // Ease-out cubic
       const eased = 1 - Math.pow(1 - t, 3);
+
       setProgress(eased * TARGET);
       if (t < 1) {
         progressRafRef.current = requestAnimationFrame(tick);
@@ -76,18 +80,20 @@ export default function PageLoader() {
       // We finish as soon as this effect runs with the new pathname.
       // Using a tiny timeout gives the ramp animation a chance to play.
       const finishTimer = setTimeout(finishLoad, 600);
+
       prevPathRef.current = pathname;
+
       return () => clearTimeout(finishTimer);
     }
 
     prevPathRef.current = pathname;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pathname]);
 
   // Cleanup on unmount
   useEffect(() => {
     return () => {
-      if (progressRafRef.current !== null) cancelAnimationFrame(progressRafRef.current);
+      if (progressRafRef.current !== null)
+        cancelAnimationFrame(progressRafRef.current);
       if (hideTimerRef.current !== null) clearTimeout(hideTimerRef.current);
     };
   }, []);
@@ -97,20 +103,21 @@ export default function PageLoader() {
       {isLoading && (
         <motion.div
           key="page-loader"
-          className="fixed inset-0 z-[99999] flex flex-col items-center justify-center bg-background"
-          initial={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.35, ease: "easeInOut" }}
+          aria-label={t.common.loading}
           aria-live="polite"
-          aria-label="Loading page"
+          className="fixed inset-0 z-[99999] flex flex-col items-center justify-center bg-background"
+          exit={{ opacity: 0 }}
+          initial={{ opacity: 1 }}
+          transition={{ duration: 0.35, ease: "easeInOut" }}
         >
           {/* ── Top progress bar ─────────────────────────────────────────── */}
           <div
+            aria-label={t.common.loading}
+            aria-valuemax={100}
+            aria-valuemin={0}
+            aria-valuenow={Math.round(progress)}
             className="absolute inset-x-0 top-0 h-[3px] bg-foreground/10"
             role="progressbar"
-            aria-valuenow={Math.round(progress)}
-            aria-valuemin={0}
-            aria-valuemax={100}
           >
             <motion.div
               className="h-full origin-left bg-gradient-to-r from-secondary to-primary"
@@ -121,21 +128,21 @@ export default function PageLoader() {
 
           {/* ── Center content: logo + church name ───────────────────────── */}
           <motion.div
-            className="flex flex-col items-center gap-5"
-            initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
+            className="flex flex-col items-center gap-5"
             exit={{ opacity: 0, y: -8 }}
+            initial={{ opacity: 0, y: 12 }}
             transition={{ duration: 0.3, ease: "easeOut" }}
           >
             {/* Logo badge */}
             <div className="flex h-20 w-20 items-center justify-center rounded-2xl bg-white shadow-[0_12px_36px_rgba(0,0,0,0.18)]">
               <Image
-                src={AdventistLogo}
-                alt="Adventist Logo"
-                width={44}
-                height={44}
-                className="h-11 w-11"
                 priority
+                alt="Adventist Logo"
+                className="h-11 w-11"
+                height={44}
+                src={AdventistLogo}
+                width={44}
               />
             </div>
 
@@ -150,12 +157,12 @@ export default function PageLoader() {
             </div>
 
             {/* Animated dots */}
-            <div className="flex items-center gap-1.5" aria-hidden="true">
+            <div aria-hidden="true" className="flex items-center gap-1.5">
               {[0, 1, 2].map((i) => (
                 <motion.span
                   key={i}
-                  className="h-1.5 w-1.5 rounded-full bg-secondary"
                   animate={{ opacity: [0.3, 1, 0.3] }}
+                  className="h-1.5 w-1.5 rounded-full bg-secondary"
                   transition={{
                     duration: 1.2,
                     repeat: Infinity,

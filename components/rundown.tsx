@@ -26,8 +26,7 @@ const RUNDOWN_ICON_MAP: Record<string, TablerIcon> = {
   IconSparkles,
   IconUsersGroup,
 };
-import { Button } from "@/components/ui/button";
-import SideSheet from "./ui/side-sheet";
+
 import { Accordion, AccordionItem } from "@heroui/react";
 import {
   AnimatePresence,
@@ -38,7 +37,16 @@ import {
   useTransform,
   type MotionValue,
 } from "framer-motion";
-import { fadeUp, staggerContainer, staggerItem, viewport } from "@/lib/animations";
+
+import SideSheet from "./ui/side-sheet";
+
+import { Button } from "@/components/ui/button";
+import {
+  fadeUp,
+  staggerContainer,
+  staggerItem,
+  viewport,
+} from "@/lib/animations";
 import {
   RUNDOWN_ITEMS,
   SCROLL_MOMENTS,
@@ -49,7 +57,10 @@ import { createClient } from "@/utils/supabase/client";
 
 // Derive the same snake_case key used in the admin panel
 function toKey(s: string) {
-  return s.toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_|_$/g, "");
+  return s
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "_")
+    .replace(/^_|_$/g, "");
 }
 
 // ─── Desktop: Scroll-Stack Card ───────────────────────────────────────────────
@@ -71,7 +82,7 @@ const ScrollStackCard = ({
 }: ScrollStackCardProps) => {
   const segment = 1 / total;
   const start = index * segment;
-  const settle = start + segment * 0.30;
+  const settle = start + segment * 0.3;
   const hold = start + segment * 0.76;
   const end = start + segment;
   const enter = start - segment * 0.65;
@@ -80,7 +91,7 @@ const ScrollStackCard = ({
   const scale = useTransform(
     progress,
     [enter, start, hold, end, exit],
-    reduceMotion ? [1.03, 1, 1, 0.97, 0.94] : [1.10, 1, 1, 0.92, 0.86],
+    reduceMotion ? [1.03, 1, 1, 0.97, 0.94] : [1.1, 1, 1, 0.92, 0.86],
   );
   const y = useTransform(
     progress,
@@ -113,37 +124,37 @@ const ScrollStackCard = ({
       className="absolute inset-0 w-full origin-top transform-gpu will-change-transform"
       style={{ scale, y, opacity, rotate, zIndex: index + 1 }}
     >
-      <div className="relative flex h-full overflow-hidden rounded-[32px] border border-white/20 bg-slate-950 shadow-[0_28px_80px_rgba(2,6,23,0.28)]">
+      <div className="ns-feature relative flex h-full overflow-hidden border border-border bg-surface">
         <motion.img
-          src={item.image}
-          alt={`${item.title} placeholder image`}
+          className="h-full w-full object-cover"
+          alt={item.title}
           // Eagerly load only the first card; all others are deferred until
           // the user scrolls the rundown section into view.
-          loading={index === 0 ? "eager" : "lazy"}
           decoding="async"
-          className="h-full w-full object-cover"
+          loading={index === 0 ? "eager" : "lazy"}
+          src={item.image}
           style={{ scale: imageScale }}
         />
-        <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(2,6,23,0.08),rgba(2,6,23,0.72))]" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.22),transparent_28%),radial-gradient(circle_at_bottom_right,rgba(248,167,36,0.22),transparent_32%)]" />
+        <div
+          aria-hidden="true"
+          className="absolute inset-0 bg-gradient-to-t from-black/85 to-black/20"
+        />
 
         <motion.figcaption
           className="absolute inset-x-0 bottom-0 space-y-4 p-5 sm:p-8 md:p-10"
           style={{ opacity: contentOpacity }}
         >
-          <div className="flex items-center justify-between gap-3">
-            <span className="inline-flex rounded-full border border-white/20 bg-white/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.24em] text-white backdrop-blur-sm">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <span className="text-sm font-semibold text-white">
               {item.label}
             </span>
-            <span className="text-xs font-semibold tracking-[0.35em] text-white">
+            <span className="text-sm font-semibold tabular-nums text-white">
               {String(index + 1).padStart(2, "0")}
             </span>
           </div>
 
           <div className="max-w-2xl space-y-3">
-            <h3 className="text-2xl font-bold leading-tight text-white sm:text-3xl">
-              {item.title}
-            </h3>
+            <h3 className="ns-card-title text-white">{item.title}</h3>
             <p className="max-w-xl text-sm leading-6 text-white sm:text-base">
               {item.description}
             </p>
@@ -161,13 +172,18 @@ type MobileCardCarouselProps = {
   reduceMotion: boolean;
 };
 
-const MobileCardCarousel = ({ moments, reduceMotion }: MobileCardCarouselProps) => {
+const MobileCardCarousel = ({
+  moments,
+  reduceMotion,
+}: MobileCardCarouselProps) => {
+  const { messages: t } = useLanguage();
   const [activeIndex, setActiveIndex] = useState(0);
   const [direction, setDirection] = useState(0); // 1 = forward (left swipe), -1 = backward (right swipe)
   const total = moments.length;
 
   const goTo = (next: number) => {
     const clamped = Math.max(0, Math.min(total - 1, next));
+
     if (clamped === activeIndex) return;
     setDirection(clamped > activeIndex ? 1 : -1);
     setActiveIndex(clamped);
@@ -200,60 +216,58 @@ const MobileCardCarousel = ({ moments, reduceMotion }: MobileCardCarouselProps) 
     <div className="mt-6 select-none">
       {/* Card area — pure image, no text overlay */}
       <div className="relative w-full" style={{ aspectRatio: "16/9" }}>
-        <div className="absolute inset-0 overflow-hidden rounded-[20px] shadow-[0_20px_60px_rgba(2,6,23,0.32)]">
-          <AnimatePresence custom={direction} mode="wait" initial={false}>
+        <div className="ns-feature absolute inset-0 overflow-hidden border border-border bg-surface">
+          <AnimatePresence custom={direction} initial={false} mode="wait">
             <motion.figure
               key={activeIndex}
-              custom={direction}
-              variants={reduceMotion ? undefined : cardVariants}
-              initial={reduceMotion ? { opacity: 0 } : "enter"}
               animate={reduceMotion ? { opacity: 1 } : "center"}
-              exit={reduceMotion ? { opacity: 0 } : "exit"}
+              className="absolute inset-0 cursor-grab active:cursor-grabbing"
+              custom={direction}
               drag={!reduceMotion ? "x" : undefined}
               dragConstraints={{ left: 0, right: 0 }}
               dragElastic={0.18}
+              exit={reduceMotion ? { opacity: 0 } : "exit"}
+              initial={reduceMotion ? { opacity: 0 } : "enter"}
+              style={{ touchAction: "pan-y" }}
+              variants={reduceMotion ? undefined : cardVariants}
               onDragEnd={(_, info) => {
                 const THRESHOLD = 48;
+
                 if (info.offset.x < -THRESHOLD && activeIndex < total - 1) {
                   goTo(activeIndex + 1);
                 } else if (info.offset.x > THRESHOLD && activeIndex > 0) {
                   goTo(activeIndex - 1);
                 }
               }}
-              className="absolute inset-0 cursor-grab active:cursor-grabbing"
-              style={{ touchAction: "pan-y" }}
             >
               {/* Clean image — no caption overlay */}
               <img
-                src={current.image}
                 alt={current.title}
-                loading="lazy"
+                className="h-full w-full object-cover pointer-events-none"
                 decoding="async"
                 draggable={false}
-                className="h-full w-full object-cover pointer-events-none"
+                loading="lazy"
+                src={current.image}
               />
             </motion.figure>
           </AnimatePresence>
 
-          {/* Subtle vignette so arrows stay readable */}
-          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_60%,rgba(2,6,23,0.35))]" />
-
           {/* Prev arrow */}
           <button
-            onClick={() => goTo(activeIndex - 1)}
+            aria-label={t.gallery.lightbox.prev}
+            className="absolute left-2 top-1/2 z-10 -translate-y-1/2 flex h-11 w-11 items-center justify-center rounded-xl border border-control-border bg-surface text-foreground hover:bg-card disabled:opacity-0 disabled:pointer-events-none"
             disabled={activeIndex === 0}
-            aria-label="Previous moment"
-            className="absolute left-2 top-1/2 z-10 -translate-y-1/2 flex h-8 w-8 items-center justify-center rounded-full bg-black/30 text-white backdrop-blur-sm transition-all duration-200 hover:bg-black/50 disabled:opacity-0 disabled:pointer-events-none"
+            onClick={() => goTo(activeIndex - 1)}
           >
             <IconChevronLeft size={16} stroke={2.5} />
           </button>
 
           {/* Next arrow */}
           <button
-            onClick={() => goTo(activeIndex + 1)}
+            aria-label={t.gallery.lightbox.next}
+            className="absolute right-2 top-1/2 z-10 -translate-y-1/2 flex h-11 w-11 items-center justify-center rounded-xl border border-control-border bg-surface text-foreground hover:bg-card disabled:opacity-0 disabled:pointer-events-none"
             disabled={activeIndex === total - 1}
-            aria-label="Next moment"
-            className="absolute right-2 top-1/2 z-10 -translate-y-1/2 flex h-8 w-8 items-center justify-center rounded-full bg-black/30 text-white backdrop-blur-sm transition-all duration-200 hover:bg-black/50 disabled:opacity-0 disabled:pointer-events-none"
+            onClick={() => goTo(activeIndex + 1)}
           >
             <IconChevronRight size={16} stroke={2.5} />
           </button>
@@ -263,34 +277,36 @@ const MobileCardCarousel = ({ moments, reduceMotion }: MobileCardCarouselProps) 
       {/* ── Text content below the image ─────────────────────────────────── */}
       <div className="mt-4 px-1">
         {/* Label row + counter */}
-        <div className="flex items-center justify-between gap-3">
+        <div className="flex flex-wrap items-center justify-between gap-3">
           <AnimatePresence mode="wait">
             <motion.span
               key={`label-${activeIndex}`}
-              initial={{ opacity: 0, y: 6 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -6 }}
-              transition={{ duration: 0.22 }}
-              className="inline-flex rounded-full border border-secondary/40 bg-secondary/10 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.22em] text-secondary"
+              className="text-sm font-semibold text-secondary"
+              exit={reduceMotion ? { opacity: 0 } : { opacity: 0, y: -6 }}
+              initial={reduceMotion ? false : { opacity: 0, y: 6 }}
+              transition={{ duration: reduceMotion ? 0 : 0.22 }}
             >
               {current.label}
             </motion.span>
           </AnimatePresence>
 
           {/* Dot indicators */}
-          <div className="flex items-center gap-1.5" role="tablist" aria-label="Moment indicators">
+          <div
+            aria-label={t.common.slide.replace(
+              "{count}",
+              String(activeIndex + 1),
+            )}
+            className="flex max-w-full flex-wrap items-center gap-1"
+            role="group"
+          >
             {moments.map((_, i) => (
               <button
                 key={i}
-                role="tab"
-                aria-selected={i === activeIndex}
-                aria-label={`Go to moment ${i + 1}`}
+                aria-label={t.common.slide.replace("{count}", String(i + 1))}
+                aria-pressed={i === activeIndex}
+                className={`relative h-11 w-11 rounded-lg after:absolute after:inset-x-3 after:top-5 after:h-1 after:rounded-full ${i === activeIndex ? "after:bg-secondary" : "after:bg-muted-foreground"}`}
                 onClick={() => goTo(i)}
-                className={`h-1 rounded-full transition-all duration-300 ${
-                  i === activeIndex
-                    ? "w-6 bg-secondary"
-                    : "w-2 bg-foreground/20 dark:bg-white/30 hover:bg-foreground/40"
-                }`}
               />
             ))}
           </div>
@@ -300,25 +316,21 @@ const MobileCardCarousel = ({ moments, reduceMotion }: MobileCardCarouselProps) 
         <AnimatePresence mode="wait">
           <motion.div
             key={`text-${activeIndex}`}
-            initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -8 }}
-            transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
             className="mt-2 space-y-1"
+            exit={reduceMotion ? { opacity: 0 } : { opacity: 0, y: -8 }}
+            initial={reduceMotion ? false : { opacity: 0, y: 10 }}
+            transition={{
+              duration: reduceMotion ? 0 : 0.28,
+              ease: [0.22, 1, 0.36, 1],
+            }}
           >
-            <h3 className="text-lg font-bold leading-snug text-primary dark:text-white">
-              {current.title}
-            </h3>
-            <p className="text-sm leading-relaxed text-foreground/70 dark:text-white/65 line-clamp-3">
+            <h3 className="ns-card-title">{current.title}</h3>
+            <p className="text-base leading-relaxed text-muted-foreground">
               {current.description}
             </p>
           </motion.div>
         </AnimatePresence>
-
-        {/* Swipe hint */}
-        <p className="mt-3 text-center text-[10px] tracking-wide text-foreground/35 dark:text-white/30">
-          swipe or tap arrows to navigate
-        </p>
       </div>
     </div>
   );
@@ -334,6 +346,7 @@ function getNextSaturday(locale: Locale): string {
   // ensures "next" Saturday, not today if it's already Saturday
 
   const nextSaturday = new Date(today);
+
   nextSaturday.setDate(today.getDate() + daysUntilSaturday);
 
   return nextSaturday.toLocaleDateString(locale === "id" ? "id-ID" : "en-GB", {
@@ -369,22 +382,29 @@ const Rundown = () => {
   });
 
   // DB participant name lookup: service_key -> role_key -> participant_name
-  const [dbParticipants, setDbParticipants] = useState<Record<string, Record<string, string>>>({});
+  const [dbParticipants, setDbParticipants] = useState<
+    Record<string, Record<string, string>>
+  >({});
   // DB sabbath moments (images from storage)
   const [dbMoments, setDbMoments] = useState<ScrollMoment[] | null>(null);
 
   useEffect(() => {
     const supabase = createClient();
+
     // Fetch participant names
-    supabase.from("rundown_participants").select("service_key,role_key,participant_name").then(({ data }) => {
-      if (!data) return;
-      const lookup: Record<string, Record<string, string>> = {};
-      for (const row of data) {
-        if (!lookup[row.service_key]) lookup[row.service_key] = {};
-        lookup[row.service_key][row.role_key] = row.participant_name;
-      }
-      setDbParticipants(lookup);
-    });
+    supabase
+      .from("rundown_participants")
+      .select("service_key,role_key,participant_name")
+      .then(({ data }) => {
+        if (!data) return;
+        const lookup: Record<string, Record<string, string>> = {};
+
+        for (const row of data) {
+          if (!lookup[row.service_key]) lookup[row.service_key] = {};
+          lookup[row.service_key][row.role_key] = row.participant_name;
+        }
+        setDbParticipants(lookup);
+      });
     // Fetch sabbath moments
     supabase
       .from("sabbath_moments")
@@ -407,19 +427,24 @@ const Rundown = () => {
   // Detect mobile breakpoint (< 640px = Tailwind's `sm`) after mount.
   useEffect(() => {
     const mq = window.matchMedia("(max-width: 639px)");
+
     setIsMobile(mq.matches);
     const handler = (e: MediaQueryListEvent) => setIsMobile(e.matches);
+
     mq.addEventListener("change", handler);
+
     return () => mq.removeEventListener("change", handler);
   }, []);
 
   const rundownItems = RUNDOWN_ITEMS.map((item, index) => {
     const sk = toKey(item.title);
+
     return {
       ...item,
       ...t.rundown.items[index],
       participants: item.participants.map((participant, participantIndex) => {
         const rk = toKey(participant.rundown);
+
         return {
           ...participant,
           rundown: t.rundown.items[index].participants[participantIndex],
@@ -437,28 +462,33 @@ const Rundown = () => {
   }));
 
   return (
-    <div id="rundown" className="mb-48 scroll-mt-24">
+    <section
+      aria-labelledby="rundown-heading"
+      className="ns-section ns-container"
+      id="rundown"
+    >
       <motion.h2
-        className="scroll-m-20 text-5xl font-extrabold tracking-tight text-center text-primary px-2 mb-6"
+        animate="visible"
+        className="ns-heading text-center mb-6"
+        id="rundown-heading"
+        initial={false}
         variants={fadeUp}
-        initial="hidden"
-        whileInView="visible"
         viewport={viewport}
       >
         {t.rundown.titleStart}
         <span className="text-secondary">{t.rundown.titleEmphasis}</span>
       </motion.h2>
 
-      <div className="my-12">
+      <div className="my-8">
         <div className="relative mx-auto max-w-6xl">
-          <div className="pointer-events-none absolute left-1/2 top-0 hidden h-full w-px -translate-x-1/2 bg-gradient-to-b from-primary/20 via-secondary/60 to-primary/20 lg:block" />
+          <div className="pointer-events-none absolute left-1/2 top-0 hidden h-full border-l border-border -translate-x-1/2 lg:block" />
 
           <motion.div
             key={locale}
+            animate="visible"
             className="flex flex-col gap-6"
+            initial={false}
             variants={staggerContainer}
-            initial="hidden"
-            whileInView="visible"
             viewport={viewport}
           >
             {rundownItems.map((item, index) => {
@@ -470,18 +500,18 @@ const Rundown = () => {
                 <Fragment key={item.title}>
                   <SideSheet
                     open={openSheet === index}
-                    onClose={() => setOpenSheet(null)}
                     title={item.title}
                     width="w-full sm:max-w-lg"
+                    onClose={() => setOpenSheet(null)}
                   >
-                    <div className="space-y-1 p-5">
+                    <div className="ns-dialog-body space-y-1">
                       <p className="text-base font-medium text-foreground dark:text-white">
                         {t.rundown.sabbath}, {getNextSaturday(locale)}
                       </p>
                       <p className="text-sm text-foreground dark:text-white mb-4">
                         {item.time}
                       </p>
-                      <Accordion variant="bordered" isCompact className="!my-4">
+                      <Accordion isCompact className="!my-4" variant="bordered">
                         <AccordionItem
                           aria-label={item.title}
                           title={
@@ -490,68 +520,72 @@ const Rundown = () => {
                             </span>
                           }
                         >
-                          <div className="flex flex-col gap-3 pb-2 text-xs">
+                          <div className="flex flex-col gap-3 pb-2 text-sm">
                             <p>{item.subdetail}</p>
                             {item.image && (
                               <img
-                                src={item.image}
                                 alt={`${item.title} situation`}
                                 className="w-full rounded-xl object-cover max-h-40"
                                 loading="lazy"
+                                src={item.image}
                               />
                             )}
                           </div>
                         </AccordionItem>
                       </Accordion>
                       <div className="space-y-3 mt-6">
-                        {item.participants.length > 0 && (
+                        {item.participants.length > 0 &&
                           item.participants.map((p) => {
-                            const ParticipantIcon = RUNDOWN_ICON_MAP[p.icon] ?? IconSparkles;
+                            const ParticipantIcon =
+                              RUNDOWN_ICON_MAP[p.icon] ?? IconSparkles;
+
                             return (
                               <div
                                 key={p.rundown}
-                                className="flex items-center gap-3 rounded-lg border border-border hover:border-l-4 hover:border-l-primary p-3 pl-4 transition-colors duration-300"
+                                className="flex items-center gap-3 rounded-xl border border-border p-3 pl-4"
                               >
-                                <ParticipantIcon size={16} />
+                                <ParticipantIcon
+                                  aria-hidden="true"
+                                  className="shrink-0 text-secondary"
+                                  size={16}
+                                />
                                 <div>
                                   <p className="text-sm font-medium text-foreground dark:text-white">
                                     {p.rundown}
                                   </p>
-                                  <p className="text-xs text-foreground dark:text-white mt-0.5">
+                                  <p className="text-sm text-foreground dark:text-white mt-0.5">
                                     {p.participant}
                                   </p>
                                 </div>
                               </div>
                             );
-                          })
-                        )}
+                          })}
                       </div>
                     </div>
                   </SideSheet>
                   <motion.div
-                    variants={staggerItem}
                     className={`group relative flex w-full ${
                       isEven ? "lg:justify-start" : "lg:justify-end"
                     }`}
+                    variants={staggerItem}
                   >
                     {!isLast ? (
-                      <div className="pointer-events-none absolute left-5 top-16 h-[calc(100%+1.5rem)] w-px bg-gradient-to-b from-secondary/70 to-primary/20 lg:hidden" />
+                      <div className="pointer-events-none absolute left-2 sm:left-5 top-16 h-[calc(100%+1.5rem)] border-l border-border lg:hidden" />
                     ) : null}
 
-                    <div className="pointer-events-none absolute left-5 top-14 z-10 flex h-6 w-6 -translate-x-1/2 items-center justify-center rounded-full border-4 border-background bg-secondary shadow-[0_0_0_8px_rgba(248,167,36,0.14)] transition-all duration-300 group-hover:scale-110 group-hover:bg-primary lg:left-1/2" />
+                    <div className="pointer-events-none absolute left-2 sm:left-5 top-14 z-10 h-4 w-4 -translate-x-1/2 rounded-full border-4 border-background bg-secondary lg:left-1/2" />
 
-                    <div className="ml-12 w-full lg:ml-0 lg:w-[calc(50%-3rem)]">
-                      <div className="relative flex min-h-[220px] w-full flex-col justify-between overflow-hidden rounded-[28px] border border-white/20 bg-[linear-gradient(145deg,rgba(255,255,255,0.92),rgba(255,255,255,0.72))] p-6 shadow-[0_18px_45px_rgba(15,23,42,0.12)] transition-all duration-300 group-hover:-translate-y-2 group-hover:shadow-[0_26px_65px_rgba(1,75,63,0.18)] dark:bg-[linear-gradient(145deg,rgba(255,255,255,0.08),rgba(255,255,255,0.03))]">
-                        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(248,167,36,0.18),transparent_35%),radial-gradient(circle_at_bottom_left,rgba(1,75,63,0.12),transparent_32%)] opacity-80 transition-opacity duration-300 group-hover:opacity-100" />
-
-                        <div className="relative z-10 flex items-start justify-between gap-4">
-                          <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl border border-primary/15 bg-primary/10 text-primary transition-all duration-300 group-hover:scale-110 group-hover:bg-primary group-hover:text-white dark:border-white/10 dark:bg-white/10 dark:text-secondary">
+                    <div className="ml-6 min-w-0 w-full sm:ml-12 lg:ml-0 lg:w-[calc(50%-3rem)]">
+                      <div className="ns-surface relative flex w-full flex-col justify-between">
+                        <div className="relative z-10 flex flex-wrap items-start justify-between gap-4">
+                          <div className="flex h-11 w-11 shrink-0 items-center justify-center text-secondary">
                             <Icon size={28} />
                           </div>
 
                           <Button
-                            variant="outline"
-                            className="cursor-pointer"
+                            className="border-control-border focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-ring focus-visible:outline-offset-4"
+                            size="public"
+                            variant="public-secondary"
                             onClick={() => setOpenSheet(index)}
                           >
                             {t.rundown.viewDetail} <IconScanPosition />
@@ -559,11 +593,8 @@ const Rundown = () => {
                         </div>
 
                         <div className="relative z-10 mt-6 space-y-3">
-                          <h2 className="text-2xl font-bold text-primary dark:text-white">
-                            {item.title}
-                          </h2>
-                          <p className="inline-flex items-center gap-2 rounded-full border border-primary/10 bg-primary/5 px-3 py-1 text-sm font-semibold text-primary dark:border-white/10 dark:bg-white/5 dark:text-secondary">
-                            <IconSparkles size={16} />
+                          <h3 className="ns-card-title">{item.title}</h3>
+                          <p className="text-sm font-semibold tabular-nums text-secondary">
                             {item.time}
                           </p>
                           <p className="max-w-md text-sm leading-6 text-foreground dark:text-white">
@@ -580,27 +611,22 @@ const Rundown = () => {
         </div>
       </div>
 
-      <div className="mt-28">
+      <div className="mt-12 md:mt-16">
         {/* Heading stays within the narrow centred column */}
         <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-0">
           <motion.div
+            animate="visible"
             className="space-y-3 text-center w-full"
+            initial={false}
             variants={fadeUp}
-            initial="hidden"
-            whileInView="visible"
             viewport={viewport}
           >
-            <p className="text-xs font-semibold uppercase tracking-[0.28em] text-secondary">
-              {t.rundown.momentsLabel}
-            </p>
-            <h2 className="text-3xl font-bold tracking-tight text-primary dark:text-white">
-              {t.rundown.momentsTitle}
-            </h2>
+            <h2 className="ns-heading">{t.rundown.momentsTitle}</h2>
           </motion.div>
         </div>
 
         {/* Mobile: swipeable carousel */}
-        {isMobile ? (
+        {isMobile || shouldReduceMotion ? (
           <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-0">
             <MobileCardCarousel
               moments={scrollMoments}
@@ -611,20 +637,23 @@ const Rundown = () => {
           /* Desktop: scroll-driven stack — intentionally full-width */
           <div
             ref={scrollStackRef}
-            className="relative mt-10 h-[320vh] sm:h-[380vh] lg:h-[440vh]"
+            className="relative mt-10 h-[220vh] lg:h-[260vh]"
           >
             <div className="sticky top-0 flex h-screen items-center justify-center">
               {/* Fills nearly the full viewport width; height driven by 16/9 ratio */}
               <div className="relative w-full max-w-[72vw] xl:max-w-5xl px-3 sm:px-6">
-                <div className="relative w-full" style={{ aspectRatio: "16/9", maxHeight: "72vh" }}>
+                <div
+                  className="relative w-full"
+                  style={{ aspectRatio: "16/9", maxHeight: "72vh" }}
+                >
                   {scrollMoments.map((item, index) => (
                     <ScrollStackCard
                       key={item.label}
-                      item={item}
                       index={index}
-                      total={SCROLL_MOMENTS.length}
+                      item={item}
                       progress={smoothScrollProgress}
                       reduceMotion={shouldReduceMotion}
+                      total={scrollMoments.length}
                     />
                   ))}
                 </div>
@@ -633,7 +662,7 @@ const Rundown = () => {
           </div>
         )}
       </div>
-    </div>
+    </section>
   );
 };
 

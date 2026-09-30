@@ -1,129 +1,56 @@
 "use client";
 
 import { IconBookmarkQuestion } from "@tabler/icons-react";
-import { motion } from "framer-motion";
 
-import { Button } from "@/components/ui/button";
 import { BELIEFS } from "@/constants/core-beliefs";
 import { useLanguage } from "@/lib/i18n";
-import {
-  fadeUp,
-  staggerContainer,
-  staggerItem,
-  viewport,
-} from "@/lib/animations";
 
-const CoreBeliefs = () => {
-  const { locale, messages: t } = useLanguage();
-  const beliefs = BELIEFS.map((belief, index) => ({
-    ...belief,
-    ...t.coreBeliefs.items[index],
-  }));
+export default function CoreBeliefs() {
+  const { messages: t } = useLanguage();
 
   return (
-    <div id="core-beliefs" className="mb-48 space-y-10">
-      <section
-        aria-labelledby="core-beliefs-heading"
-        className="px-4 py-16 sm:px-6 lg:px-10"
+    <section
+      aria-labelledby="core-beliefs-heading"
+      className="ns-section ns-container border-t border-border"
+      id="core-beliefs"
+    >
+      <div className="max-w-2xl">
+        <h2 className="ns-heading" id="core-beliefs-heading">
+          {t.coreBeliefs.titleStart}
+          <span className="text-secondary">{t.coreBeliefs.titleEmphasis}</span>
+        </h2>
+        <p className="ns-copy mt-4">{t.coreBeliefs.description}</p>
+      </div>
+      <div className="mt-8 grid gap-x-8 gap-y-6 md:grid-cols-2 lg:grid-cols-3">
+        {BELIEFS.map((belief, index) => {
+          const content = t.coreBeliefs.items[index];
+          const Icon = belief.icon;
+
+          return (
+            <article key={belief.title} className="border-t border-border py-5">
+              <Icon
+                aria-hidden="true"
+                className="mb-4 text-secondary"
+                size={24}
+              />
+              <h3 className="ns-card-title">{content.title}</h3>
+              <p className="mt-3 text-sm font-medium text-secondary">
+                {content.highlight}
+              </p>
+              <p className="ns-copy mt-2">{content.summary}</p>
+            </article>
+          );
+        })}
+      </div>
+      <a
+        className="ns-secondary mt-6"
+        href="https://adventist.org/beliefs"
+        rel="noopener noreferrer"
+        target="_blank"
       >
-        <div className="mx-auto max-w-6xl">
-          {/* Section heading */}
-          <motion.div
-            className="mx-auto max-w-3xl text-center"
-            variants={fadeUp}
-            initial="hidden"
-            whileInView="visible"
-            viewport={viewport}
-          >
-            <h2
-              id="core-beliefs-heading"
-              className="mt-6 text-5xl font-black tracking-tight text-secondary"
-            >
-              {t.coreBeliefs.titleStart}
-              <span className="text-primary">{t.coreBeliefs.titleEmphasis}</span>
-            </h2>
-            <p className="mt-4 text-sm leading-7 text-foreground dark:text-white sm:text-base">
-              {t.coreBeliefs.description}
-            </p>
-          </motion.div>
-
-          {/* Cards grid */}
-          <motion.div
-            key={locale}
-            className="mt-12 grid gap-5 md:grid-cols-2 xl:grid-cols-4 xl:auto-rows-[minmax(220px,1fr)]"
-            variants={staggerContainer}
-            initial="hidden"
-            whileInView="visible"
-            viewport={viewport}
-          >
-            {beliefs.map((belief) => {
-              const Icon = belief.icon;
-
-              return (
-                <motion.article
-                  key={belief.title}
-                  variants={staggerItem}
-                  className={`group relative overflow-hidden rounded-[30px] border border-primary/10 p-6 shadow-[0_18px_45px_rgba(15,23,42,0.08)] transition-all duration-300 hover:-translate-y-2 hover:shadow-[0_26px_60px_rgba(1,75,63,0.14)] dark:border-white/10 dark:shadow-[0_22px_55px_rgba(2,6,23,0.28)] ${belief.className}`}
-                >
-                  <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.34),transparent_30%),radial-gradient(circle_at_bottom_left,rgba(1,75,63,0.08),transparent_34%)] dark:bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.12),transparent_28%),radial-gradient(circle_at_bottom_left,rgba(248,167,36,0.08),transparent_34%)]" />
-
-                  <div className="relative flex h-full flex-col">
-                    <div className="flex items-start justify-between gap-4">
-                      <div>
-                        <p className="text-xs font-semibold uppercase tracking-[0.32em] text-primary/60 dark:text-white">
-                          {belief.number}
-                        </p>
-                        <h2 className="mt-3 text-2xl font-bold text-primary dark:text-white">
-                          {belief.title}
-                        </h2>
-                      </div>
-
-                      <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl border border-primary/15 bg-white/70 text-primary backdrop-blur-sm transition-transform duration-300 group-hover:scale-110 dark:border-white/10 dark:bg-white/10 dark:text-secondary">
-                        <Icon size={28} stroke={1.7} />
-                      </div>
-                    </div>
-
-                    <div className="mt-8 space-y-3">
-                      <p className="text-xs font-semibold uppercase tracking-[0.28em] text-secondary dark:text-primary">
-                        {belief.highlight}
-                      </p>
-                      <p className="text-sm leading-7 text-foreground dark:text-white">
-                        {belief.summary}
-                      </p>
-                    </div>
-                  </div>
-                </motion.article>
-              );
-            })}
-          </motion.div>
-
-          {/* CTA button */}
-          <motion.div
-            className="mt-10 flex justify-center"
-            variants={fadeUp}
-            initial="hidden"
-            whileInView="visible"
-            viewport={viewport}
-          >
-            <Button
-              asChild
-              size="lg"
-              className="h-12 rounded-full px-6 text-sm font-semibold shadow-[0_16px_40px_rgba(1,75,63,0.16)]"
-            >
-              <a
-                href="https://adventist.org/beliefs"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                {t.coreBeliefs.readMore}
-                <IconBookmarkQuestion />
-              </a>
-            </Button>
-          </motion.div>
-        </div>
-      </section>
-    </div>
+        {t.coreBeliefs.readMore}
+        <IconBookmarkQuestion size={20} />
+      </a>
+    </section>
   );
-};
-
-export default CoreBeliefs;
+}

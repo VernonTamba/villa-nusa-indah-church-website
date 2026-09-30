@@ -4,41 +4,49 @@ import { motion } from "framer-motion";
 import { Accordion, AccordionItem } from "@heroui/react";
 
 import { useLanguage } from "@/lib/i18n";
-import {
-  fadeUp,
-  staggerContainer,
-  viewport,
-} from "@/lib/animations";
+import { fadeUp, staggerContainer, viewport } from "@/lib/animations";
 
 const Faq = () => {
   const { locale, messages: t } = useLanguage();
 
   return (
-    <div className="mb-48 flex flex-col items-center gap-10 px-2">
+    <section
+      aria-labelledby="faq-heading"
+      className="ns-section ns-container flex flex-col items-center gap-8 border-t border-border"
+    >
       {/* Section heading */}
       <motion.div
+        animate="visible"
         className="w-full max-w-3xl text-center"
+        initial={false}
         variants={fadeUp}
-        initial="hidden"
-        whileInView="visible"
         viewport={viewport}
       >
-        <h2 className="scroll-m-20 text-4xl md:text-5xl font-extrabold tracking-tight text-secondary">
+        <h2 className="ns-heading" id="faq-heading">
           {t.faq.titleStart}
-          <span className="text-primary">{t.faq.titleEmphasis}</span>
+          <span className="text-secondary">{t.faq.titleEmphasis}</span>
         </h2>
       </motion.div>
 
       {/* FAQ accordion – staggered entrance */}
       <motion.div
         key={locale}
+        animate="visible"
         className="w-full max-w-3xl"
+        initial={false}
         variants={staggerContainer}
-        initial="hidden"
-        whileInView="visible"
         viewport={viewport}
       >
-        <Accordion className="w-full px-0" variant="splitted">
+        <Accordion
+          className="w-full px-0"
+          itemClasses={{
+            base: "border-b border-border",
+            trigger: "min-h-14 py-4",
+            title: "text-base font-semibold",
+            content: "pb-5 text-base text-muted-foreground",
+          }}
+          variant="light"
+        >
           {t.faq.items.map((item, index) => (
             <AccordionItem
               key={`${locale}-${index}`}
@@ -46,7 +54,7 @@ const Faq = () => {
               title={item.title}
             >
               <div className="flex items-start gap-2 pb-2">
-                <p className="text-sm leading-6 text-foreground dark:text-white">
+                <p className="text-base leading-relaxed text-muted-foreground">
                   {item.content}
                 </p>
               </div>
@@ -54,7 +62,7 @@ const Faq = () => {
           ))}
         </Accordion>
       </motion.div>
-    </div>
+    </section>
   );
 };
 

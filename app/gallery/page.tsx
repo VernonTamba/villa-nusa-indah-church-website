@@ -11,15 +11,17 @@ export const metadata: Metadata = {
     title: "Gallery | GMAHK Villa Nusa Indah",
     description:
       "A glimpse into the vibrant life and warm community of GMAHK Villa Nusa Indah.",
-    images: [{ url: "/images/gallery-opt/gallery_1.webp", width: 1200, height: 800 }],
+    images: [
+      { url: "/images/gallery-opt/gallery_1.webp", width: 1200, height: 800 },
+    ],
   },
 };
 
 export default function GalleryPage() {
   return (
-    <main>
+    <>
       <GalleryHero />
       <GalleryGrid />
-    </main>
+    </>
   );
 }

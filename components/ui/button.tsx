@@ -9,6 +9,10 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
+        "public-primary":
+          "focus-visible:ring-0 focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-ring focus-visible:outline-offset-4",
+        "public-secondary":
+          "focus-visible:ring-0 focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-ring focus-visible:outline-offset-4",
         default: "bg-primary text-primary-foreground [a]:hover:bg-primary/80",
         outline:
           "border-border bg-background text-foreground hover:bg-muted hover:text-foreground aria-expanded:bg-muted aria-expanded:text-foreground dark:border-input dark:bg-input/30 dark:text-white dark:hover:bg-input/50 dark:hover:text-white dark:aria-expanded:text-white",
@@ -21,6 +25,10 @@ const buttonVariants = cva(
         link: "text-primary underline-offset-4 hover:underline",
       },
       size: {
+        public:
+          "min-h-12 h-auto max-w-full whitespace-normal rounded-xl px-5 py-3 gap-2 text-base font-semibold leading-[1.4] active:translate-y-0 disabled:opacity-60",
+        "public-icon":
+          "min-h-11 min-w-11 rounded-xl p-2 active:translate-y-0 disabled:opacity-60",
         default:
           "h-8 gap-1.5 px-2.5 has-data-[icon=inline-end]:pr-2 has-data-[icon=inline-start]:pl-2",
         xs: "h-6 gap-1 rounded-[min(var(--radius-md),10px)] px-2 text-xs in-data-[slot=button-group]:rounded-lg has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 [&_svg:not([class*='size-'])]:size-3",
@@ -63,10 +71,10 @@ const Button = React.forwardRef<
     return (
       <Comp
         ref={ref}
+        className={cn(buttonVariants({ variant, size, className }))}
+        data-size={size}
         data-slot="button"
         data-variant={variant}
-        data-size={size}
-        className={cn(buttonVariants({ variant, size, className }))}
         {...props}
       />
     );

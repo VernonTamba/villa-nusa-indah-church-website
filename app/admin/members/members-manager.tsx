@@ -1,5 +1,7 @@
 "use client";
 
+import type { MemberRow } from "./page";
+
 import { useRef, useState, useTransition } from "react";
 import Image from "next/image";
 import {
@@ -13,18 +15,21 @@ import {
   IconPlus,
   IconSearch,
   IconTrash,
-  IconUpload,
   IconUsersGroup,
   IconX,
   IconAlertTriangle,
 } from "@tabler/icons-react";
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
+
 import {
-  motion,
-  AnimatePresence,
-  useReducedMotion,
-} from "framer-motion";
-import { addMember, deleteMember, updateMember, updateMemberImage, updateMembersOrder } from "../actions";
-import type { MemberRow } from "./page";
+  addMember,
+  deleteMember,
+  updateMember,
+  updateMemberImage,
+  updateMembersOrder,
+} from "../actions";
+
+import { AccessibleDialog } from "@/components/ui/accessible-dialog";
 
 // Position options matching the existing i18n keys
 const POSITIONS = [
@@ -65,7 +70,10 @@ function parseUploadError(e: unknown): string {
   const msg = e instanceof Error ? e.message : String(e);
 
   // Match status codes embedded in the error message
-  if (msg.includes("413") || /too large|entity too large|body.*limit/i.test(msg)) {
+  if (
+    msg.includes("413") ||
+    /too large|entity too large|body.*limit/i.test(msg)
+  ) {
     return `Gagal upload: File terlalu besar (413). Maksimal ukuran foto adalah ${MAX_IMAGE_SIZE_MB} MB.`;
   }
   if (msg.includes("400") || /bad request/i.test(msg)) {
@@ -95,37 +103,44 @@ function parseUploadError(e: unknown): string {
 
 type Toast = { id: number; message: string; type: "success" | "error" };
 
-function ToastContainer({ toasts, onRemove }: { toasts: Toast[]; onRemove: (id: number) => void }) {
+function ToastContainer({
+  toasts,
+  onRemove,
+}: {
+  toasts: Toast[];
+  onRemove: (id: number) => void;
+}) {
   return (
-    <div className="pointer-events-none fixed bottom-6 right-6 z-[100] flex flex-col gap-2 items-end">
+    <div className="pointer-events-none fixed bottom-5 left-5 right-5 sm:left-auto sm:max-w-md z-[100] flex flex-col gap-2 items-end">
       <AnimatePresence>
         {toasts.map((toast) => (
           <motion.div
             key={toast.id}
-            initial={{ opacity: 0, x: 80, scale: 0.9 }}
             animate={{ opacity: 1, x: 0, scale: 1 }}
-            exit={{ opacity: 0, x: 80, scale: 0.9 }}
-            transition={{ type: "spring", stiffness: 380, damping: 30 }}
-            className={`pointer-events-auto flex items-center gap-3 rounded-2xl border px-4 py-3 text-sm font-semibold shadow-2xl backdrop-blur-md ${
+            className={`pointer-events-auto flex items-center gap-3 rounded-2xl border px-4 py-3 text-sm font-semibold shadow-2xl ${
               toast.type === "success"
-                ? "border-emerald-500/30 bg-slate-900/90 text-emerald-400"
-                : "border-red-500/30 bg-slate-900/90 text-red-400"
+                ? "border-success bg-background text-success"
+                : "border-destructive bg-background text-destructive"
             }`}
+            exit={{ opacity: 0, x: 80, scale: 0.9 }}
+            initial={{ opacity: 0, x: 80, scale: 0.9 }}
+            role={toast.type === "error" ? "alert" : "status"}
+            transition={{ type: "spring", stiffness: 380, damping: 30 }}
           >
             {toast.type === "success" ? (
-              <span className="flex h-5 w-5 items-center justify-center rounded-full bg-emerald-500/20">
+              <span className="flex h-5 w-5 items-center justify-center rounded-full bg-card">
                 <IconCheck size={12} />
               </span>
             ) : (
-              <span className="flex h-5 w-5 items-center justify-center rounded-full bg-red-500/20">
+              <span className="flex h-5 w-5 items-center justify-center rounded-full bg-surface">
                 <IconX size={12} />
               </span>
             )}
             {toast.message}
             <button
-              onClick={() => onRemove(toast.id)}
-              className="ml-1 text-white/30 hover:text-white/70 transition-colors"
               aria-label="Tutup"
+              className="ml-1 flex h-11 w-11 shrink-0 items-center justify-center text-muted-foreground hover:text-muted-foreground transition-colors"
+              onClick={() => onRemove(toast.id)}
             >
               <IconX size={13} />
             </button>
@@ -140,50 +155,25 @@ function ToastContainer({ toasts, onRemove }: { toasts: Toast[]; onRemove: (id: 
 
 function MemberCardSkeleton() {
   return (
-    <div className="relative flex items-center gap-3 overflow-hidden rounded-2xl border border-white/8 bg-white/4 p-4">
+    <div className="relative flex items-center gap-3 overflow-hidden rounded-2xl border border-border bg-surface p-4">
       {/* shimmer overlay */}
       <div
-        className="absolute inset-0 -translate-x-full animate-[shimmer_1.6s_infinite]"
+        className="absolute inset-0 -translate-x-full motion-safe:animate-[shimmer_1.6s_infinite]"
         style={{
           background:
             "linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.06) 50%, transparent 100%)",
         }}
       />
-      <div className="h-12 w-12 shrink-0 rounded-xl bg-white/8" />
+      <div className="h-12 w-12 shrink-0 rounded-xl bg-surface" />
       <div className="flex-1 space-y-2">
-        <div className="h-3.5 w-2/3 rounded-full bg-white/8" />
-        <div className="h-2.5 w-1/2 rounded-full bg-white/6" />
+        <div className="h-3.5 w-2/3 rounded-full bg-surface" />
+        <div className="h-2.5 w-1/2 rounded-full bg-surface" />
       </div>
     </div>
   );
 }
 
 // ─── Animated Modal Wrapper ───────────────────────────────────────────────────
-
-function ModalWrapper({ onClose, children, reduced }: { onClose: () => void; children: React.ReactNode; reduced: boolean }) {
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <motion.div
-        className="absolute inset-0 bg-black/70 backdrop-blur-sm"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        transition={{ duration: reduced ? 0 : 0.2 }}
-        onClick={onClose}
-        aria-hidden="true"
-      />
-      <motion.div
-        className="relative z-10 w-full max-w-md"
-        initial={{ opacity: 0, scale: reduced ? 1 : 0.92, y: reduced ? 0 : 16 }}
-        animate={{ opacity: 1, scale: 1, y: 0 }}
-        exit={{ opacity: 0, scale: reduced ? 1 : 0.92, y: reduced ? 0 : 16 }}
-        transition={{ duration: reduced ? 0 : 0.28, ease: [0.22, 1, 0.36, 1] }}
-      >
-        {children}
-      </motion.div>
-    </div>
-  );
-}
 
 // ─── Add Member Modal ─────────────────────────────────────────────────────────
 
@@ -206,10 +196,14 @@ function AddMemberModal({
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
+
     if (!file) return;
     if (file.size > MAX_IMAGE_SIZE_BYTES) {
-      setError(`Ukuran foto terlalu besar. Maksimal ${MAX_IMAGE_SIZE_MB} MB (file Anda: ${(file.size / 1024 / 1024).toFixed(1)} MB).`);
+      setError(
+        `Ukuran foto terlalu besar. Maksimal ${MAX_IMAGE_SIZE_MB} MB (file Anda: ${(file.size / 1024 / 1024).toFixed(1)} MB).`,
+      );
       e.target.value = "";
+
       return;
     }
     setError(null);
@@ -219,10 +213,15 @@ function AddMemberModal({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name.trim()) { setError("Nama tidak boleh kosong"); return; }
+    if (!name.trim()) {
+      setError("Nama tidak boleh kosong");
+
+      return;
+    }
     setError(null);
 
     const fd = new FormData();
+
     fd.append("name", name.trim());
     fd.append("position", position);
     if (imageFile) fd.append("image", imageFile);
@@ -230,6 +229,7 @@ function AddMemberModal({
     startTransition(async () => {
       try {
         const real = await addMember(fd);
+
         // Use the real DB row so edits immediately after adding work correctly
         onAdded({
           id: real.id,
@@ -246,111 +246,127 @@ function AddMemberModal({
   };
 
   return (
-    <ModalWrapper onClose={onClose} reduced={reduced}>
-      <div className="overflow-hidden rounded-2xl border border-white/12 bg-slate-900 shadow-2xl">
-        <div className="flex items-center justify-between border-b border-white/8 px-6 py-4">
-          <h2 className="font-bold text-white">Tambah Anggota Baru</h2>
-          <button onClick={onClose} className="text-white/40 hover:text-white transition-colors" aria-label="Tutup">
-            <IconX size={20} />
+    <AccessibleDialog
+      open
+      className="left-1/2 top-1/2 max-h-[calc(100dvh-2rem)] w-[calc(100%-2rem)] max-w-lg -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-2xl"
+      title="Tambah Anggota Baru"
+      onClose={onClose}
+    >
+      <form className="p-6 space-y-4" onSubmit={handleSubmit}>
+        {/* Photo upload */}
+        <div className="flex flex-col items-center gap-3">
+          <button
+            aria-label="Pilih gambar"
+            className="relative h-24 w-24 overflow-hidden rounded-2xl border-2 border-dashed border-border bg-surface cursor-pointer hover:border-success transition-colors"
+            type="button"
+            onClick={() => fileRef.current?.click()}
+          >
+            {imagePreview ? (
+              <Image
+                fill
+                alt="Preview"
+                className="object-cover"
+                src={imagePreview}
+              />
+            ) : (
+              <div className="flex h-full w-full flex-col items-center justify-center gap-1 text-muted-foreground">
+                <IconPhoto size={24} stroke={1.5} />
+                <span className="text-sm">Upload foto</span>
+              </div>
+            )}
+          </button>
+          <input
+            ref={fileRef}
+            accept="image/*"
+            className="hidden"
+            id="new-member-image"
+            type="file"
+            onChange={handleImageChange}
+          />
+          <button
+            className="ns-secondary"
+            type="button"
+            onClick={() => fileRef.current?.click()}
+          >
+            {imagePreview ? "Ganti foto" : "Pilih foto (opsional)"}
           </button>
         </div>
-        <form onSubmit={handleSubmit} className="p-6 space-y-4">
-          {/* Photo upload */}
-          <div className="flex flex-col items-center gap-3">
-            <div
-              className="relative h-24 w-24 overflow-hidden rounded-2xl border-2 border-dashed border-white/20 bg-white/6 cursor-pointer hover:border-emerald-500/50 transition-colors"
-              onClick={() => fileRef.current?.click()}
-            >
-              {imagePreview ? (
-                <Image src={imagePreview} alt="Preview" fill className="object-cover" />
-              ) : (
-                <div className="flex h-full w-full flex-col items-center justify-center gap-1 text-white/30">
-                  <IconPhoto size={24} stroke={1.5} />
-                  <span className="text-[10px]">Upload foto</span>
-                </div>
-              )}
-            </div>
-            <input
-              ref={fileRef}
-              id="new-member-image"
-              type="file"
-              accept="image/*"
-              className="hidden"
-              onChange={handleImageChange}
-            />
-            <button
-              type="button"
-              onClick={() => fileRef.current?.click()}
-              className="text-xs text-emerald-400 hover:underline"
-            >
-              {imagePreview ? "Ganti foto" : "Pilih foto (opsional)"}
-            </button>
-          </div>
 
-          {/* Name */}
-          <div className="space-y-1.5">
-            <label htmlFor="new-member-name" className="block text-xs font-semibold text-white/60 uppercase tracking-wide">
-              Nama Lengkap *
-            </label>
-            <input
-              id="new-member-name"
-              type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="Masukkan nama"
-              required
-              className="w-full rounded-xl border border-white/10 bg-white/6 px-4 py-2.5 text-sm text-white placeholder-white/25 outline-none focus:border-emerald-500/50 focus:ring-2 focus:ring-emerald-500/15"
-            />
-          </div>
+        {/* Name */}
+        <div className="space-y-1.5">
+          <label className="ns-label" htmlFor="new-member-name">
+            Nama Lengkap *
+          </label>
+          <input
+            required
+            className="ns-field"
+            id="new-member-name"
+            placeholder="Masukkan nama"
+            type="text"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+          />
+        </div>
 
-          {/* Position */}
-          <div className="space-y-1.5">
-            <label htmlFor="new-member-position" className="block text-xs font-semibold text-white/60 uppercase tracking-wide">
-              Jabatan *
-            </label>
-            <select
-              id="new-member-position"
-              value={position}
-              onChange={(e) => setPosition(e.target.value)}
-              className="w-full rounded-xl border border-white/10 bg-slate-800 px-4 py-2.5 text-sm text-white outline-none focus:border-emerald-500/50 focus:ring-2 focus:ring-emerald-500/15"
+        {/* Position */}
+        <div className="space-y-1.5">
+          <label className="ns-label" htmlFor="new-member-position">
+            Jabatan *
+          </label>
+          <select
+            className="ns-field"
+            id="new-member-position"
+            value={position}
+            onChange={(e) => setPosition(e.target.value)}
+          >
+            {POSITIONS.map((p) => (
+              <option key={p.value} value={p.value}>
+                {p.label}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <AnimatePresence>
+          {error && (
+            <motion.p
+              animate={{ opacity: 1, y: 0 }}
+              className="ns-alert"
+              data-tone="danger"
+              exit={{ opacity: 0, y: -6 }}
+              initial={{ opacity: 0, y: -6 }}
+              role="alert"
+              transition={{ duration: reduced ? 0 : 0.2 }}
             >
-              {POSITIONS.map((p) => (
-                <option key={p.value} value={p.value}>{p.label}</option>
-              ))}
-            </select>
-          </div>
+              {error}
+            </motion.p>
+          )}
+        </AnimatePresence>
 
-          <AnimatePresence>
-            {error && (
-              <motion.p
-                initial={{ opacity: 0, y: -6 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -6 }}
-                transition={{ duration: reduced ? 0 : 0.2 }}
-                className="rounded-lg border border-red-500/20 bg-red-500/10 px-3 py-2 text-xs text-red-400"
-              >
-                {error}
-              </motion.p>
+        <div className="flex gap-3 pt-2">
+          <button
+            className="ns-secondary flex-1"
+            type="button"
+            onClick={onClose}
+          >
+            Batal
+          </button>
+          <button
+            className="ns-primary flex-1"
+            disabled={isPending}
+            id="add-member-submit"
+            type="submit"
+          >
+            {isPending ? (
+              <IconLoader2 className="animate-spin" size={15} />
+            ) : (
+              <IconPlus size={15} />
             )}
-          </AnimatePresence>
-
-          <div className="flex gap-3 pt-2">
-            <button type="button" onClick={onClose} className="flex-1 rounded-xl border border-white/10 py-2.5 text-sm text-white/60 hover:bg-white/6 transition-colors">
-              Batal
-            </button>
-            <button
-              id="add-member-submit"
-              type="submit"
-              disabled={isPending}
-              className="flex-1 inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-emerald-700 to-emerald-600 py-2.5 text-sm font-bold text-white disabled:opacity-60 transition-opacity"
-            >
-              {isPending ? <IconLoader2 size={15} className="animate-spin" /> : <IconPlus size={15} />}
-              {isPending ? "Menyimpan..." : "Tambah"}
-            </button>
-          </div>
-        </form>
-      </div>
-    </ModalWrapper>
+            {isPending ? "Menyimpan..." : "Tambah"}
+          </button>
+        </div>
+      </form>
+    </AccessibleDialog>
   );
 }
 
@@ -369,7 +385,9 @@ function EditMemberModal({
 }) {
   const [name, setName] = useState(member.name);
   const [position, setPosition] = useState(member.position);
-  const [imagePreview, setImagePreview] = useState<string | null>(member.image_url);
+  const [imagePreview, setImagePreview] = useState<string | null>(
+    member.image_url,
+  );
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
@@ -377,10 +395,14 @@ function EditMemberModal({
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
+
     if (!file) return;
     if (file.size > MAX_IMAGE_SIZE_BYTES) {
-      setError(`Ukuran foto terlalu besar. Maksimal ${MAX_IMAGE_SIZE_MB} MB (file Anda: ${(file.size / 1024 / 1024).toFixed(1)} MB).`);
+      setError(
+        `Ukuran foto terlalu besar. Maksimal ${MAX_IMAGE_SIZE_MB} MB (file Anda: ${(file.size / 1024 / 1024).toFixed(1)} MB).`,
+      );
       e.target.value = "";
+
       return;
     }
     setError(null);
@@ -390,7 +412,11 @@ function EditMemberModal({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name.trim()) { setError("Nama tidak boleh kosong"); return; }
+    if (!name.trim()) {
+      setError("Nama tidak boleh kosong");
+
+      return;
+    }
     setError(null);
 
     startTransition(async () => {
@@ -398,16 +424,24 @@ function EditMemberModal({
         await updateMember(member.id, { name: name.trim(), position });
 
         let finalImageUrl = member.image_url; // keep existing URL by default
+
         if (imageFile) {
           // Must use FormData — Next.js cannot serialize File as a plain argument
           const fd = new FormData();
+
           fd.append("id", member.id);
           fd.append("image", imageFile);
           const result = await updateMemberImage(fd);
+
           finalImageUrl = result.publicUrl;
         }
 
-        onUpdated({ ...member, name: name.trim(), position, image_url: finalImageUrl });
+        onUpdated({
+          ...member,
+          name: name.trim(),
+          position,
+          image_url: finalImageUrl,
+        });
         onClose();
       } catch (e: unknown) {
         setError(parseUploadError(e));
@@ -416,93 +450,126 @@ function EditMemberModal({
   };
 
   return (
-    <ModalWrapper onClose={onClose} reduced={reduced}>
-      <div className="overflow-hidden rounded-2xl border border-white/12 bg-slate-900 shadow-2xl">
-        <div className="flex items-center justify-between border-b border-white/8 px-6 py-4">
-          <h2 className="font-bold text-white">Edit Anggota</h2>
-          <button onClick={onClose} className="text-white/40 hover:text-white transition-colors" aria-label="Tutup">
-            <IconX size={20} />
+    <AccessibleDialog
+      open
+      className="left-1/2 top-1/2 max-h-[calc(100dvh-2rem)] w-[calc(100%-2rem)] max-w-lg -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-2xl"
+      title="Edit Anggota"
+      onClose={onClose}
+    >
+      <form className="p-6 space-y-4" onSubmit={handleSubmit}>
+        {/* Photo */}
+        <div className="flex flex-col items-center gap-3">
+          <button
+            aria-label="Pilih gambar"
+            className="relative h-24 w-24 overflow-hidden rounded-2xl border-2 border-dashed border-border bg-surface cursor-pointer hover:border-success transition-colors"
+            type="button"
+            onClick={() => fileRef.current?.click()}
+          >
+            {imagePreview ? (
+              <Image
+                fill
+                alt="Preview"
+                className="object-cover"
+                src={imagePreview}
+              />
+            ) : (
+              <div className="flex h-full w-full flex-col items-center justify-center gap-1 text-muted-foreground">
+                <IconPhoto size={24} stroke={1.5} />
+                <span className="text-sm">Upload foto</span>
+              </div>
+            )}
+          </button>
+          <input
+            ref={fileRef}
+            accept="image/*"
+            className="hidden"
+            id="edit-member-image"
+            type="file"
+            onChange={handleImageChange}
+          />
+          <button
+            className="ns-secondary"
+            type="button"
+            onClick={() => fileRef.current?.click()}
+          >
+            {imagePreview ? "Ganti foto" : "Upload foto"}
           </button>
         </div>
-        <form onSubmit={handleSubmit} className="p-6 space-y-4">
-          {/* Photo */}
-          <div className="flex flex-col items-center gap-3">
-            <div
-              className="relative h-24 w-24 overflow-hidden rounded-2xl border-2 border-dashed border-white/20 bg-white/6 cursor-pointer hover:border-emerald-500/50 transition-colors"
-              onClick={() => fileRef.current?.click()}
+
+        {/* Name */}
+        <div className="space-y-1.5">
+          <label className="ns-label" htmlFor="edit-member-name">
+            Nama Lengkap
+          </label>
+          <input
+            required
+            className="ns-field"
+            id="edit-member-name"
+            type="text"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+          />
+        </div>
+
+        {/* Position */}
+        <div className="space-y-1.5">
+          <label className="ns-label" htmlFor="edit-member-position">
+            Jabatan
+          </label>
+          <select
+            className="ns-field"
+            id="edit-member-position"
+            value={position}
+            onChange={(e) => setPosition(e.target.value)}
+          >
+            {POSITIONS.map((p) => (
+              <option key={p.value} value={p.value}>
+                {p.label}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <AnimatePresence>
+          {error && (
+            <motion.p
+              animate={{ opacity: 1, y: 0 }}
+              className="ns-alert"
+              data-tone="danger"
+              exit={{ opacity: 0, y: -6 }}
+              initial={{ opacity: 0, y: -6 }}
+              role="alert"
+              transition={{ duration: reduced ? 0 : 0.2 }}
             >
-              {imagePreview ? (
-                <Image src={imagePreview} alt="Preview" fill className="object-cover" />
-              ) : (
-                <div className="flex h-full w-full flex-col items-center justify-center gap-1 text-white/30">
-                  <IconPhoto size={24} stroke={1.5} />
-                  <span className="text-[10px]">Upload foto</span>
-                </div>
-              )}
-            </div>
-            <input ref={fileRef} id="edit-member-image" type="file" accept="image/*" className="hidden" onChange={handleImageChange} />
-            <button type="button" onClick={() => fileRef.current?.click()} className="text-xs text-emerald-400 hover:underline">
-              {imagePreview ? "Ganti foto" : "Upload foto"}
-            </button>
-          </div>
+              {error}
+            </motion.p>
+          )}
+        </AnimatePresence>
 
-          {/* Name */}
-          <div className="space-y-1.5">
-            <label htmlFor="edit-member-name" className="block text-xs font-semibold text-white/60 uppercase tracking-wide">Nama Lengkap</label>
-            <input
-              id="edit-member-name"
-              type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              required
-              className="w-full rounded-xl border border-white/10 bg-white/6 px-4 py-2.5 text-sm text-white placeholder-white/25 outline-none focus:border-emerald-500/50 focus:ring-2 focus:ring-emerald-500/15"
-            />
-          </div>
-
-          {/* Position */}
-          <div className="space-y-1.5">
-            <label htmlFor="edit-member-position" className="block text-xs font-semibold text-white/60 uppercase tracking-wide">Jabatan</label>
-            <select
-              id="edit-member-position"
-              value={position}
-              onChange={(e) => setPosition(e.target.value)}
-              className="w-full rounded-xl border border-white/10 bg-slate-800 px-4 py-2.5 text-sm text-white outline-none focus:border-emerald-500/50"
-            >
-              {POSITIONS.map((p) => (
-                <option key={p.value} value={p.value}>{p.label}</option>
-              ))}
-            </select>
-          </div>
-
-          <AnimatePresence>
-            {error && (
-              <motion.p
-                initial={{ opacity: 0, y: -6 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -6 }}
-                transition={{ duration: reduced ? 0 : 0.2 }}
-                className="rounded-lg border border-red-500/20 bg-red-500/10 px-3 py-2 text-xs text-red-400"
-              >
-                {error}
-              </motion.p>
+        <div className="flex gap-3 pt-2">
+          <button
+            className="ns-secondary flex-1"
+            type="button"
+            onClick={onClose}
+          >
+            Batal
+          </button>
+          <button
+            className="ns-primary flex-1"
+            disabled={isPending}
+            id="edit-member-submit"
+            type="submit"
+          >
+            {isPending ? (
+              <IconLoader2 className="animate-spin" size={15} />
+            ) : (
+              <IconDeviceFloppy size={15} />
             )}
-          </AnimatePresence>
-
-          <div className="flex gap-3 pt-2">
-            <button type="button" onClick={onClose} className="flex-1 rounded-xl border border-white/10 py-2.5 text-sm text-white/60 hover:bg-white/6 transition-colors">Batal</button>
-            <button
-              id="edit-member-submit"
-              type="submit"
-              disabled={isPending}
-              className="flex-1 inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-emerald-700 to-emerald-600 py-2.5 text-sm font-bold text-white disabled:opacity-60 transition-opacity"
-            >
-              {isPending ? <IconLoader2 size={15} className="animate-spin" /> : <IconDeviceFloppy size={15} />}
-              {isPending ? "Menyimpan..." : "Simpan"}
-            </button>
-          </div>
-        </form>
-      </div>
-    </ModalWrapper>
+            {isPending ? "Menyimpan..." : "Simpan"}
+          </button>
+        </div>
+      </form>
+    </AccessibleDialog>
   );
 }
 
@@ -510,7 +577,11 @@ function EditMemberModal({
 
 let toastCounter = 0;
 
-export default function MembersManager({ initialMembers }: { initialMembers: MemberRow[] }) {
+export default function MembersManager({
+  initialMembers,
+}: {
+  initialMembers: MemberRow[];
+}) {
   const [members, setMembers] = useState<MemberRow[]>(initialMembers);
   const [search, setSearch] = useState("");
   const [showAdd, setShowAdd] = useState(false);
@@ -538,13 +609,21 @@ export default function MembersManager({ initialMembers }: { initialMembers: Mem
   );
 
   // ── Toast helpers ─────────────────────────────────────────────────────────
-  const pushToast = (message: string, type: "success" | "error" = "success") => {
+  const pushToast = (
+    message: string,
+    type: "success" | "error" = "success",
+  ) => {
     const id = ++toastCounter;
+
     setToasts((prev) => [...prev, { id, message, type }]);
-    setTimeout(() => setToasts((prev) => prev.filter((t) => t.id !== id)), 3200);
+    setTimeout(
+      () => setToasts((prev) => prev.filter((t) => t.id !== id)),
+      3200,
+    );
   };
 
-  const removeToast = (id: number) => setToasts((prev) => prev.filter((t) => t.id !== id));
+  const removeToast = (id: number) =>
+    setToasts((prev) => prev.filter((t) => t.id !== id));
 
   const handleDelete = (id: string) => {
     setDeletingId(id);
@@ -557,6 +636,7 @@ export default function MembersManager({ initialMembers }: { initialMembers: Mem
         pushToast("Anggota berhasil dihapus");
       } catch (e: unknown) {
         const msg = e instanceof Error ? e.message : "Gagal menghapus";
+
         setDeleteError(msg);
         pushToast(msg, "error");
       } finally {
@@ -591,8 +671,10 @@ export default function MembersManager({ initialMembers }: { initialMembers: Mem
     setMembers((prev) => {
       const next = [...prev];
       const dragged = next.splice(dragItem.current!, 1)[0];
+
       next.splice(index, 0, dragged);
       dragItem.current = index;
+
       return next;
     });
   };
@@ -606,6 +688,7 @@ export default function MembersManager({ initialMembers }: { initialMembers: Mem
 
   const handleSaveOrder = () => {
     const updates = members.map((m, i) => ({ id: m.id, display_order: i }));
+
     startTransition(async () => {
       try {
         setReorderError(null);
@@ -617,6 +700,7 @@ export default function MembersManager({ initialMembers }: { initialMembers: Mem
         setTimeout(() => setReorderSaved(false), 2500);
       } catch (e: unknown) {
         const msg = e instanceof Error ? e.message : "Gagal menyimpan urutan";
+
         setReorderError(msg);
         pushToast(msg, "error");
       }
@@ -633,7 +717,7 @@ export default function MembersManager({ initialMembers }: { initialMembers: Mem
 
   // ── Animation variants ────────────────────────────────────────────────────
   const cardIn = (i: number) => ({
-    initial: { opacity: 0, y: reduced ? 0 : 22, scale: reduced ? 1 : 0.97 },
+    initial: false,
     animate: {
       opacity: 1,
       y: 0,
@@ -660,18 +744,18 @@ export default function MembersManager({ initialMembers }: { initialMembers: Mem
         {showAdd && (
           <AddMemberModal
             key="add-modal"
-            onClose={() => setShowAdd(false)}
-            onAdded={handleAdded}
             reduced={reduced}
+            onAdded={handleAdded}
+            onClose={() => setShowAdd(false)}
           />
         )}
         {editMember && (
           <EditMemberModal
             key="edit-modal"
             member={editMember}
+            reduced={reduced}
             onClose={() => setEditMember(null)}
             onUpdated={handleUpdated}
-            reduced={reduced}
           />
         )}
       </AnimatePresence>
@@ -684,55 +768,52 @@ export default function MembersManager({ initialMembers }: { initialMembers: Mem
         }
       `}</style>
 
-      <div className="mx-auto max-w-4xl space-y-6">
+      <div className="mx-auto max-w-5xl space-y-8">
         {/* Header */}
         <motion.div
-          initial={{ opacity: 0, y: reduced ? 0 : 20 }}
           animate={{ opacity: 1, y: 0 }}
+          className="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between"
+          initial={false}
           transition={{ duration: reduced ? 0 : 0.4, ease: [0.22, 1, 0.36, 1] }}
-          className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between"
         >
           <div>
-            <div className="flex items-center gap-2 text-emerald-400">
-              <IconUsersGroup size={20} stroke={1.8} />
-              <span className="text-xs font-semibold uppercase tracking-[0.22em]">Anggota Jemaat</span>
-            </div>
-            <h1 className="mt-1 text-2xl font-black text-white">Kelola Anggota</h1>
-            <p className="mt-1 text-sm text-white/50">
-              Tambah, edit, atau hapus anggota jemaat. Total: {members.length} anggota.
+            <h1 className="ns-title">Kelola Anggota</h1>
+            <p className="ns-copy mt-3">
+              Tambah, edit, atau hapus anggota jemaat. Total: {members.length}{" "}
+              anggota.
             </p>
           </div>
-          <div className="flex shrink-0 items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <button
+              className={`ns-secondary ${
+                isReordering
+                  ? "border-control-border bg-surface text-secondary hover:bg-surface"
+                  : "border-border bg-surface text-muted-foreground hover:bg-surface hover:text-foreground"
+              }`}
               id="reorder-members-btn"
               onClick={handleToggleReorder}
-              className={`inline-flex items-center gap-2 rounded-xl border px-4 py-2.5 text-sm font-semibold transition-all hover:-translate-y-0.5 ${
-                isReordering
-                  ? "border-amber-500/40 bg-amber-500/15 text-amber-400 hover:bg-amber-500/25"
-                  : "border-white/12 bg-white/6 text-white/60 hover:bg-white/12 hover:text-white"
-              }`}
             >
               <IconArrowsSort size={16} />
               {isReordering ? "Selesai Atur" : "Atur Urutan"}
             </button>
             {!isReordering && (
               <button
+                className="ns-primary shrink-0"
                 id="add-member-btn"
                 onClick={() => setShowAdd(true)}
-                className="inline-flex shrink-0 items-center gap-2 rounded-xl bg-gradient-to-r from-emerald-700 to-emerald-600 px-5 py-2.5 text-sm font-bold text-white shadow-[0_4px_16px_rgba(1,75,63,0.35)] transition-all hover:-translate-y-0.5"
               >
                 <IconPlus size={16} /> Tambah Anggota
               </button>
             )}
             {isReordering && (
               <button
+                className="ns-primary"
+                disabled={isPending}
                 id="save-order-btn"
                 onClick={handleSaveOrder}
-                disabled={isPending}
-                className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-emerald-700 to-emerald-600 px-5 py-2.5 text-sm font-bold text-white shadow-[0_4px_16px_rgba(1,75,63,0.35)] transition-all hover:-translate-y-0.5 disabled:opacity-60 disabled:translate-y-0"
               >
                 {isPending ? (
-                  <IconLoader2 size={16} className="animate-spin" />
+                  <IconLoader2 className="animate-spin" size={16} />
                 ) : reorderSaved ? (
                   <IconCheck size={16} />
                 ) : (
@@ -747,22 +828,26 @@ export default function MembersManager({ initialMembers }: { initialMembers: Mem
         <AnimatePresence>
           {deleteError && (
             <motion.div
-              initial={{ opacity: 0, y: -8 }}
               animate={{ opacity: 1, y: 0 }}
+              className="ns-alert"
+              data-tone="danger"
               exit={{ opacity: 0, y: -8 }}
+              initial={{ opacity: 0, y: -8 }}
+              role="alert"
               transition={{ duration: reduced ? 0 : 0.2 }}
-              className="rounded-xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-400"
             >
               {deleteError}
             </motion.div>
           )}
           {reorderError && (
             <motion.div
-              initial={{ opacity: 0, y: -8 }}
               animate={{ opacity: 1, y: 0 }}
+              className="ns-alert"
+              data-tone="danger"
               exit={{ opacity: 0, y: -8 }}
+              initial={{ opacity: 0, y: -8 }}
+              role="alert"
               transition={{ duration: reduced ? 0 : 0.2 }}
-              className="rounded-xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-400"
             >
               {reorderError}
             </motion.div>
@@ -773,16 +858,20 @@ export default function MembersManager({ initialMembers }: { initialMembers: Mem
         <AnimatePresence>
           {isReordering && (
             <motion.div
-              initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: "auto" }}
-              exit={{ opacity: 0, height: 0 }}
-              transition={{ duration: reduced ? 0 : 0.25 }}
               className="overflow-hidden"
+              exit={{ opacity: 0, height: 0 }}
+              initial={{ opacity: 0, height: 0 }}
+              transition={{ duration: reduced ? 0 : 0.25 }}
             >
-              <div className="flex items-center gap-3 rounded-xl border border-amber-500/20 bg-amber-500/8 px-4 py-3">
-                <IconGripVertical size={16} className="shrink-0 text-amber-400" />
-                <p className="text-sm text-amber-300/80">
-                  Seret kartu untuk mengubah urutan tampil. Klik <strong>Simpan Urutan</strong> untuk menyimpan perubahan.
+              <div className="flex items-center gap-3 rounded-xl border border-control-border bg-surface px-4 py-3">
+                <IconGripVertical
+                  className="shrink-0 text-secondary"
+                  size={16}
+                />
+                <p className="text-sm text-secondary">
+                  Seret kartu untuk mengubah urutan tampil. Klik{" "}
+                  <strong>Simpan Urutan</strong> untuk menyimpan perubahan.
                 </p>
               </div>
             </motion.div>
@@ -793,22 +882,23 @@ export default function MembersManager({ initialMembers }: { initialMembers: Mem
         <AnimatePresence>
           {!isReordering && (
             <motion.div
-              initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: reduced ? 0 : 0.2 }}
               className="relative"
+              exit={{ opacity: 0 }}
+              initial={{ opacity: 0 }}
+              transition={{ duration: reduced ? 0 : 0.2 }}
             >
-              <span className="pointer-events-none absolute inset-y-0 left-4 flex items-center text-white/30">
+              <span className="pointer-events-none absolute inset-y-0 left-4 flex items-center text-muted-foreground">
                 <IconSearch size={16} stroke={1.8} />
               </span>
               <input
+                aria-label="Cari nama atau jabatan"
+                className="ns-field pl-10"
                 id="member-search"
-                type="search"
                 placeholder="Cari nama atau jabatan..."
+                type="search"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="w-full rounded-2xl border border-white/10 bg-white/5 py-3 pl-10 pr-4 text-sm text-white placeholder-white/25 outline-none focus:border-emerald-500/40 focus:ring-2 focus:ring-emerald-500/15"
               />
             </motion.div>
           )}
@@ -817,15 +907,15 @@ export default function MembersManager({ initialMembers }: { initialMembers: Mem
         {/* Members grid */}
         {(isReordering ? members : filtered).length === 0 ? (
           <motion.div
-            initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="flex min-h-48 flex-col items-center justify-center rounded-2xl border border-dashed border-white/10 text-white/30"
+            className="flex min-h-48 flex-col items-center justify-center rounded-2xl border border-dashed border-border text-muted-foreground"
+            initial={{ opacity: 0 }}
           >
             <IconUsersGroup size={36} stroke={1.4} />
             <p className="mt-3 text-sm">Tidak ada anggota ditemukan</p>
           </motion.div>
         ) : (
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-4 xl:grid-cols-2">
             <AnimatePresence mode="popLayout">
               {(isReordering ? members : filtered).map((member, index) => {
                 const anim = cardIn(index);
@@ -837,11 +927,6 @@ export default function MembersManager({ initialMembers }: { initialMembers: Mem
                     key={member.id}
                     layout
                     {...anim}
-                    draggable={isReordering}
-                    onDragStart={isReordering ? () => handleDragStart(index) : undefined}
-                    onDragEnter={isReordering ? () => handleDragEnter(index) : undefined}
-                    onDragEnd={isReordering ? handleDragEnd : undefined}
-                    onDragOver={isReordering ? (e) => e.preventDefault() : undefined}
                     animate={
                       isThisDragging && isReordering && !reduced
                         ? {
@@ -856,75 +941,86 @@ export default function MembersManager({ initialMembers }: { initialMembers: Mem
                             zIndex: 1,
                           }
                     }
-                    className={`group relative flex flex-col overflow-hidden rounded-2xl border bg-white/4 transition-colors duration-200 ${
+                    className={`group relative flex flex-col overflow-hidden rounded-2xl border bg-surface transition-colors duration-200 ${
                       isReordering
-                        ? "cursor-grab border-amber-500/20 bg-amber-500/4 hover:border-amber-500/40 active:cursor-grabbing"
+                        ? "cursor-grab border-control-border bg-surface hover:border-control-border active:cursor-grabbing"
                         : savedId === member.id
-                        ? "border-emerald-500/40 bg-emerald-500/8"
-                        : "border-white/8 hover:border-white/16"
+                          ? "border-success bg-card"
+                          : "border-border hover:border-border"
                     }`}
+                    draggable={isReordering}
+                    onDragEnd={isReordering ? handleDragEnd : undefined}
+                    onDragEnter={
+                      isReordering ? () => handleDragEnter(index) : undefined
+                    }
+                    onDragOver={
+                      isReordering ? (e) => e.preventDefault() : undefined
+                    }
+                    onDragStart={
+                      isReordering ? () => handleDragStart(index) : undefined
+                    }
                   >
                     {/* Main card row */}
-                    <div className="flex items-center gap-3 p-4">
+                    <div className="grid grid-cols-[3rem_minmax(0,1fr)] items-center gap-3 p-5">
                       {/* Drag handle — only in reorder mode */}
                       {isReordering && (
-                        <div className="flex shrink-0 items-center text-amber-400/60">
+                        <div className="col-span-2 flex items-center text-secondary">
                           <IconGripVertical size={18} stroke={1.8} />
                         </div>
                       )}
 
                       {/* Avatar */}
-                      <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-xl bg-white/8">
+                      <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-xl bg-surface">
                         {member.image_url ? (
                           <Image
-                            src={member.image_url}
-                            alt={member.name}
                             fill
+                            alt={member.name}
                             className="object-cover"
                             sizes="48px"
+                            src={member.image_url}
                           />
                         ) : (
-                          <div className="flex h-full w-full items-center justify-center text-lg font-bold text-white/30">
+                          <div className="flex h-full w-full items-center justify-center text-lg font-bold text-muted-foreground">
                             {member.name[0]}
                           </div>
                         )}
                       </div>
 
                       {/* Info */}
-                      <div className="min-w-0 flex-1">
-                        <p className="truncate text-sm font-semibold text-white">
+                      <div className="min-w-0">
+                        <p className="break-words text-sm font-semibold text-foreground">
                           {member.name}
                           {savedId === member.id && (
-                            <span className="ml-1 inline-flex items-center gap-0.5 text-[10px] text-emerald-400">
+                            <span className="ml-1 inline-flex items-center gap-0.5 text-sm text-success">
                               <IconCheck size={10} /> Tersimpan
                             </span>
                           )}
                         </p>
-                        <p className="mt-0.5 truncate text-xs text-white/40">
+                        <p className="mt-0.5 break-words text-sm text-muted-foreground">
                           {getPositionLabel(member.position)}
                         </p>
                       </div>
 
                       {/* Actions — only in normal mode */}
                       {!isReordering && !isConfirmingDelete && (
-                        <div className="flex items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100">
+                        <div className="col-span-2 flex justify-end gap-2 border-t border-border pt-3">
                           <button
+                            aria-label={`Edit ${member.name}`}
+                            className="flex h-11 w-11 items-center justify-center rounded-lg bg-surface text-muted-foreground hover:bg-surface hover:text-foreground transition-colors"
                             id={`edit-member-${member.id}`}
                             onClick={() => setEditMember(member)}
-                            className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/8 text-white/50 hover:bg-white/16 hover:text-white transition-colors"
-                            aria-label={`Edit ${member.name}`}
                           >
                             <IconPencil size={14} stroke={1.8} />
                           </button>
                           <button
+                            aria-label={`Hapus ${member.name}`}
+                            className="flex h-11 w-11 items-center justify-center rounded-lg bg-surface text-destructive hover:bg-surface hover:text-destructive disabled:opacity-50 transition-colors"
+                            disabled={isPending && deletingId === member.id}
                             id={`delete-member-${member.id}`}
                             onClick={() => setConfirmDeleteId(member.id)}
-                            disabled={isPending && deletingId === member.id}
-                            className="flex h-8 w-8 items-center justify-center rounded-lg bg-red-500/10 text-red-400/70 hover:bg-red-500/20 hover:text-red-400 disabled:opacity-50 transition-colors"
-                            aria-label={`Hapus ${member.name}`}
                           >
                             {isPending && deletingId === member.id ? (
-                              <IconLoader2 size={14} className="animate-spin" />
+                              <IconLoader2 className="animate-spin" size={14} />
                             ) : (
                               <IconTrash size={14} stroke={1.8} />
                             )}
@@ -937,32 +1033,45 @@ export default function MembersManager({ initialMembers }: { initialMembers: Mem
                     <AnimatePresence>
                       {isConfirmingDelete && (
                         <motion.div
-                          initial={{ opacity: 0, height: 0 }}
                           animate={{ opacity: 1, height: "auto" }}
-                          exit={{ opacity: 0, height: 0 }}
-                          transition={{ duration: reduced ? 0 : 0.22, ease: [0.22, 1, 0.36, 1] }}
                           className="overflow-hidden"
+                          exit={{ opacity: 0, height: 0 }}
+                          initial={{ opacity: 0, height: 0 }}
+                          transition={{
+                            duration: reduced ? 0 : 0.22,
+                            ease: [0.22, 1, 0.36, 1],
+                          }}
                         >
-                          <div className="flex items-center gap-2 border-t border-red-500/15 bg-red-500/8 px-4 py-2.5">
-                            <IconAlertTriangle size={13} className="shrink-0 text-red-400" />
-                            <p className="flex-1 text-[11px] text-red-300/80">
-                              Hapus <span className="font-semibold">{member.name}</span>?
+                          <div className="flex flex-wrap items-center gap-2 border-t border-destructive bg-surface px-4 py-2.5">
+                            <IconAlertTriangle
+                              className="shrink-0 text-destructive"
+                              size={13}
+                            />
+                            <p className="flex-1 text-sm text-destructive">
+                              Hapus{" "}
+                              <span className="font-semibold">
+                                {member.name}
+                              </span>
+                              ?
                             </p>
                             <button
-                              onClick={() => handleDelete(member.id)}
+                              className="inline-flex min-h-11 items-center gap-1 rounded-lg bg-surface px-2.5 py-1 text-sm font-bold text-destructive hover:bg-surface disabled:opacity-50 transition-colors"
                               disabled={isPending && deletingId === member.id}
-                              className="inline-flex items-center gap-1 rounded-lg bg-red-500/25 px-2.5 py-1 text-[11px] font-bold text-red-300 hover:bg-red-500/40 disabled:opacity-50 transition-colors"
+                              onClick={() => handleDelete(member.id)}
                             >
                               {isPending && deletingId === member.id ? (
-                                <IconLoader2 size={11} className="animate-spin" />
+                                <IconLoader2
+                                  className="animate-spin"
+                                  size={11}
+                                />
                               ) : (
                                 <IconCheck size={11} />
                               )}
                               Ya, hapus
                             </button>
                             <button
+                              className="inline-flex min-h-11 items-center gap-1 rounded-lg bg-surface px-2.5 py-1 text-sm font-semibold text-muted-foreground hover:bg-surface transition-colors"
                               onClick={() => setConfirmDeleteId(null)}
-                              className="inline-flex items-center gap-1 rounded-lg bg-white/8 px-2.5 py-1 text-[11px] font-semibold text-white/50 hover:bg-white/14 transition-colors"
                             >
                               <IconX size={11} /> Batal
                             </button>
@@ -982,9 +1091,9 @@ export default function MembersManager({ initialMembers }: { initialMembers: Mem
                   {[0, 1, 2].map((i) => (
                     <motion.div
                       key={`skel-${i}`}
-                      initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
                       exit={{ opacity: 0 }}
+                      initial={{ opacity: 0 }}
                       transition={{ delay: i * 0.05 }}
                     >
                       <MemberCardSkeleton />
@@ -996,7 +1105,7 @@ export default function MembersManager({ initialMembers }: { initialMembers: Mem
           </div>
         )}
 
-        <p className="text-center text-xs text-white/25 pb-4">
+        <p className="text-center text-sm text-muted-foreground pb-4">
           Perubahan akan langsung tampil di halaman direktori anggota
         </p>
       </div>

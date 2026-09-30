@@ -1,5 +1,7 @@
 "use client";
 
+import type { HeroImageRow, SabbathMomentRow } from "./page";
+
 import { useRef, useState, useTransition } from "react";
 import Image from "next/image";
 import {
@@ -13,6 +15,7 @@ import {
   IconUpload,
   IconX,
 } from "@tabler/icons-react";
+
 import {
   addHeroImage,
   addSabbathMoment,
@@ -20,7 +23,8 @@ import {
   deleteSabbathMoment,
   updateSabbathMoment,
 } from "../actions";
-import type { HeroImageRow, SabbathMomentRow } from "./page";
+
+import { AccessibleDialog } from "@/components/ui/accessible-dialog";
 
 // ─── Tab ─────────────────────────────────────────────────────────────────────
 
@@ -28,7 +32,11 @@ type Tab = "hero" | "sabbath";
 
 // ─── Hero Images Section ───────────────────────────────────────────────────────
 
-function HeroImagesSection({ initialImages }: { initialImages: HeroImageRow[] }) {
+function HeroImagesSection({
+  initialImages,
+}: {
+  initialImages: HeroImageRow[];
+}) {
   const [images, setImages] = useState<HeroImageRow[]>(initialImages);
   const [isPending, startTransition] = useTransition();
   const [deletingId, setDeletingId] = useState<string | null>(null);
@@ -39,6 +47,7 @@ function HeroImagesSection({ initialImages }: { initialImages: HeroImageRow[] })
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
+
     if (!file) return;
     setUploadFile(file);
     setUploadPreview(URL.createObjectURL(file));
@@ -47,6 +56,7 @@ function HeroImagesSection({ initialImages }: { initialImages: HeroImageRow[] })
   const handleUpload = () => {
     if (!uploadFile) return;
     const fd = new FormData();
+
     fd.append("image", uploadFile);
 
     startTransition(async () => {
@@ -89,60 +99,76 @@ function HeroImagesSection({ initialImages }: { initialImages: HeroImageRow[] })
   return (
     <div className="space-y-5">
       <div>
-        <h2 className="font-bold text-white">Hero Carousel</h2>
-        <p className="text-sm text-white/50">
-          Gambar latar hero section di halaman utama. Akan berganti otomatis setiap 5,6 detik.
+        <h2 className="ns-card-title">Hero Carousel</h2>
+        <p className="text-sm text-muted-foreground">
+          Gambar latar hero section di halaman utama. Akan berganti otomatis
+          setiap 5,6 detik.
         </p>
       </div>
 
       {error && (
-        <div className="rounded-xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-400">{error}</div>
+        <div className="ns-alert" data-tone="danger" role="alert">
+          {error}
+        </div>
       )}
 
       {/* Upload area */}
-      <div className="rounded-2xl border border-dashed border-white/16 bg-white/4 p-5">
+      <div className="rounded-2xl border border-dashed border-border bg-surface p-5">
         <div className="flex flex-col items-center gap-4 sm:flex-row">
-          <div
-            className="relative h-32 w-48 shrink-0 overflow-hidden rounded-xl border border-white/10 bg-white/6 cursor-pointer hover:border-emerald-500/50 transition-colors"
+          <button
+            aria-label="Pilih gambar"
+            className="relative h-32 w-48 shrink-0 overflow-hidden rounded-xl border border-border bg-surface cursor-pointer hover:border-success transition-colors"
+            type="button"
             onClick={() => fileRef.current?.click()}
           >
             {uploadPreview ? (
-              <Image src={uploadPreview} alt="Preview" fill className="object-cover" />
+              <Image
+                fill
+                alt="Preview"
+                className="object-cover"
+                src={uploadPreview}
+              />
             ) : (
-              <div className="flex h-full w-full flex-col items-center justify-center gap-2 text-white/25">
+              <div className="flex h-full w-full flex-col items-center justify-center gap-2 text-muted-foreground">
                 <IconUpload size={28} stroke={1.4} />
-                <span className="text-xs">Klik untuk pilih gambar</span>
+                <span className="text-sm">Klik untuk pilih gambar</span>
               </div>
             )}
-          </div>
+          </button>
 
           <div className="flex flex-col gap-3 flex-1">
             <input
               ref={fileRef}
-              id="hero-upload-input"
-              type="file"
               accept="image/*"
               className="hidden"
+              id="hero-upload-input"
+              type="file"
               onChange={handleFileSelect}
             />
             <button
+              className="ns-secondary"
               type="button"
               onClick={() => fileRef.current?.click()}
-              className="inline-flex items-center gap-2 rounded-xl border border-white/12 bg-white/6 px-4 py-2.5 text-sm text-white/70 hover:bg-white/12 hover:text-white transition-colors"
             >
               <IconPhoto size={16} /> Pilih gambar hero
             </button>
             {uploadFile && (
               <div className="space-y-2">
-                <p className="text-xs text-white/40 truncate">{uploadFile.name}</p>
+                <p className="text-sm text-muted-foreground truncate">
+                  {uploadFile.name}
+                </p>
                 <button
+                  className="ns-primary shrink-0"
+                  disabled={isPending}
                   id="hero-upload-confirm"
                   type="button"
                   onClick={handleUpload}
-                  disabled={isPending}
-                  className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-emerald-700 to-emerald-600 px-4 py-2.5 text-sm font-bold text-white disabled:opacity-60"
                 >
-                  {isPending ? <IconLoader2 size={15} className="animate-spin" /> : <IconUpload size={15} />}
+                  {isPending ? (
+                    <IconLoader2 className="animate-spin" size={15} />
+                  ) : (
+                    <IconUpload size={15} />
+                  )}
                   {isPending ? "Mengupload..." : "Upload Gambar"}
                 </button>
               </div>
@@ -153,40 +179,40 @@ function HeroImagesSection({ initialImages }: { initialImages: HeroImageRow[] })
 
       {/* Image grid */}
       {images.length === 0 ? (
-        <div className="flex min-h-32 flex-col items-center justify-center rounded-2xl border border-dashed border-white/10 text-white/25">
+        <div className="flex min-h-32 flex-col items-center justify-center rounded-2xl border border-dashed border-border text-muted-foreground">
           <IconPhoto size={32} stroke={1.4} />
           <p className="mt-2 text-sm">Belum ada gambar hero</p>
-          <p className="text-xs">Upload gambar pertama di atas</p>
+          <p className="text-sm">Upload gambar pertama di atas</p>
         </div>
       ) : (
         <div className="grid gap-3 grid-cols-2 sm:grid-cols-3 lg:grid-cols-4">
           {images.map((img, i) => (
             <div
               key={img.id}
-              className="group relative aspect-[4/3] overflow-hidden rounded-2xl border border-white/10 bg-white/4"
+              className="group relative aspect-[4/3] overflow-hidden rounded-2xl border border-border bg-surface"
             >
               <Image
-                src={img.public_url}
-                alt={`Hero image ${i + 1}`}
                 fill
+                alt={`Hero image ${i + 1}`}
                 className="object-cover"
                 sizes="(min-width: 1024px) 25vw, (min-width: 640px) 33vw, 50vw"
+                src={img.public_url}
               />
               {/* Order badge */}
-              <div className="absolute left-2 top-2 rounded-full bg-black/60 px-2 py-0.5 text-[10px] font-bold text-white backdrop-blur-sm">
+              <div className="absolute left-2 top-2 rounded-full bg-black/70 px-2 py-0.5 text-sm font-bold text-white">
                 #{i + 1}
               </div>
               {/* Delete button */}
-              <div className="absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 transition-opacity group-hover:opacity-100">
+              <div className="absolute bottom-2 right-2">
                 <button
+                  aria-label="Hapus gambar"
+                  className="flex h-11 w-11 items-center justify-center rounded-xl bg-surface text-foreground hover:bg-surface disabled:opacity-50 transition-colors"
+                  disabled={isPending && deletingId === img.id}
                   id={`delete-hero-${img.id}`}
                   onClick={() => handleDelete(img.id, img.storage_path)}
-                  disabled={isPending && deletingId === img.id}
-                  className="flex h-10 w-10 items-center justify-center rounded-xl bg-red-500/80 text-white hover:bg-red-500 disabled:opacity-50 transition-colors"
-                  aria-label="Hapus gambar"
                 >
                   {isPending && deletingId === img.id ? (
-                    <IconLoader2 size={16} className="animate-spin" />
+                    <IconLoader2 className="animate-spin" size={16} />
                   ) : (
                     <IconTrash size={16} />
                   )}
@@ -231,41 +257,86 @@ function EditMomentModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={onClose} aria-hidden="true" />
-      <div className="relative z-10 w-full max-w-md overflow-hidden rounded-2xl border border-white/12 bg-slate-900 shadow-2xl">
-        <div className="flex items-center justify-between border-b border-white/8 px-6 py-4">
-          <h2 className="font-bold text-white">Edit Sabbath Moment</h2>
-          <button onClick={onClose} className="text-white/40 hover:text-white" aria-label="Tutup"><IconX size={20} /></button>
+    <AccessibleDialog
+      open
+      className="left-1/2 top-1/2 max-h-[calc(100dvh-2rem)] w-[calc(100%-2rem)] max-w-lg -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-2xl"
+      title="Edit Sabbath Moment"
+      onClose={onClose}
+    >
+      <form className="p-6 space-y-4" onSubmit={handleSubmit}>
+        <div className="space-y-1.5">
+          <label className="ns-label" htmlFor="edit-moment-label">
+            Label
+          </label>
+          <input
+            className="ns-field"
+            id="edit-moment-label"
+            type="text"
+            value={label}
+            onChange={(e) => setLabel(e.target.value)}
+          />
         </div>
-        <form onSubmit={handleSubmit} className="p-6 space-y-4">
-          <div className="space-y-1.5">
-            <label htmlFor="edit-moment-label" className="block text-xs font-semibold text-white/60 uppercase tracking-wide">Label</label>
-            <input id="edit-moment-label" type="text" value={label} onChange={(e) => setLabel(e.target.value)} className="w-full rounded-xl border border-white/10 bg-white/6 px-4 py-2.5 text-sm text-white outline-none focus:border-emerald-500/50" />
-          </div>
-          <div className="space-y-1.5">
-            <label htmlFor="edit-moment-title" className="block text-xs font-semibold text-white/60 uppercase tracking-wide">Judul</label>
-            <input id="edit-moment-title" type="text" value={title} onChange={(e) => setTitle(e.target.value)} className="w-full rounded-xl border border-white/10 bg-white/6 px-4 py-2.5 text-sm text-white outline-none focus:border-emerald-500/50" />
-          </div>
-          <div className="space-y-1.5">
-            <label htmlFor="edit-moment-desc" className="block text-xs font-semibold text-white/60 uppercase tracking-wide">Deskripsi</label>
-            <textarea id="edit-moment-desc" value={description} onChange={(e) => setDescription(e.target.value)} rows={3} className="w-full rounded-xl border border-white/10 bg-white/6 px-4 py-2.5 text-sm text-white outline-none focus:border-emerald-500/50 resize-none" />
-          </div>
-          {error && <p className="rounded-lg border border-red-500/20 bg-red-500/10 px-3 py-2 text-xs text-red-400">{error}</p>}
-          <div className="flex gap-3 pt-2">
-            <button type="button" onClick={onClose} className="flex-1 rounded-xl border border-white/10 py-2.5 text-sm text-white/60 hover:bg-white/6">Batal</button>
-            <button id="edit-moment-submit" type="submit" disabled={isPending} className="flex-1 inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-emerald-700 to-emerald-600 py-2.5 text-sm font-bold text-white disabled:opacity-60">
-              {isPending ? <IconLoader2 size={15} className="animate-spin" /> : <IconDeviceFloppy size={15} />}
-              {isPending ? "Menyimpan..." : "Simpan"}
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
+        <div className="space-y-1.5">
+          <label className="ns-label" htmlFor="edit-moment-title">
+            Judul
+          </label>
+          <input
+            className="ns-field"
+            id="edit-moment-title"
+            type="text"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+          />
+        </div>
+        <div className="space-y-1.5">
+          <label className="ns-label" htmlFor="edit-moment-desc">
+            Deskripsi
+          </label>
+          <textarea
+            className="ns-field resize-y"
+            id="edit-moment-desc"
+            rows={3}
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+          />
+        </div>
+        {error && (
+          <p className="ns-alert" data-tone="danger" role="alert">
+            {error}
+          </p>
+        )}
+        <div className="flex gap-3 pt-2">
+          <button
+            className="ns-secondary flex-1"
+            type="button"
+            onClick={onClose}
+          >
+            Batal
+          </button>
+          <button
+            className="ns-primary flex-1"
+            disabled={isPending}
+            id="edit-moment-submit"
+            type="submit"
+          >
+            {isPending ? (
+              <IconLoader2 className="animate-spin" size={15} />
+            ) : (
+              <IconDeviceFloppy size={15} />
+            )}
+            {isPending ? "Menyimpan..." : "Simpan"}
+          </button>
+        </div>
+      </form>
+    </AccessibleDialog>
   );
 }
 
-function SabbathMomentsSection({ initialMoments }: { initialMoments: SabbathMomentRow[] }) {
+function SabbathMomentsSection({
+  initialMoments,
+}: {
+  initialMoments: SabbathMomentRow[];
+}) {
   const [moments, setMoments] = useState<SabbathMomentRow[]>(initialMoments);
   const [editMoment, setEditMoment] = useState<SabbathMomentRow | null>(null);
   const [showAdd, setShowAdd] = useState(false);
@@ -275,7 +346,9 @@ function SabbathMomentsSection({ initialMoments }: { initialMoments: SabbathMome
   const [savedId, setSavedId] = useState<string | null>(null);
 
   // Add form state
-  const [newLabel, setNewLabel] = useState(`Moment ${String(moments.length + 1).padStart(2, "0")}`);
+  const [newLabel, setNewLabel] = useState(
+    `Moment ${String(moments.length + 1).padStart(2, "0")}`,
+  );
   const [newTitle, setNewTitle] = useState("");
   const [newDescription, setNewDescription] = useState("");
   const [newPreview, setNewPreview] = useState<string | null>(null);
@@ -284,14 +357,20 @@ function SabbathMomentsSection({ initialMoments }: { initialMoments: SabbathMome
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
+
     if (!file) return;
     setNewFile(file);
     setNewPreview(URL.createObjectURL(file));
   };
 
   const handleAdd = () => {
-    if (!newFile || !newTitle.trim()) { setError("Gambar dan judul wajib diisi"); return; }
+    if (!newFile || !newTitle.trim()) {
+      setError("Gambar dan judul wajib diisi");
+
+      return;
+    }
     const fd = new FormData();
+
     fd.append("image", newFile);
     fd.append("label", newLabel);
     fd.append("title", newTitle);
@@ -310,6 +389,7 @@ function SabbathMomentsSection({ initialMoments }: { initialMoments: SabbathMome
           description: newDescription,
           display_order: moments.length,
         };
+
         setMoments((prev) => [...prev, newMoment]);
         setShowAdd(false);
         setNewFile(null);
@@ -347,21 +427,26 @@ function SabbathMomentsSection({ initialMoments }: { initialMoments: SabbathMome
   return (
     <>
       {editMoment && (
-        <EditMomentModal moment={editMoment} onClose={() => setEditMoment(null)} onUpdated={handleUpdated} />
+        <EditMomentModal
+          moment={editMoment}
+          onClose={() => setEditMoment(null)}
+          onUpdated={handleUpdated}
+        />
       )}
 
       <div className="space-y-5">
-        <div className="flex items-end justify-between">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <h2 className="font-bold text-white">Sabbath Moments</h2>
-            <p className="text-sm text-white/50">
-              Foto-foto yang ditampilkan dalam scroll stack "Momen Sabat" di halaman utama.
+            <h2 className="ns-card-title">Sabbath Moments</h2>
+            <p className="text-sm text-muted-foreground">
+              Foto-foto yang ditampilkan dalam scroll stack &quot;Momen
+              Sabat&quot; di halaman utama.
             </p>
           </div>
           <button
+            className="ns-primary"
             id="add-moment-btn"
             onClick={() => setShowAdd((v) => !v)}
-            className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-emerald-700 to-emerald-600 px-4 py-2.5 text-sm font-bold text-white shadow-[0_4px_16px_rgba(1,75,63,0.35)] transition-all hover:-translate-y-0.5"
           >
             {showAdd ? <IconX size={15} /> : <IconPlus size={15} />}
             {showAdd ? "Batal" : "Tambah Momen"}
@@ -369,44 +454,99 @@ function SabbathMomentsSection({ initialMoments }: { initialMoments: SabbathMome
         </div>
 
         {error && (
-          <div className="rounded-xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-400">{error}</div>
+          <div className="ns-alert" data-tone="danger" role="alert">
+            {error}
+          </div>
         )}
 
         {/* Add form */}
         {showAdd && (
-          <div className="rounded-2xl border border-emerald-500/20 bg-emerald-500/5 p-5 space-y-4">
-            <h3 className="text-sm font-semibold text-emerald-400">Tambah Momen Baru</h3>
+          <div className="rounded-2xl border border-success bg-card p-5 space-y-4">
+            <h3 className="ns-card-title">Tambah Momen Baru</h3>
             <div className="flex flex-col gap-4 sm:flex-row">
               {/* Preview */}
-              <div
-                className="relative h-40 w-full sm:w-48 shrink-0 overflow-hidden rounded-xl border border-white/10 bg-white/6 cursor-pointer hover:border-emerald-500/40 transition-colors"
+              <button
+                aria-label="Pilih gambar"
+                className="relative h-40 w-full sm:w-48 shrink-0 overflow-hidden rounded-xl border border-border bg-surface cursor-pointer hover:border-success transition-colors"
+                type="button"
                 onClick={() => fileRef.current?.click()}
               >
                 {newPreview ? (
-                  <Image src={newPreview} alt="Preview" fill className="object-cover" />
+                  <Image
+                    fill
+                    alt="Preview"
+                    className="object-cover"
+                    src={newPreview}
+                  />
                 ) : (
-                  <div className="flex h-full w-full flex-col items-center justify-center gap-2 text-white/25">
+                  <div className="flex h-full w-full flex-col items-center justify-center gap-2 text-muted-foreground">
                     <IconUpload size={24} stroke={1.4} />
-                    <span className="text-xs">Klik untuk pilih gambar</span>
+                    <span className="text-sm">Klik untuk pilih gambar</span>
                   </div>
                 )}
-              </div>
-              <div className="flex flex-1 flex-col gap-3">
-                <input ref={fileRef} id="moment-upload-input" type="file" accept="image/*" className="hidden" onChange={handleFileSelect} />
-                <button type="button" onClick={() => fileRef.current?.click()} className="inline-flex items-center gap-2 rounded-xl border border-white/12 bg-white/6 px-3 py-2 text-xs text-white/60 hover:bg-white/12">
-                  <IconPhoto size={14} /> {newPreview ? "Ganti gambar" : "Pilih gambar *"}
-                </button>
-                <input id="moment-label" type="text" placeholder="Label (e.g. Moment 06)" value={newLabel} onChange={(e) => setNewLabel(e.target.value)} className="rounded-xl border border-white/10 bg-white/6 px-3 py-2 text-sm text-white placeholder-white/25 outline-none focus:border-emerald-500/50" />
-                <input id="moment-title" type="text" placeholder="Judul momen *" value={newTitle} onChange={(e) => setNewTitle(e.target.value)} className="rounded-xl border border-white/10 bg-white/6 px-3 py-2 text-sm text-white placeholder-white/25 outline-none focus:border-emerald-500/50" />
-                <textarea id="moment-description" placeholder="Deskripsi singkat" value={newDescription} onChange={(e) => setNewDescription(e.target.value)} rows={2} className="rounded-xl border border-white/10 bg-white/6 px-3 py-2 text-sm text-white placeholder-white/25 outline-none focus:border-emerald-500/50 resize-none" />
+              </button>
+              <div className="flex min-w-0 flex-1 flex-col gap-3">
+                <input
+                  ref={fileRef}
+                  accept="image/*"
+                  className="hidden"
+                  id="moment-upload-input"
+                  type="file"
+                  onChange={handleFileSelect}
+                />
                 <button
+                  className="ns-secondary"
+                  type="button"
+                  onClick={() => fileRef.current?.click()}
+                >
+                  <IconPhoto size={14} />{" "}
+                  {newPreview ? "Ganti gambar" : "Pilih gambar *"}
+                </button>
+                <label className="ns-label" htmlFor="moment-label">
+                  Label
+                </label>
+                <input
+                  className="ns-field"
+                  id="moment-label"
+                  placeholder="Label (e.g. Moment 06)"
+                  type="text"
+                  value={newLabel}
+                  onChange={(e) => setNewLabel(e.target.value)}
+                />
+                <label className="ns-label" htmlFor="moment-title">
+                  Judul momen *
+                </label>
+                <input
+                  className="ns-field"
+                  id="moment-title"
+                  placeholder="Judul momen *"
+                  type="text"
+                  value={newTitle}
+                  onChange={(e) => setNewTitle(e.target.value)}
+                />
+                <label className="ns-label" htmlFor="moment-description">
+                  Deskripsi singkat
+                </label>
+                <textarea
+                  className="ns-field resize-y"
+                  id="moment-description"
+                  placeholder="Deskripsi singkat"
+                  rows={2}
+                  value={newDescription}
+                  onChange={(e) => setNewDescription(e.target.value)}
+                />
+                <button
+                  className="ns-primary"
+                  disabled={isPending}
                   id="add-moment-confirm"
                   type="button"
                   onClick={handleAdd}
-                  disabled={isPending}
-                  className="inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-700 px-4 py-2.5 text-sm font-bold text-white disabled:opacity-60"
                 >
-                  {isPending ? <IconLoader2 size={15} className="animate-spin" /> : <IconUpload size={15} />}
+                  {isPending ? (
+                    <IconLoader2 className="animate-spin" size={15} />
+                  ) : (
+                    <IconUpload size={15} />
+                  )}
                   {isPending ? "Mengupload..." : "Upload Momen"}
                 </button>
               </div>
@@ -416,7 +556,7 @@ function SabbathMomentsSection({ initialMoments }: { initialMoments: SabbathMome
 
         {/* Moments list */}
         {moments.length === 0 ? (
-          <div className="flex min-h-32 flex-col items-center justify-center rounded-2xl border border-dashed border-white/10 text-white/25">
+          <div className="flex min-h-32 flex-col items-center justify-center rounded-2xl border border-dashed border-border text-muted-foreground">
             <IconPhoto size={32} stroke={1.4} />
             <p className="mt-2 text-sm">Belum ada foto Sabbath Moment</p>
           </div>
@@ -425,51 +565,65 @@ function SabbathMomentsSection({ initialMoments }: { initialMoments: SabbathMome
             {moments.map((moment, i) => (
               <div
                 key={moment.id}
-                className={`group flex items-center gap-4 overflow-hidden rounded-2xl border bg-white/4 p-3 transition-all duration-200 ${
-                  savedId === moment.id ? "border-emerald-500/40" : "border-white/8 hover:border-white/16"
+                className={`group grid grid-cols-[minmax(0,1fr)_auto] items-start gap-4 overflow-hidden rounded-2xl border bg-surface p-4 transition-colors duration-200 sm:grid-cols-[6rem_minmax(0,1fr)_auto] sm:items-center ${
+                  savedId === moment.id
+                    ? "border-success"
+                    : "border-border hover:border-border"
                 }`}
               >
                 {/* Thumbnail */}
-                <div className="relative h-16 w-24 shrink-0 overflow-hidden rounded-xl bg-white/8">
-                  <Image src={moment.public_url} alt={moment.title} fill className="object-cover" sizes="96px" />
+                <div className="relative h-16 w-24 shrink-0 overflow-hidden rounded-xl bg-surface">
+                  <Image
+                    fill
+                    alt={moment.title}
+                    className="object-cover"
+                    sizes="96px"
+                    src={moment.public_url}
+                  />
                 </div>
 
                 {/* Info */}
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-2">
-                    <span className="rounded-full bg-emerald-500/15 px-2 py-0.5 text-[10px] font-semibold text-emerald-400">
+                <div className="col-span-2 row-start-2 min-w-0 sm:col-span-1 sm:col-start-2 sm:row-start-1">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="rounded-full bg-card px-2 py-0.5 text-sm font-semibold text-success">
                       #{i + 1}
                     </span>
-                    <span className="text-[10px] text-white/30">{moment.label}</span>
+                    <span className="text-sm text-muted-foreground">
+                      {moment.label}
+                    </span>
                     {savedId === moment.id && (
-                      <span className="flex items-center gap-0.5 text-[10px] text-emerald-400">
+                      <span className="flex items-center gap-0.5 text-sm text-success">
                         <IconCheck size={10} /> Tersimpan
                       </span>
                     )}
                   </div>
-                  <p className="mt-1 truncate text-sm font-semibold text-white">{moment.title}</p>
-                  <p className="truncate text-xs text-white/40">{moment.description}</p>
+                  <p className="mt-1 break-words text-sm font-semibold text-foreground">
+                    {moment.title}
+                  </p>
+                  <p className="break-words text-sm text-muted-foreground">
+                    {moment.description}
+                  </p>
                 </div>
 
                 {/* Actions */}
-                <div className="flex items-center gap-1.5 opacity-0 transition-opacity group-hover:opacity-100">
+                <div className="col-start-2 row-start-1 flex items-center gap-2 sm:col-start-3">
                   <button
+                    aria-label="Edit momen"
+                    className="flex h-11 w-11 items-center justify-center rounded-lg bg-surface text-muted-foreground hover:bg-surface hover:text-foreground transition-colors"
                     id={`edit-moment-${moment.id}`}
                     onClick={() => setEditMoment(moment)}
-                    className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/8 text-white/50 hover:bg-white/16 hover:text-white transition-colors"
-                    aria-label="Edit momen"
                   >
                     <IconPencil size={14} stroke={1.8} />
                   </button>
                   <button
+                    aria-label="Hapus momen"
+                    className="flex h-11 w-11 items-center justify-center rounded-lg bg-surface text-destructive hover:bg-surface hover:text-destructive disabled:opacity-50 transition-colors"
+                    disabled={isPending && deletingId === moment.id}
                     id={`delete-moment-${moment.id}`}
                     onClick={() => handleDelete(moment.id, moment.storage_path)}
-                    disabled={isPending && deletingId === moment.id}
-                    className="flex h-8 w-8 items-center justify-center rounded-lg bg-red-500/10 text-red-400/70 hover:bg-red-500/20 hover:text-red-400 disabled:opacity-50 transition-colors"
-                    aria-label="Hapus momen"
                   >
                     {isPending && deletingId === moment.id ? (
-                      <IconLoader2 size={14} className="animate-spin" />
+                      <IconLoader2 className="animate-spin" size={14} />
                     ) : (
                       <IconTrash size={14} stroke={1.8} />
                     )}
@@ -496,39 +650,36 @@ export default function ImagesManager({
   const [tab, setTab] = useState<Tab>("hero");
 
   return (
-    <div className="mx-auto max-w-3xl space-y-6">
+    <div className="mx-auto max-w-5xl space-y-8">
       {/* Header */}
       <div>
-        <div className="flex items-center gap-2 text-emerald-400">
-          <IconPhoto size={20} stroke={1.8} />
-          <span className="text-xs font-semibold uppercase tracking-[0.22em]">Manajemen Gambar</span>
-        </div>
-        <h1 className="mt-1 text-2xl font-black text-white">Galeri & Carousel</h1>
-        <p className="mt-1 text-sm text-white/50">
+        <h1 className="ns-title">Galeri & Carousel</h1>
+        <p className="ns-copy mt-3">
           Kelola gambar hero carousel dan foto Sabbath Moments di halaman utama.
         </p>
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-1 rounded-2xl border border-white/8 bg-white/4 p-1">
+      <div className="flex gap-1 rounded-2xl border border-border bg-surface p-1">
         {(["hero", "sabbath"] as Tab[]).map((t) => (
           <button
             key={t}
+            aria-pressed={tab === t}
+            className={`min-h-12 flex-1 rounded-xl px-3 py-3 text-sm font-semibold transition-all duration-200 ${
+              tab === t
+                ? "bg-card text-foreground"
+                : "text-muted-foreground hover:text-foreground"
+            }`}
             id={`images-tab-${t}`}
             onClick={() => setTab(t)}
-            className={`flex-1 rounded-xl py-2.5 text-sm font-semibold transition-all duration-200 ${
-              tab === t
-                ? "bg-emerald-700 text-white shadow-[0_2px_12px_rgba(1,75,63,0.4)]"
-                : "text-white/50 hover:text-white"
-            }`}
           >
-            {t === "hero" ? "🏞️ Hero Carousel" : "📸 Sabbath Moments"}
+            {t === "hero" ? "Hero Carousel" : "Sabbath Moments"}
           </button>
         ))}
       </div>
 
       {/* Content */}
-      <div className="rounded-2xl border border-white/8 bg-white/4 p-5">
+      <div className="ns-surface">
         {tab === "hero" ? (
           <HeroImagesSection initialImages={initialHeroImages} />
         ) : (
@@ -536,7 +687,7 @@ export default function ImagesManager({
         )}
       </div>
 
-      <p className="text-center text-xs text-white/25 pb-4">
+      <p className="text-center text-sm text-muted-foreground pb-4">
         Perubahan akan langsung tampil di halaman utama website
       </p>
     </div>

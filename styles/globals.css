@@ -6,6 +6,286 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/* Public Newskin primitives. Keep admin styling independent. */
+@layer components {
+  .newskin {
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+    line-height: 1.6;
+  }
+  .newskin .ns-card-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    line-height: 1.3;
+  }
+  .newskin .ns-label {
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 600;
+    line-height: 1.4;
+  }
+  .newskin .ns-caption {
+    font-size: 0.875rem;
+    line-height: 1.5;
+    color: var(--color-muted-foreground);
+  }
+  .newskin .ns-lead {
+    max-width: 65ch;
+    font-size: clamp(1rem, 1.5vw, 1.125rem);
+    line-height: 1.6;
+  }
+  .newskin .ns-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+  }
+  .newskin .ns-dialog-body {
+    padding: 1.25rem;
+  }
+  .newskin .ns-feature {
+    border-radius: 1.5rem;
+  }
+  .newskin .ns-empty {
+    padding: 2rem 1.5rem;
+    text-align: center;
+  }
+  .newskin .ns-alert {
+    --alert-accent: var(--color-information);
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    padding: 1rem;
+    border: 1px solid var(--alert-accent);
+    border-radius: 0.75rem;
+    background: var(--color-surface);
+    color: var(--color-foreground);
+    font-size: 0.875rem;
+    line-height: 1.5;
+  }
+  .newskin .ns-alert > svg {
+    flex-shrink: 0;
+    color: var(--alert-accent);
+  }
+  .newskin .ns-alert[data-tone="danger"] {
+    --alert-accent: var(--color-destructive);
+  }
+  .newskin .ns-alert[data-tone="success"] {
+    --alert-accent: var(--color-success);
+  }
+  .newskin .ns-alert[data-tone="warning"] {
+    --alert-accent: var(--color-warning);
+  }
+  .newskin.ns-container,
+  .newskin .ns-container {
+    width: 100%;
+    max-width: 1200px;
+    margin-inline: auto;
+    padding-inline: 20px;
+  }
+  .newskin.ns-section,
+  .newskin .ns-section {
+    padding-block: 48px;
+    scroll-margin-top: 80px;
+  }
+  .newskin .ns-title {
+    font-size: clamp(2rem, 4vw, 3rem);
+    font-weight: 700;
+    line-height: 1.15;
+    letter-spacing: -0.025em;
+    text-wrap: balance;
+  }
+  .newskin .ns-display {
+    font-size: clamp(2.25rem, 5vw, 4rem);
+    font-weight: 700;
+    line-height: 1.1;
+    letter-spacing: -0.025em;
+    text-wrap: balance;
+  }
+  .newskin .ns-heading {
+    font-size: clamp(1.75rem, 3vw, 2.25rem);
+    font-weight: 600;
+    line-height: 1.2;
+    letter-spacing: -0.02em;
+    color: var(--color-foreground);
+    text-wrap: balance;
+  }
+  .newskin .ns-copy {
+    max-width: 65ch;
+    font-size: 1rem;
+    line-height: 1.6;
+    color: var(--color-muted-foreground);
+  }
+  .newskin .ns-surface {
+    background: var(--color-card);
+    color: var(--color-card-foreground);
+    border: 1px solid var(--color-border);
+    border-radius: 16px;
+    padding: 20px;
+  }
+  .newskin .ns-primary,
+  .newskin .ns-secondary {
+    display: inline-flex;
+    min-height: 48px;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    border-radius: 12px;
+    padding: 12px 20px;
+    font-size: 1rem;
+    font-weight: 600;
+    line-height: 1.4;
+    text-align: center;
+    transition:
+      background-color 160ms ease,
+      color 160ms ease;
+    cursor: pointer;
+  }
+  .newskin .ns-primary {
+    background: var(--color-primary);
+    color: var(--color-primary-foreground);
+  }
+  .newskin .ns-primary:hover:not(:disabled):not([aria-disabled="true"]) {
+    background: var(--color-primary-hover);
+  }
+  .newskin .ns-secondary {
+    border: 1px solid var(--color-control-border);
+    background: var(--color-surface);
+    color: var(--color-foreground);
+  }
+  .newskin .ns-secondary:hover:not(:disabled):not([aria-disabled="true"]) {
+    background: var(--color-card);
+  }
+  .newskin .ns-primary:disabled,
+  .newskin .ns-primary[aria-disabled="true"],
+  .newskin .ns-secondary:disabled,
+  .newskin .ns-secondary[aria-disabled="true"] {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+  .newskin .ns-field {
+    width: 100%;
+    min-height: 48px;
+    border: 1px solid var(--color-control-border);
+    border-radius: 12px;
+    background: var(--color-surface);
+    color: var(--color-foreground);
+    padding: 12px 16px;
+    font-size: 1rem;
+  }
+  .newskin .ns-field::placeholder {
+    color: var(--color-muted-foreground);
+    opacity: 1;
+  }
+  .newskin :where(h1, h2, h3, p, a, button) {
+    overflow-wrap: anywhere;
+  }
+  .newskin
+    :where(button, a, input, select, textarea, [tabindex]):focus-visible {
+    outline: 2px solid var(--color-ring);
+    outline-offset: 4px;
+  }
+  .newskin input {
+    caret-color: var(--color-primary);
+  }
+  .newskin ::selection {
+    background: var(--color-secondary);
+    color: var(--color-secondary-foreground);
+  }
+  .newskin {
+    scrollbar-color: var(--color-primary) var(--color-background);
+  }
+  .newskin a {
+    text-underline-offset: 0.2em;
+  }
+  .newskin .ns-elevated {
+    border-radius: 1rem;
+    background: var(--color-popover);
+    color: var(--color-popover-foreground);
+    box-shadow: 0 16px 40px rgb(0 0 0 / 24%);
+  }
+  .newskin.ns-modal,
+  .newskin .ns-modal {
+    background: var(--color-background);
+    color: var(--color-foreground);
+    box-shadow: 0 24px 64px rgb(0 0 0 / 32%);
+  }
+  .newskin.ns-overlay,
+  .newskin .ns-overlay {
+    background: rgb(0 0 0 / 70%);
+  }
+  .newskin .ns-primary:active:not(:disabled):not([aria-disabled="true"]) {
+    background: var(--color-primary-active);
+  }
+  .newskin .ns-secondary:active:not(:disabled):not([aria-disabled="true"]) {
+    background: var(--color-background);
+  }
+  .newskin .ns-field[aria-invalid="true"] {
+    border-color: var(--color-destructive);
+  }
+  .newskin .ns-field:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+  .newskin [data-size="public"],
+  .newskin [data-size="public-icon"] {
+    transform: none;
+    transition:
+      background-color 160ms ease,
+      color 160ms ease;
+  }
+  .newskin [data-variant="public-primary"] {
+    background: var(--color-primary);
+    color: var(--color-primary-foreground);
+  }
+  .newskin [data-variant="public-primary"]:hover:not(:disabled) {
+    background: var(--color-primary-hover);
+  }
+  .newskin [data-variant="public-primary"]:active:not(:disabled) {
+    background: var(--color-primary-active);
+  }
+  .newskin [data-variant="public-secondary"] {
+    border-color: var(--color-control-border);
+    background: var(--color-surface);
+    color: var(--color-foreground);
+  }
+  .newskin [data-variant="public-secondary"]:hover:not(:disabled) {
+    background: var(--color-card);
+  }
+  .newskin [data-variant="public-secondary"]:active:not(:disabled) {
+    background: var(--color-background);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .newskin .animate-spin {
+      animation: none;
+    }
+    .newskin
+      :where(
+        .ns-primary,
+        .ns-secondary,
+        [data-size="public"],
+        [data-size="public-icon"]
+      ) {
+      transition: none;
+    }
+  }
+  @media (min-width: 768px) {
+    .newskin.ns-container,
+    .newskin .ns-container {
+      padding-inline: 32px;
+    }
+    .newskin.ns-section,
+    .newskin .ns-section {
+      padding-block: 80px;
+    }
+    .newskin .ns-surface {
+      padding: 24px;
+    }
+    .newskin .ns-dialog-body {
+      padding: 1.5rem;
+    }
+  }
+}
+
 :root {
   /* ========================
      BRAND COLORS
@@ -49,6 +329,7 @@
   --color-border: #d4d8d5;
   --color-input: #c4ccc6;
   --color-ring: #f8a724;
+  --color-control-border: #69756e;
   --color-muted: #ede5cc;
   --color-accent: #f0e0b0;
   --color-accent-foreground: #014b3f;
@@ -62,6 +343,7 @@
   --color-warning-foreground: #111827;
   --color-destructive: #c2410c;
   --color-destructive-foreground: #ffffff;
+  --color-information: var(--color-secondary);
 }
 
 @theme {
@@ -99,6 +381,7 @@
   --color-border: var(--color-border);
   --color-input: var(--color-input);
   --color-ring: var(--color-ring);
+  --color-control-border: var(--color-control-border);
   --color-muted: var(--color-muted);
   --color-accent: var(--color-accent);
   --color-accent-foreground: var(--color-accent-foreground);
@@ -109,6 +392,7 @@
   --color-warning-foreground: var(--color-warning-foreground);
   --color-destructive: var(--color-destructive);
   --color-destructive-foreground: var(--color-destructive-foreground);
+  --color-information: var(--color-information);
 }
 
 .dark {
@@ -142,6 +426,7 @@
   --color-border: rgba(255, 255, 255, 0.18);
   --color-input: rgba(255, 255, 255, 0.2);
   --color-ring: #f8a724;
+  --color-control-border: rgb(255 255 255 / 50%);
   --color-muted: rgba(255, 255, 255, 0.08);
   --color-accent: #fae9c7;
   --color-accent-foreground: #014b3f;
@@ -152,6 +437,7 @@
   --color-warning-foreground: #111827;
   --color-destructive: #f97316;
   --color-destructive-foreground: #ffffff;
+  --color-information: var(--color-secondary);
 }
 
 /* Side sheet scrollbar */

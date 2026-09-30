@@ -1,9 +1,11 @@
 "use client";
 
+import type { Icon as TablerIcon } from "@tabler/icons-react";
+import type { RUNDOWN_ITEMS } from "@/constants/rundown";
+
 import { useState, useTransition } from "react";
 import {
   IconBook2,
-  IconCalendarEvent,
   IconCheck,
   IconChevronDown,
   IconChevronUp,
@@ -19,9 +21,8 @@ import {
   IconUser,
   IconUsersGroup,
 } from "@tabler/icons-react";
-import type { Icon as TablerIcon } from "@tabler/icons-react";
+
 import { upsertAllRundownParticipants } from "../actions";
-import type { RUNDOWN_ITEMS } from "@/constants/rundown";
 
 /** Map from the serializable string key stored in RUNDOWN_ITEMS to the actual icon component. */
 const RUNDOWN_ICON_MAP: Record<string, TablerIcon> = {
@@ -37,7 +38,10 @@ const RUNDOWN_ICON_MAP: Record<string, TablerIcon> = {
 
 // Derive a stable snake_case key from a title/string
 function toKey(s: string) {
-  return s.toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_|_$/g, "");
+  return s
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "_")
+    .replace(/^_|_$/g, "");
 }
 
 type Props = {
@@ -57,34 +61,48 @@ type ServiceState = {
   };
 };
 
-export default function RundownForm({ rundownItems, dbLookup, labelLookup }: Props) {
+export default function RundownForm({
+  rundownItems,
+  dbLookup,
+  labelLookup,
+}: Props) {
   // Initialize local state from DB (fall back to constants participant name / role label)
   const [state, setState] = useState<ServiceState>(() => {
     const init: ServiceState = {};
+
     for (const item of rundownItems) {
       const sk = toKey(item.title);
+
       init[sk] = {};
       for (const p of item.participants) {
         const rk = toKey(p.rundown);
+
         init[sk][rk] = {
           participantName: dbLookup[sk]?.[rk] ?? p.participant,
           roleLabel: labelLookup[sk]?.[rk] ?? p.rundown,
         };
       }
     }
+
     return init;
   });
 
-  const [openSections, setOpenSections] = useState<Record<string, boolean>>(() => {
-    // First section open by default
-    const init: Record<string, boolean> = {};
-    rundownItems.forEach((item, i) => {
-      init[toKey(item.title)] = i === 0;
-    });
-    return init;
-  });
+  const [openSections, setOpenSections] = useState<Record<string, boolean>>(
+    () => {
+      // First section open by default
+      const init: Record<string, boolean> = {};
 
-  const [savedSections, setSavedSections] = useState<Record<string, boolean>>({});
+      rundownItems.forEach((item, i) => {
+        init[toKey(item.title)] = i === 0;
+      });
+
+      return init;
+    },
+  );
+
+  const [savedSections, setSavedSections] = useState<Record<string, boolean>>(
+    {},
+  );
   const [globalSaved, setGlobalSaved] = useState(false);
   const [globalError, setGlobalError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
@@ -93,7 +111,11 @@ export default function RundownForm({ rundownItems, dbLookup, labelLookup }: Pro
     setOpenSections((prev) => ({ ...prev, [key]: !prev[key] }));
   };
 
-  const handleParticipantChange = (serviceKey: string, roleKey: string, value: string) => {
+  const handleParticipantChange = (
+    serviceKey: string,
+    roleKey: string,
+    value: string,
+  ) => {
     setState((prev) => ({
       ...prev,
       [serviceKey]: {
@@ -105,7 +127,11 @@ export default function RundownForm({ rundownItems, dbLookup, labelLookup }: Pro
     setGlobalSaved(false);
   };
 
-  const handleRoleLabelChange = (serviceKey: string, roleKey: string, value: string) => {
+  const handleRoleLabelChange = (
+    serviceKey: string,
+    roleKey: string,
+    value: string,
+  ) => {
     setState((prev) => ({
       ...prev,
       [serviceKey]: {
@@ -133,7 +159,10 @@ export default function RundownForm({ rundownItems, dbLookup, labelLookup }: Pro
       try {
         await upsertAllRundownParticipants(payload);
         setSavedSections((prev) => ({ ...prev, [serviceKey]: true }));
-        setTimeout(() => setSavedSections((prev) => ({ ...prev, [serviceKey]: false })), 2500);
+        setTimeout(
+          () => setSavedSections((prev) => ({ ...prev, [serviceKey]: false })),
+          2500,
+        );
       } catch (e: unknown) {
         setGlobalError(e instanceof Error ? e.message : "Terjadi kesalahan");
       }
@@ -141,7 +170,9 @@ export default function RundownForm({ rundownItems, dbLookup, labelLookup }: Pro
   };
 
   const handleSaveAll = () => {
-    const payload = Object.keys(state).flatMap((serviceKey) => buildPayload(serviceKey));
+    const payload = Object.keys(state).flatMap((serviceKey) =>
+      buildPayload(serviceKey),
+    );
 
     startTransition(async () => {
       try {
@@ -156,31 +187,25 @@ export default function RundownForm({ rundownItems, dbLookup, labelLookup }: Pro
   };
 
   return (
-    <div className="mx-auto max-w-3xl space-y-6">
+    <div className="mx-auto max-w-5xl space-y-8">
       {/* Header */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+      <div className="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
         <div>
-          <div className="flex items-center gap-2 text-emerald-400">
-            <IconCalendarEvent size={20} stroke={1.8} />
-            <span className="text-xs font-semibold uppercase tracking-[0.22em]">
-              Worship Rundown
-            </span>
-          </div>
-          <h1 className="mt-1 text-2xl font-black text-white">
-            Peserta Ibadah
-          </h1>
-          <p className="mt-1 text-sm text-white/50">
-            Edit nama peran dan peserta untuk setiap bagian ibadah. Perubahan akan langsung tampil di website.
+          <h1 className="ns-title">Peserta Ibadah</h1>
+          <p className="ns-copy mt-3">
+            Edit nama peran dan peserta untuk setiap bagian ibadah. Perubahan
+            akan langsung tampil di website.
           </p>
         </div>
         <button
+          aria-live="polite"
+          className="ns-primary shrink-0"
+          disabled={isPending}
           id="save-all-rundown"
           onClick={handleSaveAll}
-          disabled={isPending}
-          className="inline-flex shrink-0 items-center gap-2 rounded-xl bg-gradient-to-r from-emerald-700 to-emerald-600 px-5 py-2.5 text-sm font-bold text-white shadow-[0_4px_16px_rgba(1,75,63,0.35)] transition-all hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(1,75,63,0.45)] disabled:opacity-60 disabled:translate-y-0"
         >
           {isPending ? (
-            <IconLoader2 size={16} className="animate-spin" />
+            <IconLoader2 className="animate-spin" size={16} />
           ) : globalSaved ? (
             <IconCheck size={16} />
           ) : (
@@ -192,7 +217,7 @@ export default function RundownForm({ rundownItems, dbLookup, labelLookup }: Pro
 
       {/* Error */}
       {globalError && (
-        <div className="rounded-xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-400">
+        <div className="ns-alert" data-tone="danger" role="alert">
           {globalError}
         </div>
       )}
@@ -208,45 +233,58 @@ export default function RundownForm({ rundownItems, dbLookup, labelLookup }: Pro
           return (
             <div
               key={sk}
-              className="overflow-hidden rounded-2xl border border-white/8 bg-white/4 backdrop-blur-sm"
+              className="overflow-hidden rounded-2xl border border-border bg-card"
             >
               {/* Section header */}
               <button
-                type="button"
+                aria-controls={`section-body-${sk}`}
+                aria-expanded={isOpen}
+                className="flex w-full items-center gap-4 px-5 py-4 text-left transition-colors hover:bg-surface"
                 id={`section-${sk}`}
+                type="button"
                 onClick={() => toggleSection(sk)}
-                className="flex w-full items-center gap-4 px-5 py-4 text-left transition-colors hover:bg-white/4"
               >
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-700/20 text-emerald-400">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-card text-success">
                   <Icon size={20} />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="font-semibold text-white">{item.title}</p>
-                  <p className="text-xs text-white/40">{item.time} · {item.participants.length} peserta</p>
+                  <p className="font-semibold text-foreground">{item.title}</p>
+                  <p className="text-sm text-muted-foreground">
+                    {item.time} · {item.participants.length} peserta
+                  </p>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex flex-wrap items-center gap-2">
                   {isSaved && (
-                    <span className="flex items-center gap-1 rounded-full bg-emerald-500/15 px-2 py-0.5 text-[10px] font-semibold text-emerald-400">
+                    <span className="flex items-center gap-1 rounded-full bg-card px-2 py-0.5 text-sm font-semibold text-success">
                       <IconCheck size={10} /> Tersimpan
                     </span>
                   )}
                   {isOpen ? (
-                    <IconChevronUp size={18} className="text-white/40" />
+                    <IconChevronUp
+                      className="text-muted-foreground"
+                      size={18}
+                    />
                   ) : (
-                    <IconChevronDown size={18} className="text-white/40" />
+                    <IconChevronDown
+                      className="text-muted-foreground"
+                      size={18}
+                    />
                   )}
                 </div>
               </button>
 
               {/* Section body */}
               {isOpen && (
-                <div className="border-t border-white/8 px-5 py-4">
+                <div
+                  className="border-t border-border px-5 py-6"
+                  id={`section-body-${sk}`}
+                >
                   {/* Column headers */}
                   <div className="mb-2 hidden sm:grid sm:grid-cols-2 sm:gap-3 sm:pl-11">
-                    <span className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-widest text-white/30">
+                    <span className="flex items-center gap-1.5 text-sm font-semibold uppercase tracking-widest text-muted-foreground">
                       <IconTag size={10} /> Nama Peran
                     </span>
-                    <span className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-widest text-white/30">
+                    <span className="flex items-center gap-1.5 text-sm font-semibold uppercase tracking-widest text-muted-foreground">
                       <IconUser size={10} /> Peserta
                     </span>
                   </div>
@@ -254,44 +292,53 @@ export default function RundownForm({ rundownItems, dbLookup, labelLookup }: Pro
                     {item.participants.map((p) => {
                       const rk = toKey(p.rundown);
                       const roleState = state[sk]?.[rk];
+
                       return (
                         <div key={rk} className="flex items-start gap-3">
-                          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white/6 text-white/30 mt-1.5">
+                          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-surface text-muted-foreground mt-1.5">
                             <IconUser size={14} stroke={1.8} />
                           </div>
-                          <div className="flex flex-1 flex-col gap-2 sm:grid sm:grid-cols-2 sm:gap-3">
+                          <div className="flex min-w-0 flex-1 flex-col gap-2 sm:grid sm:grid-cols-2 sm:gap-3">
                             {/* Role label input */}
                             <div className="flex flex-col gap-1">
                               <label
+                                className="ns-label sm:sr-only"
                                 htmlFor={`role-label-${sk}-${rk}`}
-                                className="text-[10px] font-semibold uppercase tracking-widest text-white/30 sm:hidden"
                               >
                                 Nama Peran
                               </label>
                               <input
+                                className="ns-field"
                                 id={`role-label-${sk}-${rk}`}
+                                placeholder={p.rundown}
                                 type="text"
                                 value={roleState?.roleLabel ?? ""}
-                                onChange={(e) => handleRoleLabelChange(sk, rk, e.target.value)}
-                                placeholder={p.rundown}
-                                className="w-full rounded-xl border border-white/10 bg-white/6 px-3 py-2 text-sm text-white placeholder-white/25 outline-none transition-all focus:border-amber-500/50 focus:bg-white/10 focus:ring-2 focus:ring-amber-500/15"
+                                onChange={(e) =>
+                                  handleRoleLabelChange(sk, rk, e.target.value)
+                                }
                               />
                             </div>
                             {/* Participant name input */}
                             <div className="flex flex-col gap-1">
                               <label
+                                className="ns-label sm:sr-only"
                                 htmlFor={`participant-${sk}-${rk}`}
-                                className="text-[10px] font-semibold uppercase tracking-widest text-white/30 sm:hidden"
                               >
                                 Peserta
                               </label>
                               <input
+                                className="ns-field"
                                 id={`participant-${sk}-${rk}`}
+                                placeholder={p.participant}
                                 type="text"
                                 value={roleState?.participantName ?? ""}
-                                onChange={(e) => handleParticipantChange(sk, rk, e.target.value)}
-                                placeholder={p.participant}
-                                className="w-full rounded-xl border border-white/10 bg-white/6 px-3 py-2 text-sm text-white placeholder-white/25 outline-none transition-all focus:border-emerald-500/50 focus:bg-white/10 focus:ring-2 focus:ring-emerald-500/15"
+                                onChange={(e) =>
+                                  handleParticipantChange(
+                                    sk,
+                                    rk,
+                                    e.target.value,
+                                  )
+                                }
                               />
                             </div>
                           </div>
@@ -302,14 +349,14 @@ export default function RundownForm({ rundownItems, dbLookup, labelLookup }: Pro
 
                   <div className="mt-5 flex justify-end">
                     <button
+                      className="ns-secondary"
+                      disabled={isPending}
                       id={`save-section-${sk}`}
                       type="button"
                       onClick={() => handleSaveSection(sk)}
-                      disabled={isPending}
-                      className="inline-flex items-center gap-2 rounded-xl border border-emerald-500/25 bg-emerald-500/10 px-4 py-2 text-xs font-semibold text-emerald-400 transition-all hover:bg-emerald-500/20 disabled:opacity-50"
                     >
                       {isPending ? (
-                        <IconLoader2 size={13} className="animate-spin" />
+                        <IconLoader2 className="animate-spin" size={13} />
                       ) : isSaved ? (
                         <IconCheck size={13} />
                       ) : (
@@ -325,7 +372,7 @@ export default function RundownForm({ rundownItems, dbLookup, labelLookup }: Pro
         })}
       </div>
 
-      <p className="text-center text-xs text-white/25 pb-4">
+      <p className="text-center text-sm text-muted-foreground pb-4">
         Perubahan akan langsung tampil di halaman utama website
       </p>
     </div>
